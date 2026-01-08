@@ -177,12 +177,12 @@ const AnalyticsView = ({
               activeIndex={summary.byCategory.findIndex(
                 (c) => c.category === activeCategory,
               )}
-              activeShape={(props) => (
-                <Sector
-                  {...props}
-                  outerRadius={(props.outerRadius ?? 0) + 8}
-                />
-              )}
+             activeShape={(props: any) => (
+  <Sector
+    {...props}
+    outerRadius={(props.outerRadius ?? 0) + 8}
+  />
+)}
               onClick={(data) =>
                 onActivateCategory(data?.payload?.category ?? null)
               }
