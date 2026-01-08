@@ -147,7 +147,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       return jsonError(400, "INVALID_JSON", "Invalid JSON body");
     }
     const updated = await updateTransactionWithHistory(user.id, id, data);
-    if (!updated) {.
+    if (!updated) {
       return jsonError(404, "NOT_FOUND", "Transaction not found");
     }
     return NextResponse.json({ ok: true });
