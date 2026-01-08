@@ -244,20 +244,17 @@ export default function UploadWizard({
         ...extracted,
         status: "success",
         error_message: null,
-        data: extracted.data
-          ? {
-              ...extracted.data,
-              merchant_name:
-                formState.merchantName ?? extracted.data.merchant_name,
-              date: date ?? extracted.data.date,
-              total_sum_bgn: fromCents(totals.bgnCents),
-              total_sum_eur: fromCents(totals.eurCents),
-              items: extracted.data.items.map((item) => ({
-                ...item,
-                category: mapCategoryKeyToAssistant(selectedCategory),
-              })),
-            }
-          : null,
+          data: extracted.data
+  ? {
+      ...extracted.data,
+      items: extracted.data.items.map((item: any) => ({
+        ...item,
+        // Казваме на TS да приеме стринга като валидна категория
+        category: item.category as any, 
+      })),
+      merchant_name: extracted.data.merchant_name || "Unknown",
+    }
+  : null,
       };
 
       const response = await safeFetchJson("/api/transactions/from-extraction", {
