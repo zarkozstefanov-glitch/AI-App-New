@@ -10,8 +10,7 @@ import { redirect } from "next/navigation";
 export default async function SettingsPage() {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/auth");
-  const { t } = getServerTranslator();
-
+const { t } = await getServerTranslator(); // Добавяме await тук
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
   });
