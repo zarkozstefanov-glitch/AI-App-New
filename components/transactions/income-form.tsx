@@ -13,8 +13,7 @@ export default function IncomeForm() {
   const router = useRouter();
   const { accounts, currentAccountId } = useAccounts();
   const { t, locale } = useI18n();
-  const incomeCategories =
-    translations[locale]?.categories?.income ?? [];
+  const [incomeCategories, setIncomeCategories] = useState<string[]>([]);
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -29,6 +28,11 @@ export default function IncomeForm() {
     currency: "EUR",
     note: "",
   });
+
+  useEffect(() => {
+    const categories = translations[locale]?.categories?.income;
+    setIncomeCategories(Array.isArray(categories) ? categories : []);
+  }, [locale]);
 
   useEffect(() => {
     if (!incomeCategories.length) return;
@@ -136,7 +140,7 @@ export default function IncomeForm() {
             onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
             className="mt-1.5 min-h-[44px] h-auto w-full max-w-full rounded-xl border border-slate-200/60 bg-slate-50/50 focus-within:border-indigo-500/50 focus-within:ring-2 focus-within:ring-indigo-500/20 px-2 py-1 text-center text-[13px] text-slate-700 leading-tight whitespace-normal break-words outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 box-border sm:h-[52px] sm:px-6"
           >
-            {(incomeCategories ?? []).map((item) => (
+            {(incomeCategories ?? []).map((category) => (
               <option key={item} value={item}>
                 {item}
               </option>
