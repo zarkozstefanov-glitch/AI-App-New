@@ -10,7 +10,7 @@ export default async function AuthPage() {
   if (session) {
     redirect("/");
   }
-  const { t } = getServerTranslator();
+  const { t } = await getServerTranslator();
 
   return (
     <div className="flex min-h-[100dvh] items-center justify-center px-4 py-8">
