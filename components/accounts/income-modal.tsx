@@ -16,7 +16,8 @@ type Props = {
 export default function IncomeModal({ open, onClose, onCreated }: Props) {
   const { accounts, currentAccountId } = useAccounts();
   const { t, locale } = useI18n();
-  const incomeCategories = translations[locale].categories.income;
+  const incomeCategories: Array<"Salary" | "Заплата"> =
+    translations[locale].categories.income;
   const [loading, setLoading] = useState(false);
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
@@ -115,7 +116,12 @@ export default function IncomeModal({ open, onClose, onCreated }: Props) {
             <span className="mb-1 block">{t("transactions.category")}</span>
             <select
               value={form.category}
-              onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+              onChange={(e) =>
+                setForm((f) => ({
+                  ...f,
+                  category: e.target.value as "Salary" | "Заплата",
+                }))
+              }
               className="h-[38px] w-full rounded-lg border-2 border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition focus:border-slate-300 focus:bg-white"
             >
               {incomeCategories.map((cat) => (
