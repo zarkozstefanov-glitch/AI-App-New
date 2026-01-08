@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String        @id @default(cuid())
+  name               String        @default("")
+  firstName          String
+  lastName           String
+  email              String        @unique
+  phone              String?
+  passwordHash       String
+  nickname           String?
+  monthlyBudgetGoal  Float?
+  storeOriginalImage Boolean       @default(false)
+  createdAt          DateTime      @default(now())
+  accounts           Account[]
+  transactions       Transaction[]
+  transactionHistory TransactionHistory[]
+  extractionDrafts   ExtractionDraft[]
+  recurringTemplates RecurringTemplate[]
+}
+
+model Account {
+  id        String        @id @default(cuid())
+  userId    String
+  name      String
+  kind      String
+  currency  String        @default("BGN")
+  balanceBgnCents Int     @default(0)
+  balanceEurCents Int     @default(0)
+  createdAt DateTime      @default(now())
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[] @relation("AccountTransactions")
+  transferTransactions Transaction[] @relation("TransferAccount")
+  recurringTemplates RecurringTemplate[]
+}
+
+model Transaction {
+  id                 String                  @id @default(cuid())
+  userId             String
+  accountId          String
+  transferAccountId  String?
+  sourceType         String
+  originalImageUrl   String?
+  merchantName       String?
+  paymentMethod      String?
+  transactionDate    DateTime                @default(now())
+  totalBgn           Float?
+  totalEur           Float?
+  totalBgnCents      Int
+  totalEurCents      Int
+  currencyOriginal   String
+  totalOriginal      Float?
+  totalOriginalCents Int
+  category           String
+  categoryConfidence Float
+  aiExtractedJson    String?
+  overallConfidence  Float
+  transactionType    String                  @default("expense")
+  isFixed            Boolean                 @default(false)
+  isBalanceApplied   Boolean                 @default(true)
+  isEdited           Boolean                 @default(false)
+  notes              String?
+  createdAt          DateTime                @default(now())
+  account            Account                 @relation("AccountTransactions", fields: [accountId], references: [id], onDelete: Cascade)
+  transferAccount    Account?                @relation("TransferAccount", fields: [transferAccountId], references: [id], onDelete: Cascade)
+  user               User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lineItems          LineItem[]
+  historyEntries     TransactionHistory[]
+}
+
+model TransactionHistory {
+  id            String   @id @default(cuid())
+  transactionId String
+  userId        String
+  oldData       String
+  createdAt     DateTime @default(now())
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model LineItem {
+  id             String      @id @default(cuid())
+  transactionId  String
+  name           String?
+  quantity       Int?
+  priceOriginal  Float?
+  priceBgn       Float?
+  priceEur       Float?
+  priceOriginalCents  Int?
+  priceBgnCents       Int?
+  priceEurCents       Int?
+  transaction    Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+}
+
+model ExtractionDraft {
+  id               String   @id @default(cuid())
+  userId           String
+  extractionJson   String
+  originalImageUrl String?
+  createdAt        DateTime @default(now())
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model RecurringTemplate {
+  id          String  @id @default(cuid())
+  userId      String
+  accountId   String
+  name        String
+  amount      Float
+  category    String  @default("Фиксирани разходи")
+  subCategory String
+  paymentDay  Int
+  note        String?
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  account     Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
