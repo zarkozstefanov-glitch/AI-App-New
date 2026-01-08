@@ -1,9 +1,14 @@
 import Link from "next/link";
 import { getServerTranslator } from "@/lib/i18n/server";
 
-export default function ContactPage() {
-  const { t } = getServerTranslator();
+// 1. Правим функцията асинхронна
+export default async function ContactPage() {
+  
+  // 2. Добавяме await тук
+  const { t } = await getServerTranslator(); 
+
   return (
+    // ... останалият JSX код си остава същият
     <div className="mx-auto w-full max-w-3xl px-4 pb-12 pt-8 sm:px-8">
       <div className="glass rounded-3xl border border-slate-200 bg-white/70 p-6 shadow-glow">
         <h1 className="text-2xl font-semibold text-slate-900">
