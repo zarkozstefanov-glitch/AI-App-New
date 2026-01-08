@@ -8,18 +8,29 @@ function jsonError(status: number, code: string, message: string) {
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> } // Дефинираме го като Promise
 ) {
   try {
-    const user = await getCurrentUser();
+    const { id } = await params; // Трябва да добавиш await тук
+    const user = await getCurrentUser(); // Взимаме потребителя правилно
+
+    if (!user) {
+      return jsonError(401, "UNAUTHORIZED", "User not found");
+    }
+
     const rows = await prisma.transactionHistory.findMany({
-      where: { transactionId: params.id, userId: user.id },
+      where: { 
+        transactionId: id, // Използваме 'id', което вече сме изчакали (await)
+        userId: user.id 
+      },
       orderBy: { createdAt: "desc" },
     });
+
     const data = rows.map((row) => ({
       ...row,
       oldData: row.oldData ? JSON.parse(row.oldData) : null,
     }));
+
     return NextResponse.json({ ok: true, data });
   } catch (error) {
     if (error instanceof UnauthorizedError) {
