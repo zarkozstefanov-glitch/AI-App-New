@@ -33,8 +33,10 @@ export const authOptions: NextAuthOptions = {
       }
 
       // Проверка на лимита за опити
-      const limited = await rateLimit(`login-${ip}`, { limit: 5 }); 
-      if (!limited.success) {
+const limited = await rateLimit(`login-${ip}`, { 
+  limit: 5, 
+  windowMs: 60000 // 1 минута в милисекунди
+});      if (!limited.success) {
         throw new Error("Твърде много опити. Опитай след минута.");
       }
 
