@@ -338,10 +338,13 @@ export default function ListClient() {
         key = format(date, "yyyy-MM-dd");
         label = format(date, "dd.MM.yyyy");
         sortDate = tx.transactionDate;
+// Намери този ред (обикновено малко по-нагоре в кода)
+const groups = new Map<string, any>(); 
 
+// ... и след това в логиката за групиране:
 const group = groups.get(key) || {
-  label: key,              // Добавяме това
-  sortDate: tx.date,       // Добавяме това (използваме датата от текущата транзакция)
+  label: key,
+  sortDate: tx.transactionDate,
   items: [] as any[], 
   totalEurCents: 0,
   totalBgnCents: 0,
