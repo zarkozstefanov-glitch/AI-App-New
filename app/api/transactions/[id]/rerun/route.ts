@@ -22,17 +22,21 @@ function jsonError(status: number, code: string, message: string, details?: stri
 
 export async function POST(
   _request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> }, // ПРОМЯНА 1: Дефинираме го като Promise
 ) {
   const requestId = randomUUID();
   if (process.env.NODE_ENV !== "production") {
     console.log(`[rerun] requestId=${requestId}`);
   }
   try {
+    const { id } = await params; // ПРОМЯНА 2: Извличаме ID-то с await
     const user = await getCurrentUser();
+    
+    // ПРОМЯНА 3: Използваме директно 'id' вместо 'params.id'
     const existing = await prisma.transaction.findFirst({
-      where: { id: params.id, userId: user.id },
+      where: { id: id, userId: user.id },
     });
+    
     if (!existing) {
       return jsonError(404, "NOT_FOUND", "Transaction not found");
     }
@@ -123,8 +127,8 @@ export async function POST(
         merchantName: validated.data.data.merchant_name,
         paymentMethod: null,
         transactionDate: validated.data.data.date
-  ? new Date(validated.data.data.date)
-  : new Date(), // Ако няма дата от бележката, сложи днешната дата
+          ? new Date(validated.data.data.date)
+          : new Date(), 
         totalBgnCents,
         totalEurCents,
         currencyOriginal: "BGN",
