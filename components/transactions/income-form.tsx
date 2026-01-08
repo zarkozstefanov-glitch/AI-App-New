@@ -9,20 +9,35 @@ import { safeFetchJson } from "@/lib/safe-fetch";
 import { useI18n } from "@/components/i18n-provider";
 import { translations } from "@/lib/i18n/translations";
 
+type IncomeCategory =
+  (typeof translations.bg.categories.income)[number] |
+  (typeof translations.en.categories.income)[number];
+
 export default function IncomeForm() {
   const router = useRouter();
   const { accounts, currentAccountId } = useAccounts();
   const { t, locale } = useI18n();
-  const [incomeCategories, setIncomeCategories] = useState<string[]>([]);
+  const incomeCategories = useMemo(
+    () => translations[locale].categories.income,
+    [locale],
+  );
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState<"" | "success" | "error">("");
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    date: string;
+    accountId: string;
+    category: IncomeCategory;
+    source: string;
+    amount: string;
+    currency: string;
+    note: string;
+  }>({
     date: today,
     accountId: currentAccountId ?? "",
-    category: incomeCategories[0] ?? "",
+    category: incomeCategories[0],
     source: "",
     amount: "",
     currency: "EUR",
@@ -30,16 +45,11 @@ export default function IncomeForm() {
   });
 
   useEffect(() => {
-    const categories = translations[locale]?.categories?.income;
-    setIncomeCategories(Array.isArray(categories) ? categories : []);
-  }, [locale]);
-
-  useEffect(() => {
     if (!incomeCategories.length) return;
     setForm((current) =>
-      incomeCategories.includes(current.category)
+      (incomeCategories as readonly IncomeCategory[]).includes(current.category)
         ? current
-        : { ...current, category: incomeCategories[0] ?? "" },
+        : { ...current, category: incomeCategories[0] },
     );
   }, [incomeCategories]);
 
@@ -137,12 +147,17 @@ export default function IncomeForm() {
           </p>
           <select
             value={form.category}
-            onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+            onChange={(e) =>
+              setForm((f) => ({
+                ...f,
+                category: e.target.value as IncomeCategory,
+              }))
+            }
             className="mt-1.5 min-h-[44px] h-auto w-full max-w-full rounded-xl border border-slate-200/60 bg-slate-50/50 focus-within:border-indigo-500/50 focus-within:ring-2 focus-within:ring-indigo-500/20 px-2 py-1 text-center text-[13px] text-slate-700 leading-tight whitespace-normal break-words outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 box-border sm:h-[52px] sm:px-6"
           >
             {(incomeCategories ?? []).map((category) => (
-              <option key={item} value={item}>
-                {item}
+              <option key={category} value={category}>
+                {category}
               </option>
             ))}
           </select>

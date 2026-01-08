@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { safeFetchJson } from "@/lib/safe-fetch";
 import { convertCents, formatMoney, toCents } from "@/lib/currency";
-import { getCategoryOptionsForLocale } from "@/lib/categories";
+import { getCategoryOptionsForLocale, type CategoryKey } from "@/lib/categories";
 import { recurringGroups, getRecurringGroupLabel, getRecurringItemLabel } from "@/lib/recurring";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
@@ -200,7 +200,9 @@ export default function ManualTransactionForm({
           </p>
           <select
             value={form.category}
-            onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+            onChange={(e) =>
+              setForm((f) => ({ ...f, category: e.target.value as CategoryKey }))
+            }
             className="mt-1.5 min-h-[44px] h-auto w-full max-w-full rounded-xl border border-slate-200/60 bg-slate-50/50 focus-within:border-indigo-500/50 focus-within:ring-2 focus-within:ring-indigo-500/20 px-2 py-1 text-center text-[13px] text-slate-700 leading-tight whitespace-normal break-words outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 box-border sm:min-h-[52px] sm:px-6"
           >
             {(fixedOnly ? fixedOptions : getCategoryOptionsForLocale(locale)).map((opt) => (
