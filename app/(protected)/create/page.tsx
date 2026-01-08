@@ -2,9 +2,13 @@ import NewTransaction from "@/components/transactions/new-transaction";
 import PageHeader from "@/components/page-header";
 import { getServerTranslator } from "@/lib/i18n/server";
 
-export default function CreateTransactionPage() {
-  const { t } = getServerTranslator();
+// Променяме на "async function"
+export default async function CreateTransactionPage() {
+  // Добавяме "await"
+  const { t } = await getServerTranslator(); 
+  
   return (
+    // ... останалата част от кода
     <div className="mx-auto max-w-6xl space-y-6">
       <div className="mb-6 rounded-[2rem] border border-slate-100/50 bg-white p-4 shadow-sm">
         <PageHeader
