@@ -337,8 +337,7 @@ export default function ListClient() {
       if (date) {
         key = format(date, "yyyy-MM-dd");
         label = format(date, "dd.MM.yyyy");
-        sortDate = date;
-      }
+        sortDate = tx.transactionDate;
 
 const group = groups.get(key) || {
   label: key,              // Добавяме това
