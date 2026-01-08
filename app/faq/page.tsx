@@ -2,10 +2,17 @@ import Link from "next/link";
 import { getServerTranslator } from "@/lib/i18n/server";
 import { translations } from "@/lib/i18n/translations";
 
-export default function FaqPage() {
-  const { t, locale } = getServerTranslator();
+// 1. Правим функцията асинхронна
+export default async function FaqPage() {
+  
+  // 2. Добавяме await тук
+  const { t, locale } = await getServerTranslator();
+
+  // 3. Сега вече locale ще бъде стринг ("bg" или "en"), а не Promise
   const faqs = translations[locale].faq.items;
+
   return (
+    // ... останалият код
     <div className="mx-auto w-full max-w-4xl px-4 pb-12 pt-8 sm:px-8">
       <div className="glass rounded-3xl border border-slate-200 bg-white/70 p-6 shadow-glow">
         <h1 className="text-2xl font-semibold text-slate-900">{t("faq.title")}</h1>
