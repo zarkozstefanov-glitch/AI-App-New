@@ -123,8 +123,8 @@ export async function POST(
         merchantName: validated.data.data.merchant_name,
         paymentMethod: null,
         transactionDate: validated.data.data.date
-          ? new Date(validated.data.data.date)
-          : null,
+  ? new Date(validated.data.data.date)
+  : new Date(), // Ако няма дата от бележката, сложи днешната дата
         totalBgnCents,
         totalEurCents,
         currencyOriginal: "BGN",
