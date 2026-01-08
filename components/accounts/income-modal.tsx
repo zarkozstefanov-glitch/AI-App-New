@@ -7,6 +7,10 @@ import { formatAccountLabel } from "@/lib/accounts";
 import { useI18n } from "@/components/i18n-provider";
 import { translations } from "@/lib/i18n/translations";
 
+type IncomeCategory =
+  (typeof translations.bg.categories.income)[number] |
+  (typeof translations.en.categories.income)[number];
+
 type Props = {
   open: boolean;
   onClose: () => void;
@@ -16,12 +20,19 @@ type Props = {
 export default function IncomeModal({ open, onClose, onCreated }: Props) {
   const { accounts, currentAccountId } = useAccounts();
   const { t, locale } = useI18n();
-  const incomeCategories: Array<"Salary" | "Заплата"> =
-    translations[locale].categories.income;
+  const incomeCategories = translations[locale].categories.income;
   const [loading, setLoading] = useState(false);
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    date: string;
+    accountId: string;
+    category: IncomeCategory;
+    source: string;
+    amount: string;
+    currency: string;
+    note: string;
+  }>({
     date: today,
     accountId: currentAccountId ?? "",
     category: incomeCategories[0],
@@ -119,7 +130,7 @@ export default function IncomeModal({ open, onClose, onCreated }: Props) {
               onChange={(e) =>
                 setForm((f) => ({
                   ...f,
-                  category: e.target.value as "Salary" | "Заплата",
+                  category: e.target.value as IncomeCategory,
                 }))
               }
               className="h-[38px] w-full rounded-lg border-2 border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition focus:border-slate-300 focus:bg-white"
