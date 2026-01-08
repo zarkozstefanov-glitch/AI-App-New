@@ -328,42 +328,33 @@ export default function ListClient() {
         totalBgnCents: number;
       }
     >();
+
     for (const tx of filteredTransactions) {
       const date = tx.transactionDate ? new Date(tx.transactionDate) : null;
-      let key = "no-date";
-      let label = t("common.noDate");
-      let sortDate: Date | null = null;
+      const key = date ? format(date, "yyyy-MM-dd") : "no-date";
 
-      if (date) {
-        key = format(date, "yyyy-MM-dd");
-        label = format(date, "dd.MM.yyyy");
-        sortDate = tx.transactionDate;
-// Намери този ред (обикновено малко по-нагоре в кода)
-const groups = new Map<string, any>(); 
+      const group = groups.get(key) || {
+        label: date ? format(date, "dd.MM.yyyy") : t("common.noDate"),
+        sortDate: date,
+        items: [],
+        totalEurCents: 0,
+        totalBgnCents: 0,
+      };
 
-// ... и след това в логиката за групиране:
-const group = groups.get(key) || {
-  label: key,
-  sortDate: tx.transactionDate,
-  items: [] as any[], 
-  totalEurCents: 0,
-  totalBgnCents: 0,
-};
-
-group.items.push(tx);
-group.totalEurCents += tx.totalEurCents;
-group.totalBgnCents += tx.totalBgnCents;
-groups.set(key, group);
+      group.items.push(tx);
+      group.totalEurCents += tx.totalEurCents;
+      group.totalBgnCents += tx.totalBgnCents;
+      groups.set(key, group);
     }
+
     return Array.from(groups.entries())
       .map(([key, group]) => ({ key, ...group }))
       .sort((a, b) => {
-        if (!a.sortDate && !b.sortDate) return 0;
         if (!a.sortDate) return 1;
         if (!b.sortDate) return -1;
         return b.sortDate.getTime() - a.sortDate.getTime();
       });
-  }, [filteredTransactions]);
+  }, [filteredTransactions, t]);
 
   return (
     <div className="w-full space-y-4">
