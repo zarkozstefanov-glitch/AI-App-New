@@ -341,16 +341,17 @@ export default function ListClient() {
       }
 
 const group = groups.get(key) || {
-        date: key,
-        items: [] as any[], // Заменяме 'never' с 'any[]'
-        totalEurCents: 0,
-        totalBgnCents: 0,
-      }; // МАХНИ 'as const' оттук, ако го има!
+  label: key,              // Добавяме това
+  sortDate: tx.date,       // Добавяме това (използваме датата от текущата транзакция)
+  items: [] as any[], 
+  totalEurCents: 0,
+  totalBgnCents: 0,
+};
 
-      group.items.push(tx); 
-      group.totalEurCents += tx.totalEurCents;
-      group.totalBgnCents += tx.totalBgnCents;
-      groups.set(key, group);
+group.items.push(tx);
+group.totalEurCents += tx.totalEurCents;
+group.totalBgnCents += tx.totalBgnCents;
+groups.set(key, group);
     }
     return Array.from(groups.entries())
       .map(([key, group]) => ({ key, ...group }))
