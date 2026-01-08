@@ -17,38 +17,50 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      authorize: async (credentials, req) => {
-        if (!credentials?.email || !credentials.password) return null;
-        const headers = (req as unknown as { headers?: Headers | Record<string, string> })?.headers;
-        let ip = "unknown";
-        if (headers) {
-          if (typeof headers.get === "function") {
-            ip = headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
-          } else if (typeof headers["x-forwarded-for"] === "string") {
-            ip = headers["x-forwarded-for"].split(",")[0];
-          }
+     authorize: async (credentials, req) => {
+      if (!credentials?.email || !credentials.password) return null;
+
+      // Правилно извличане на IP адреса за rate limiting
+      const headers = (req as any)?.headers;
+      let ip = "unknown";
+
+      if (headers) {
+        if (typeof headers.get === "function") {
+          ip = headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
+        } else if (typeof headers["x-forwarded-for"] === "string") {
+          ip = headers["x-forwarded-for"].split(",")[0];
         }
-        const limited = rateLimit(`login-${ip}`, { limit: 8, windowMs: 60_000 });
-        if (!limited.success) {
-          throw new Error("Твърде много опити. Опитай след минута.");
-        }
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email.toLowerCase() },
-        });
-        if (!user) return null;
-        const isValid = await compare(credentials.password, user.passwordHash);
-        if (!isValid) return null;
-        return {
-          id: user.id,
-          email: user.email,
-          name: `${user.firstName} ${user.lastName}`,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          nickname: user.nickname ?? undefined,
-          monthlyBudgetGoal: user.monthlyBudgetGoal ?? undefined,
-          storeOriginalImage: user.storeOriginalImage,
-        };
-      },
+      }
+
+      // Проверка на лимита за опити
+      const limited = await rateLimit(`login-${ip}`, { limit: 5 }); 
+      if (!limited.success) {
+        throw new Error("Твърде много опити. Опитай след минута.");
+      }
+
+      // Търсене на потребителя в базата данни
+      const user = await prisma.user.findUnique({
+        where: { email: credentials.email.toLowerCase() },
+      });
+
+      if (!user) return null;
+
+      // Проверка на паролата
+      const isValid = await compare(credentials.password, user.passwordHash);
+      if (!isValid) return null;
+
+      // Връщане на потребителските данни към JWT сесията
+      return {
+        id: user.id,
+        email: user.email,
+        name: `${user.firstName} ${user.lastName}`,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        nickname: user.nickname ?? undefined,
+        monthlyBudgetGoal: user.monthlyBudgetGoal ?? undefined,
+        storeOriginalImage: user.storeOriginalImage,
+      };
+    },
     }),
   ],
   pages: {
