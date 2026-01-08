@@ -2,9 +2,11 @@ import Link from "next/link";
 import { getServerTranslator } from "@/lib/i18n/server";
 import { translations } from "@/lib/i18n/translations";
 
-export default function TermsPage() {
-  const { t, locale } = getServerTranslator();
+// Промени:
+export default async function TermsPage() {
+  const { t, locale } = await getServerTranslator();
   const sections = translations[locale].terms.sections;
+
   return (
     <div className="mx-auto w-full max-w-4xl px-4 pb-12 pt-8 sm:px-8">
       <div className="glass rounded-3xl border border-slate-200 bg-white/70 p-6 shadow-glow">

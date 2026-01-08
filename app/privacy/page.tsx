@@ -2,9 +2,12 @@ import Link from "next/link";
 import { getServerTranslator } from "@/lib/i18n/server";
 import { translations } from "@/lib/i18n/translations";
 
-export default function PrivacyPage() {
-  const { t, locale } = getServerTranslator();
+// Промени:
+export default async function PrivacyPage() {
+  const { t, locale } = await getServerTranslator();
+  // Увери се, че locale вече е стринг тук
   const sections = translations[locale].privacy.sections;
+  
   return (
     <div className="mx-auto w-full max-w-4xl px-4 pb-12 pt-8 sm:px-8">
       <div className="glass rounded-3xl border border-slate-200 bg-white/70 p-6 shadow-glow">

@@ -2,9 +2,16 @@ import Link from "next/link";
 import { getServerTranslator } from "@/lib/i18n/server";
 import { translations } from "@/lib/i18n/translations";
 
-export default function PoliciesPage() {
-  const { t, locale } = getServerTranslator();
+// 1. Направи компонента async
+export default async function PoliciesPage() {
+  
+  // 2. Добави await тук
+  const { t, locale } = await getServerTranslator();
+
+  // Сега вече 'locale' е текст, а не Promise, и това ще работи:
   const sections = translations[locale].policies.sections;
+  
+  // ...
   return (
     <div className="mx-auto w-full max-w-4xl px-4 pb-12 pt-8 sm:px-8">
       <div className="glass rounded-3xl border border-slate-200 bg-white/70 p-6 shadow-glow">
