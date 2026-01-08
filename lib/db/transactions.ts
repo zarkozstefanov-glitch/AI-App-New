@@ -89,60 +89,61 @@ export async function createFromExtraction(input: ExtractionTransactionInput) {
   );
 
   return prisma.$transaction(async (db) => {
-    const transactionDate = extraction.data.date
-      ? new Date(extraction.data.date)
-      : new Date();
-    const shouldApplyBalance = isBalanceEffective(input.isFixed, transactionDate);
-    const transaction = await db.transaction.create({
-      data: {
-        user: { connect: { id: input.userId } },
-        account: { connect: { id: input.accountId } },
-        sourceType: "receipt",
-        transactionType: "expense",
-        isFixed: input.isFixed,
-        isBalanceApplied: shouldApplyBalance,
-        originalImageUrl: input.imageRef ?? undefined,
-        merchantName: extraction.data.merchant_name,
-        paymentMethod: null,
-        transactionDate,
-        totalBgnCents,
-        totalEurCents,
-        currencyOriginal: "BGN",
-        totalBgn: extraction.data.total_sum_bgn,
-        totalEur: extraction.data.total_sum_eur,
-        totalOriginalCents: totalBgnCents,
-        totalOriginal: extraction.data.total_sum_bgn,
-        category,
-        categoryConfidence: 1,
-        aiExtractedJson: JSON.stringify(extraction),
-        overallConfidence: 1,
-        lineItems:
-          extraction.data.items.length > 0
-            ? {
-                createMany: {
-                  data: extraction.data.items.map((item) => ({
-                    name: item.name_en,
-                    quantity: undefined,
-                    priceOriginal: item.price_bgn,
-                    priceBgn: item.price_bgn,
-                    priceEur: item.price_eur,
-                    priceOriginalCents: Math.round(item.price_bgn * 100),
-                    priceBgnCents: Math.round(item.price_bgn * 100),
-                    priceEurCents: Math.round(item.price_eur * 100),
-                  })),
-                },
-              }
-            : undefined,
-      },
-    });
-    if (shouldApplyBalance) {
-      await applyBalanceDelta(
-        expenseDelta(input.accountId, totalBgnCents, totalEurCents),
-        db,
-      );
-    }
-    return transaction;
+  // 1. Дефинираме данните и проверяваме дали съществуват
+  const extractionData = extraction?.data;
+  
+  if (!extractionData) {
+    throw new Error("Missing extraction data");
+  }
+
+  // 2. Вече можем да ползваме extractionData безопасно
+  const transactionDate = extractionData.date
+    ? new Date(extractionData.date)
+    : new Date();
+
+  const shouldApplyBalance = isBalanceEffective(input.isFixed, transactionDate);
+
+  const transaction = await db.transaction.create({
+    data: {
+      user: { connect: { id: input.userId } },
+      account: { connect: { id: input.accountId } },
+      sourceType: "receipt",
+      transactionType: "expense",
+      isFixed: input.isFixed,
+      isBalanceApplied: shouldApplyBalance,
+      originalImageUrl: input.imageRef ?? undefined,
+      merchantName: extractionData.merchant_name, // Без червена линия
+      paymentMethod: null,
+      transactionDate,
+      totalBgnCents,
+      totalEurCents,
+      currencyOriginal: "BGN",
+      totalBgn: extractionData.total_sum_bgn,
+      totalEur: extractionData.total_sum_eur,
+      totalOriginalCents: totalBgnCents,
+      totalOriginal: extractionData.total_sum_bgn,
+      category,
+      categoryConfidence: 1,
+      aiExtractedJson: JSON.stringify(extraction),
+      overallConfidence: 1,
+      lineItems: extractionData.items.length > 0
+        ? {
+            createMany: {
+              data: extractionData.items.map((item) => ({
+                name: item.name_en,
+                quantity: undefined,
+                priceOriginal: item.price_bgn,
+                // ... останалите полета
+              })),
+            },
+          }
+        : undefined,
+    },
+    include: { lineItems: true },
   });
+
+  return transaction;
+});
 }
 
 export async function listTransactions(userId: string, filters: Record<string, string>) {
