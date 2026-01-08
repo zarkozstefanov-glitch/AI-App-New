@@ -249,7 +249,7 @@ const AnalyticsView = ({
         items={sortedCategories}
         activeCategory={activeCategory}
         onActivate={(category) => onActivateCategory(category)}
-        labelForCategory={labelForCategory}с
+        labelForCategory={labelForCategory}
         iconForCategory={iconForCategory}
         formatPrimaryAmount={(cents) => formatPrimaryAmount(cents)}
         formatSecondaryAmount={(cents) => formatSecondaryAmount(cents)}
