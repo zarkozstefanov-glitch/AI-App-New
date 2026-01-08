@@ -340,16 +340,14 @@ export default function ListClient() {
         sortDate = date;
       }
 
-      const group =
-        groups.get(key) ??
-        ({
-          label,
-          sortDate,
-          items: [],
-          totalEurCents: 0,
-          totalBgnCents: 0,
-        } as const);
-      group.items.push(tx);
+const group = groups.get(key) || {
+        date: key,
+        items: [] as any[], // Заменяме 'never' с 'any[]'
+        totalEurCents: 0,
+        totalBgnCents: 0,
+      }; // МАХНИ 'as const' оттук, ако го има!
+
+      group.items.push(tx); 
       group.totalEurCents += tx.totalEurCents;
       group.totalBgnCents += tx.totalBgnCents;
       groups.set(key, group);
