@@ -22,7 +22,7 @@ const transaction = await prisma.transaction.findFirst({
   });
 
   if (!transaction) {
-    notFound();s
+    notFound();
   }
 
   let parsedJson: unknown = null;
