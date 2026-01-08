@@ -235,12 +235,12 @@ const AnalyticsView = ({
               labelStyle={{ color: "#0f172a" }}
               itemStyle={{ color: "#0f172a" }}
               wrapperStyle={{ color: "#0f172a" }}
-              formatter={(_value, _name, entry: { payload?: { name?: string; bgnCents?: number } } | undefined) => {
-                const name = entry?.payload?.name ?? "";
-                const bgnCents = entry?.payload?.bgnCents ?? 0;
-                const eurCents = Number(entry?.payload?.value ?? 0);
-                return [formatMoney(eurCents, bgnCents), name];
-              }}
+              formatter={(value: any, name: any, entry: any) => {
+  const entryName = entry?.payload?.name ?? "";
+  const bgnCents = entry?.payload?.bgnCents ?? 0;
+  const eurCents = Number(value ?? 0); 
+  return [formatMoney(eurCents, bgnCents), entryName];
+}}
             />
           </PieChart>
         </ResponsiveContainer>
@@ -249,7 +249,7 @@ const AnalyticsView = ({
         items={sortedCategories}
         activeCategory={activeCategory}
         onActivate={(category) => onActivateCategory(category)}
-        labelForCategory={labelForCategory}
+        labelForCategory={labelForCategory}с
         iconForCategory={iconForCategory}
         formatPrimaryAmount={(cents) => formatPrimaryAmount(cents)}
         formatSecondaryAmount={(cents) => formatSecondaryAmount(cents)}
