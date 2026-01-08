@@ -51,12 +51,13 @@ function buildBalanceMap(
 
 export async function DELETE(
   _request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const user = await getCurrentUser();
     const existing = await prisma.transaction.findFirst({
-      where: { id: params.id, userId: user.id },
+      where: { id: id, userId: user.id },
     });
     if (!existing) {
       return jsonError(404, "NOT_FOUND", "Transaction not found");
@@ -89,11 +90,11 @@ export async function DELETE(
           db,
         );
       }
-      await db.lineItem.deleteMany({ where: { transactionId: params.id } });
+      await db.lineItem.deleteMany({ where: { transactionId: id } });
       await db.transactionHistory.deleteMany({
-        where: { transactionId: params.id, userId: user.id },
+        where: { transactionId: id, userId: user.id },
       });
-      await db.transaction.deleteMany({ where: { id: params.id, userId: user.id } });
+      await db.transaction.deleteMany({ where: { id: id, userId: user.id } });
     });
     return NextResponse.json({ ok: true });
   } catch (error) {
@@ -106,12 +107,13 @@ export async function DELETE(
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    const { id } = await params;
     const user = await getCurrentUser();
     const tx = await prisma.transaction.findFirst({
-      where: { id: params.id, userId: user.id },
+      where: { id: id, userId: user.id },
       include: { lineItems: true },
     });
     if (!tx) {
@@ -134,8 +136,9 @@ export async function GET(
   }
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const user = await getCurrentUser();
     let data: any = null;
     try {
@@ -143,8 +146,8 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     } catch {
       return jsonError(400, "INVALID_JSON", "Invalid JSON body");
     }
-    const updated = await updateTransactionWithHistory(user.id, params.id, data);
-    if (!updated) {
+    const updated = await updateTransactionWithHistory(user.id, id, data);
+    if (!updated) {.
       return jsonError(404, "NOT_FOUND", "Transaction not found");
     }
     return NextResponse.json({ ok: true });

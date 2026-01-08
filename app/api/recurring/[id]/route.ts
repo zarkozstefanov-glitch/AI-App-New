@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { z } from "zod";
 import { randomUUID } from "crypto";
 import { prisma } from "@/lib/prisma";
@@ -23,13 +23,14 @@ function jsonError(status: number, code: string, message: string, details?: unkn
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const requestId = randomUUID();
   try {
+    const { id } = await params;
     const user = await getCurrentUser();
     const template = await prisma.recurringTemplate.findFirst({
-      where: { id: params.id, userId: user.id },
+      where: { id, userId: user.id },
     });
     if (!template) {
       return jsonError(404, "NOT_FOUND", "Recurring template not found");
@@ -45,11 +46,12 @@ export async function GET(
 }
 
 export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } },
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const requestId = randomUUID();
   try {
+    const { id } = await params;
     const user = await getCurrentUser();
     let body: unknown = null;
     try {
@@ -63,7 +65,7 @@ export async function PATCH(
     }
 
     const template = await prisma.recurringTemplate.updateMany({
-      where: { id: params.id, userId: user.id },
+      where: { id, userId: user.id },
       data: {
         ...parsed.data,
         note: parsed.data.note === null ? null : parsed.data.note,
@@ -85,14 +87,15 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: Request,
-  { params }: { params: { id: string } },
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const requestId = randomUUID();
   try {
+    const { id } = await params;
     const user = await getCurrentUser();
     await prisma.recurringTemplate.deleteMany({
-      where: { id: params.id, userId: user.id },
+      where: { id, userId: user.id },
     });
     return NextResponse.json({ ok: true, requestId });
   } catch (error) {
