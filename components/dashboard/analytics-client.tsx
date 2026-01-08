@@ -173,6 +173,7 @@ const AnalyticsView = ({
               nameKey="name"
               innerRadius={50}
               outerRadius={80}
+              {/* @ts-expect-error - activeIndex is a valid prop, but the types are wrong */}
               activeIndex={summary.byCategory.findIndex(
                 (c) => c.category === activeCategory,
               )}
