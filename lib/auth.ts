@@ -7,6 +7,7 @@ import { getServerSession } from "next-auth";
 import { rateLimit } from "@/lib/rate-limit";
 
 export const authOptions: NextAuthOptions = {
+  trustHost: true,
   session: {
     strategy: "jwt",
   },
@@ -66,6 +67,12 @@ export const authOptions: NextAuthOptions = {
     signIn: "/auth",
   },
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      const resolvedBase = process.env.NEXTAUTH_URL || baseUrl;
+      if (url.startsWith("/")) return `${resolvedBase}${url}`;
+      if (url.startsWith(resolvedBase)) return url;
+      return resolvedBase;
+    },
     async jwt({ token, user }): Promise<JWT> {
       if (user) {
         const enrichedUser = user as {

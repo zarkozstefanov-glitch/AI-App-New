@@ -246,23 +246,15 @@ const AnalyticsView = ({
               labelStyle={{ color: "#0f172a" }}
               itemStyle={{ color: "#0f172a" }}
               wrapperStyle={{ color: "#0f172a" }}
-              formatter={(
-                value: number | string | ReadonlyArray<number | string> | null | undefined,
-                name: string | number | null | undefined,
-                entry?: { payload?: { name?: string | number | null; bgnCents?: number } },
-              ) => {
-                const normalizedValue = Array.isArray(value) ? value[0] : value;
-                const safeValue =
-                  typeof normalizedValue === "number" || typeof normalizedValue === "string"
-                    ? normalizedValue
-                    : 0;
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              formatter={(value: any, name: any, entry: any) => {
+                if (value === undefined || value === null) {
+                  return ["€0.00", String(name ?? "")];
+                }
                 const entryName = entry?.payload?.name ?? name ?? "";
                 const bgnCents = entry?.payload?.bgnCents ?? 0;
-                const eurCents = Number(safeValue);
-                return [formatMoney(eurCents, bgnCents), String(entryName)] as [
-                  string,
-                  string,
-                ];
+                const eurCents = Number(value);
+                return [formatMoney(eurCents, bgnCents), String(entryName)] as [any, any];
               }}
             />
           </PieChart>
