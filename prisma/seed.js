@@ -5,15 +5,15 @@ const { hash } = require("bcryptjs");
 const prisma = new PrismaClient();
 
 async function main() {
-  const passwordHash = await hash("demo1234", 10);
+  const passwordHash = await hash("password123", 10);
   const user = await prisma.user.upsert({
-    where: { email: "demo@demo.com" },
+    where: { email: "test@example.com" },
     update: {},
     create: {
       name: "Демо Потребител",
       firstName: "Демо",
       lastName: "Потребител",
-      email: "demo@demo.com",
+      email: "test@example.com",
       phone: "+359888000000",
       passwordHash,
       nickname: "AI Финанси",
@@ -24,6 +24,18 @@ async function main() {
 
   await prisma.lineItem.deleteMany({});
   await prisma.transaction.deleteMany({ where: { userId: user.id } });
+  await prisma.account.deleteMany({ where: { userId: user.id } });
+
+  const account = await prisma.account.create({
+    data: {
+      userId: user.id,
+      name: "Основна сметка",
+      kind: "checking",
+      currency: "BGN",
+      balanceBgnCents: 0,
+      balanceEurCents: 0,
+    },
+  });
 
   const toCents = (amount) => Math.round(amount * 100);
   const eurToBgnCents = (eurCents) => Math.round(eurCents * 1.95583);
@@ -76,7 +88,8 @@ async function main() {
         : { bgnCents: totalOriginalCents, eurCents: bgnToEurCents(totalOriginalCents) };
     await prisma.transaction.create({
       data: {
-        userId: user.id,
+        user: { connect: { id: user.id } },
+        account: { connect: { id: account.id } },
         sourceType: tx.sourceType,
         merchantName: tx.merchantName,
         transactionDate: tx.transactionDate,
@@ -121,6 +134,10 @@ async function main() {
 
 main()
   .then(async () => {
+    console.log("Seeded user login:", {
+      email: "test@example.com",
+      password: "password123",
+    });
     await prisma.$disconnect();
   })
   .catch(async (e) => {
