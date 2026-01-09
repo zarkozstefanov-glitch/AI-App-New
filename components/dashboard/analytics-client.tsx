@@ -254,7 +254,10 @@ const AnalyticsView = ({
                 const entryName = entry?.payload?.name ?? name ?? "";
                 const bgnCents = entry?.payload?.bgnCents ?? 0;
                 const eurCents = Number(value);
-                return [formatMoney(eurCents, bgnCents), String(entryName)] as [any, any];
+                return [formatMoney(eurCents, bgnCents), String(entryName)] as [
+                  string,
+                  string,
+                ];
               }}
             />
           </PieChart>

@@ -1,41 +1,27 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const { PrismaClient } = require("@prisma/client");
-const { hash } = require("bcryptjs");
+const { hashSync } = require("bcryptjs");
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const passwordHash = await hash("password123", 10);
-  const user = await prisma.user.upsert({
-    where: { email: "test@example.com" },
-    update: {},
-    create: {
-      name: "Демо Потребител",
+  const passwordHash = hashSync("password123", 10);
+  const usersToSeed = [
+    {
+      email: "test@example.com",
       firstName: "Демо",
       lastName: "Потребител",
-      email: "test@example.com",
-      phone: "+359888000000",
-      passwordHash,
       nickname: "AI Финанси",
-      monthlyBudgetGoal: 2000,
-      storeOriginalImage: false,
     },
-  });
+    {
+      email: "demo@demo.com",
+      firstName: "Демо",
+      lastName: "Потребител",
+      nickname: "AI Финанси",
+    },
+  ];
 
   await prisma.lineItem.deleteMany({});
-  await prisma.transaction.deleteMany({ where: { userId: user.id } });
-  await prisma.account.deleteMany({ where: { userId: user.id } });
-
-  const account = await prisma.account.create({
-    data: {
-      userId: user.id,
-      name: "Основна сметка",
-      kind: "checking",
-      currency: "BGN",
-      balanceBgnCents: 0,
-      balanceEurCents: 0,
-    },
-  });
 
   const toCents = (amount) => Math.round(amount * 100);
   const eurToBgnCents = (eurCents) => Math.round(eurCents * 1.95583);
@@ -80,63 +66,95 @@ async function main() {
     },
   ];
 
-  for (const tx of txData) {
-    const totalOriginalCents = toCents(tx.totalOriginal);
-    const totals =
-      tx.currencyOriginal === "EUR"
-        ? { eurCents: totalOriginalCents, bgnCents: eurToBgnCents(totalOriginalCents) }
-        : { bgnCents: totalOriginalCents, eurCents: bgnToEurCents(totalOriginalCents) };
-    await prisma.transaction.create({
-      data: {
-        user: { connect: { id: user.id } },
-        account: { connect: { id: account.id } },
-        sourceType: tx.sourceType,
-        merchantName: tx.merchantName,
-        transactionDate: tx.transactionDate,
-        totalOriginalCents,
-        currencyOriginal: tx.currencyOriginal,
-        totalBgnCents: totals.bgnCents,
-        totalEurCents: totals.eurCents,
-        category: tx.category,
-        categoryConfidence: tx.categoryConfidence,
-        aiExtractedJson: JSON.stringify({ seeded: true, merchant: tx.merchantName }),
-        overallConfidence: tx.overallConfidence,
-        lineItems: tx.lineItems?.length
-          ? {
-              createMany: {
-                data: tx.lineItems.map((item) => ({
-                  name: item.name,
-                  quantity: item.quantity,
-                  priceOriginalCents:
-                    item.priceOriginal !== undefined && item.priceOriginal !== null
-                      ? toCents(item.priceOriginal)
-                      : null,
-                  priceBgnCents:
-                    item.priceOriginal !== undefined && item.priceOriginal !== null
-                      ? (tx.currencyOriginal === "EUR"
-                          ? eurToBgnCents(toCents(item.priceOriginal))
-                          : toCents(item.priceOriginal))
-                      : null,
-                  priceEurCents:
-                    item.priceOriginal !== undefined && item.priceOriginal !== null
-                      ? (tx.currencyOriginal === "EUR"
-                          ? toCents(item.priceOriginal)
-                          : bgnToEurCents(toCents(item.priceOriginal)))
-                      : null,
-                })),
-              },
-            }
-          : undefined,
+  for (const userMeta of usersToSeed) {
+    const user = await prisma.user.upsert({
+      where: { email: userMeta.email },
+      update: { passwordHash },
+      create: {
+        name: "Демо Потребител",
+        firstName: userMeta.firstName,
+        lastName: userMeta.lastName,
+        email: userMeta.email,
+        phone: "+359888000000",
+        passwordHash,
+        nickname: userMeta.nickname,
+        monthlyBudgetGoal: 2000,
+        storeOriginalImage: false,
       },
     });
+
+    await prisma.transaction.deleteMany({ where: { userId: user.id } });
+    await prisma.account.deleteMany({ where: { userId: user.id } });
+
+    const account = await prisma.account.create({
+      data: {
+        userId: user.id,
+        name: "Main Bank",
+        kind: "checking",
+        currency: "BGN",
+        balanceBgnCents: 0,
+        balanceEurCents: 0,
+      },
+    });
+
+    for (const tx of txData) {
+      const totalOriginalCents = toCents(tx.totalOriginal);
+      const totals =
+        tx.currencyOriginal === "EUR"
+          ? { eurCents: totalOriginalCents, bgnCents: eurToBgnCents(totalOriginalCents) }
+          : { bgnCents: totalOriginalCents, eurCents: bgnToEurCents(totalOriginalCents) };
+      await prisma.transaction.create({
+        data: {
+          user: { connect: { id: user.id } },
+          account: { connect: { id: account.id } },
+          sourceType: tx.sourceType,
+          merchantName: tx.merchantName,
+          transactionDate: tx.transactionDate,
+          totalOriginalCents,
+          currencyOriginal: tx.currencyOriginal,
+          totalBgnCents: totals.bgnCents,
+          totalEurCents: totals.eurCents,
+          category: tx.category,
+          categoryConfidence: tx.categoryConfidence,
+          aiExtractedJson: JSON.stringify({ seeded: true, merchant: tx.merchantName }),
+          overallConfidence: tx.overallConfidence,
+          lineItems: tx.lineItems?.length
+            ? {
+                createMany: {
+                  data: tx.lineItems.map((item) => ({
+                    name: item.name,
+                    quantity: item.quantity,
+                    priceOriginalCents:
+                      item.priceOriginal !== undefined && item.priceOriginal !== null
+                        ? toCents(item.priceOriginal)
+                        : null,
+                    priceBgnCents:
+                      item.priceOriginal !== undefined && item.priceOriginal !== null
+                        ? (tx.currencyOriginal === "EUR"
+                            ? eurToBgnCents(toCents(item.priceOriginal))
+                            : toCents(item.priceOriginal))
+                        : null,
+                    priceEurCents:
+                      item.priceOriginal !== undefined && item.priceOriginal !== null
+                        ? (tx.currencyOriginal === "EUR"
+                            ? toCents(item.priceOriginal)
+                            : bgnToEurCents(toCents(item.priceOriginal)))
+                        : null,
+                  })),
+                },
+              }
+            : undefined,
+        },
+      });
+    }
   }
 }
 
 main()
   .then(async () => {
-    console.log("Seeded user login:", {
-      email: "test@example.com",
-      password: "password123",
+    console.log("Seeded user logins:", {
+      test: { email: "test@example.com", password: "password123" },
+      demo: { email: "demo@demo.com", password: "password123" },
     });
     await prisma.$disconnect();
   })

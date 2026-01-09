@@ -7,8 +7,6 @@ import {
   Calculator,
   LayoutDashboard,
   ListOrdered,
-  Plus,
-  Tag,
 } from "lucide-react";
 import { AuthOpenButton } from "@/components/auth/auth-modal";
 import { useI18n } from "@/components/i18n-provider";
@@ -25,8 +23,6 @@ const mobileLinks = [
   { href: "#last-operations", label: "История", icon: ListOrdered },
   { href: "#change-demo", label: "Ресто", icon: Calculator },
   { href: "#dashboard-demo", label: "Табло", icon: LayoutDashboard, primary: true },
-  { href: "#ai-scan", label: "Транзакция", icon: Plus },
-  { href: "#pricing-trial", label: "Цени", icon: Tag },
 ];
 
 export default function LandingHeader() {

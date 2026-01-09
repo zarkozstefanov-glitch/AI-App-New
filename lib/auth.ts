@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { compare } from "bcryptjs";
+import { compareSync } from "bcryptjs";
 import type { NextAuthOptions, Session } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import type { JWT } from "next-auth/jwt";
@@ -7,7 +7,6 @@ import { getServerSession } from "next-auth";
 import { rateLimit } from "@/lib/rate-limit";
 
 export const authOptions: NextAuthOptions = {
-  trustHost: true,
   session: {
     strategy: "jwt",
   },
@@ -46,7 +45,8 @@ export const authOptions: NextAuthOptions = {
       if (!user) return null;
 
       // Проверка на паролата
-      const isValid = await compare(credentials.password, user.passwordHash);
+      const isValid = compareSync(credentials.password, user.passwordHash);
+      console.log("DEBUG: Password match result:", isValid);
       if (!isValid) return null;
 
       // Връщане на потребителските данни към JWT сесията
