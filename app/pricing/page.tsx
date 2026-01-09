@@ -48,33 +48,32 @@ export default function PricingPage() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
-          <Card
-            id="pricing-trial"
-            className="relative overflow-hidden border border-indigo-200/70 bg-gradient-to-br from-indigo-500/15 via-violet-500/10 to-white/80 p-6 shadow-[0_20px_60px_rgba(99,102,241,0.25)] backdrop-blur-sm"
-          >
-            <div className="absolute right-6 top-6 rounded-full bg-white/70 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-indigo-600">
-              Free
-            </div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-100 drop-shadow-sm">
-              Trial
-            </p>
-            <h2 className="mt-3 text-2xl font-semibold text-slate-900">
-              1 месец БЕЗПЛАТНО
-            </h2>
-            <p className="mt-2 text-sm text-slate-600">
-              Без карта. Без ангажименти.
-            </p>
-            <ul className="mt-6 space-y-3 text-sm text-slate-700">
-              {features.map((feature) => (
-                <li key={feature} className="flex items-center gap-2">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 text-white shadow-sm">
-                    <Check className="h-3 w-3" />
-                  </span>
-                  {feature}
-                </li>
-              ))}
-            </ul>
-          </Card>
+          <div id="pricing-trial" className="scroll-mt-24">
+            <Card className="relative overflow-hidden border border-indigo-200/70 bg-gradient-to-br from-indigo-500/15 via-violet-500/10 to-white/80 p-6 shadow-[0_20px_60px_rgba(99,102,241,0.25)] backdrop-blur-sm">
+              <div className="absolute right-6 top-6 rounded-full bg-white/70 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-indigo-600">
+                Free
+              </div>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-100 drop-shadow-sm">
+                Trial
+              </p>
+              <h2 className="mt-3 text-2xl font-semibold text-slate-900">
+                1 месец БЕЗПЛАТНО
+              </h2>
+              <p className="mt-2 text-sm text-slate-600">
+                Без карта. Без ангажименти.
+              </p>
+              <ul className="mt-6 space-y-3 text-sm text-slate-700">
+                {features.map((feature) => (
+                  <li key={feature} className="flex items-center gap-2">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 text-white shadow-sm">
+                      <Check className="h-3 w-3" />
+                    </span>
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          </div>
 
           <Card className="relative overflow-hidden border border-blue-200 bg-gradient-to-br from-white via-blue-50/60 to-indigo-50/80 p-6 shadow-[0_20px_60px_rgba(59,130,246,0.2)] backdrop-blur-sm">
             <div className="absolute -right-12 -top-12 h-28 w-28 rounded-full bg-indigo-400/30 blur-2xl" />
