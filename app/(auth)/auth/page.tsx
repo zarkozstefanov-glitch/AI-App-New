@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import LandingHeader from "@/components/landing/landing-header";
 import LandingDemoGrid from "@/components/landing/landing-demo-grid";
+import AccountHeader from "@/components/accounts/account-header";
 import type { Summary, SeriesPoint } from "@/components/dashboard/analytics-client";
 import type { TransactionItem } from "@/components/accounts/account-history";
 import ChangeCalculator from "@/components/change/change-calculator";
@@ -421,6 +422,10 @@ export default async function AuthPage() {
               </div>
             </div>
           </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8">
+          <AccountHeader demoAccounts={demoAccounts} hideIncomeAction />
         </section>
 
         <section

@@ -1,5 +1,4 @@
 "use client";
-import AccountHeader from "@/components/accounts/account-header";
 import AccountHistory, {
   type TransactionItem,
 } from "@/components/accounts/account-history";
@@ -40,7 +39,6 @@ type LandingDemoGridProps = {
 };
 
 export default function LandingDemoGrid({
-  demoAccounts,
   demoSummary,
   demoSeries,
   demoFilters,
@@ -55,7 +53,6 @@ export default function LandingDemoGrid({
 
   return (
     <div className="space-y-8">
-      <AccountHeader demoAccounts={demoAccounts} hideIncomeAction />
       <AnalyticsClient
         demoSummary={demoSummary}
         demoSeries={demoSeries}
