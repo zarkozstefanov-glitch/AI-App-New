@@ -34,7 +34,7 @@ export default function PricingPage() {
         </div>
       </header>
 
-      <main className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-12 sm:px-6">
+      <main className="mx-auto flex max-w-5xl flex-col gap-8 px-4 pt-8 pb-12 sm:px-6">
         <div className="text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500">
             Планове

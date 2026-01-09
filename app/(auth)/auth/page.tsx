@@ -364,7 +364,7 @@ export default async function AuthPage() {
 
       <LandingHeader />
 
-      <main className="relative pt-20">
+      <main className="relative pt-16">
         <section className="mx-auto flex max-w-7xl flex-col gap-10 px-4 py-12 sm:px-6 lg:px-8 lg:py-20">
           <div className="grid items-center gap-8 lg:grid-cols-2">
             <div className="space-y-6 text-center lg:text-left">

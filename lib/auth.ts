@@ -17,7 +17,7 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      authorize: async (credentials, req) => {
+      authorize: async (credentials) => {
       if (!credentials?.email || !credentials.password) return null;
       console.log("DEBUG: Auth Attempt - Email:", credentials.email);
 
