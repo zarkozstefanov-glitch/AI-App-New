@@ -20,9 +20,9 @@ export default async function RootLayout({
   return (
     <html lang={locale}>
       <body className="min-h-[100dvh] overflow-x-hidden antialiased text-slate-900">
-        <Providers locale={locale}>
-          {children}
-        </Providers>
+<Providers>
+  {children}
+</Providers>
       </body>
     </html>
   );
