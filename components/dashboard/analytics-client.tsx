@@ -247,7 +247,7 @@ const AnalyticsView = ({
               itemStyle={{ color: "#0f172a" }}
               wrapperStyle={{ color: "#0f172a" }}
               formatter={(
-                value: number | string,
+                value: number | string | undefined,
                 name: string,
                 entry: { payload?: { name?: string; bgnCents?: number } },
               ) => {
