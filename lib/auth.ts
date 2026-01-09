@@ -19,14 +19,10 @@ export const authOptions: NextAuthOptions = {
       },
       authorize: async (credentials, req) => {
       if (!credentials?.email || !credentials.password) return null;
+      console.log("DEBUG: Auth Attempt - Email:", credentials.email);
 
-      // Правилно извличане на IP адреса за rate limiting
-      const headers = req?.headers;
-      let ip = "unknown";
-
-      if (headers) {
-        ip = headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
-      }
+      // Avoid header access in the auth callback to prevent Next.js request shape issues.
+      const ip = "unknown";
 
       // Проверка на лимита за опити
       const limited = await rateLimit(`login-${ip}`, {
@@ -42,11 +38,13 @@ export const authOptions: NextAuthOptions = {
         where: { email: credentials.email.toLowerCase() },
       });
 
+      console.log("DEBUG: User in DB found:", Boolean(user));
+      console.log("DEBUG: DB Password Hash:", user?.passwordHash);
       if (!user) return null;
 
       // Проверка на паролата
       const isValid = compareSync(credentials.password, user.passwordHash);
-      console.log("DEBUG: Password match result:", isValid);
+      console.log("DEBUG: Comparison Result:", isValid);
       if (!isValid) return null;
 
       // Връщане на потребителските данни към JWT сесията
