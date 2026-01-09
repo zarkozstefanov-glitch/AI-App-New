@@ -170,7 +170,7 @@ const AnalyticsView = ({
   return (
     <>
       <div className="flex h-56 items-center justify-center">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minHeight={220} minWidth={0}>
           <PieChart>
             <Pie
               data={summary.byCategory.map((c) => ({
@@ -678,7 +678,7 @@ export default function AnalyticsClient({
                 <TrendingUp className="h-4 w-4 text-cyan-600" />
               </div>
               <div className="mt-4 flex-1 min-h-[220px]">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minHeight={220} minWidth={0}>
                   <LineChart data={series}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.4)" />
                     <XAxis dataKey="date" stroke="#94a3b8" />
