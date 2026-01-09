@@ -5,6 +5,7 @@ import { resolveTotalsCents } from "@/lib/currency";
 import { applyBalanceDelta } from "@/lib/db/account-balances";
 import { isBalanceCurrentlyApplied } from "@/lib/db/balance-logic";
 import { updateTransactionWithHistory } from "@/lib/db/transaction-edit";
+import type { EditTransactionPayload } from "@/lib/db/transaction-edit";
 
 function jsonError(status: number, code: string, message: string) {
   return NextResponse.json({ ok: false, error: { code, message } }, { status });
@@ -140,9 +141,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   try {
     const { id } = await params;
     const user = await getCurrentUser();
-    let data: any = null;
+    let data: EditTransactionPayload | null = null;
     try {
-      data = await request.json();
+      data = (await request.json()) as EditTransactionPayload;
     } catch {
       return jsonError(400, "INVALID_JSON", "Invalid JSON body");
     }

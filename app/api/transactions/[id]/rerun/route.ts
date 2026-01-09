@@ -94,7 +94,7 @@ export async function POST(
         ?.filter((part) => part.type === "text")
         .map((part) => part.text?.value ?? "") ?? [];
     const content = textParts.join("\n").trim();
-    let parsed = parseExtraction(content);
+    const parsed = parseExtraction(content);
     if (!parsed.ok) {
       return jsonError(500, "EXTRACTION_PARSE_FAILED", parsed.error, parsed.raw);
     }

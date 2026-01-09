@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Camera, FileUp, Loader2 } from "lucide-react";
 import { categoryConfig, categoryKeys, getCategoryOptionsForLocale } from "@/lib/categories";
 import type { CategoryKey } from "@/lib/categories";
-import { convertCents, formatMoney, fromCents, toCents } from "@/lib/currency";
-import { mapAssistantCategory, mapCategoryKeyToAssistant } from "@/lib/extraction/category-map";
+import { convertCents, formatMoney, toCents } from "@/lib/currency";
+import { mapAssistantCategory } from "@/lib/extraction/category-map";
 import type { ExtractionResult } from "@/lib/extraction/schema";
 import { safeFetchJson } from "@/lib/safe-fetch";
 import { useAccounts } from "@/components/accounts/accounts-context";
@@ -40,15 +40,6 @@ type WizardFormState = {
 const normalizeCategory = (value: string | null | undefined): CategoryKey => {
   if (!value) return "other";
   return (categoryKeys.includes(value as CategoryKey) ? value : "other") as CategoryKey;
-};
-
-const splitDateTime = (value?: string) => {
-  if (!value) return { date: null, time: null };
-  const [date, time] = value.split("T");
-  return {
-    date: date || null,
-    time: time ? time.slice(0, 5) : null,
-  };
 };
 
 type UploadWizardProps = {
@@ -232,29 +223,22 @@ export default function UploadWizard({
         throw new Error(t("upload.validAmount"));
       }
 
-      const { date } = splitDateTime(formState.transactionDate);
-      const currency =
-        formState.currencyOriginal === "EUR"
-          ? "EUR"
-          : "BGN";
-      const totals = convertCents(toCents(totalOriginal), currency);
-      const selectedCategory = normalizeCategory(formState.category);
 
+      type ExtractionItem = NonNullable<ExtractionResult["data"]>["items"][number];
       const extractionToSave: ExtractionResult = {
         ...extracted,
         status: "success",
         error_message: null,
-          data: extracted.data
-  ? {
-      ...extracted.data,
-      items: extracted.data.items.map((item: any) => ({
-        ...item,
-        // Казваме на TS да приеме стринга като валидна категория
-        category: item.category as any, 
-      })),
-      merchant_name: extracted.data.merchant_name || "Unknown",
-    }
-  : null,
+        data: extracted.data
+          ? {
+              ...extracted.data,
+              items: extracted.data.items.map((item: ExtractionItem) => ({
+                ...item,
+                category: item.category,
+              })),
+              merchant_name: extracted.data.merchant_name || "Unknown",
+            }
+          : null,
       };
 
       const response = await safeFetchJson("/api/transactions/from-extraction", {

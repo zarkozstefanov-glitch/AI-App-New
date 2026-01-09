@@ -33,7 +33,7 @@ export function parseExtraction(content: string): ParseResult {
   try {
     const parsed = JSON.parse(jsonCandidate);
     return { ok: true, data: parsed };
-  } catch (error) {
+  } catch {
     return {
       ok: false,
       error: "Invalid extraction JSON",

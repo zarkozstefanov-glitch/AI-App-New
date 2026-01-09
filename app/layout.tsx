@@ -15,7 +15,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   // Вече правилно изчакваме преводача
-  const { t, locale } = await getServerTranslator();
+  const { locale } = await getServerTranslator();
 
   return (
     <html lang={locale}>

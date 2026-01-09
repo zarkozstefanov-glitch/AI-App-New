@@ -190,7 +190,7 @@ export async function POST(request: Request) {
     }
   }
 
-  let parsed = parseExtraction(content);
+  const parsed = parseExtraction(content);
   if (!parsed.ok) {
     console.error("[extract] parse error", {
       requestId,

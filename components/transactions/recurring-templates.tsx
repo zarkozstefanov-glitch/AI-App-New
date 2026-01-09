@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect */
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -153,7 +154,7 @@ export default function RecurringTemplates({
       setAutoSaveStatus("");
     };
     loadTemplate();
-  }, [recurringId]);
+  }, [recurringId, currentAccountId, form.accountId]);
 
   useEffect(() => {
     if (!editingId) return;

@@ -13,10 +13,8 @@ export default async function TransactionDetailPage({
 }) {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/auth");
-const { t } = await getServerTranslator(); // Добавяме await тук
-// Добави това най-отгоре в компонента, ако params даде грешка:
-const { id } = await params; 
-const transaction = await prisma.transaction.findFirst({
+  const { t } = await getServerTranslator();
+  const transaction = await prisma.transaction.findFirst({
     where: { id: params.id, userId: session.user.id },
     include: { lineItems: true },
   });

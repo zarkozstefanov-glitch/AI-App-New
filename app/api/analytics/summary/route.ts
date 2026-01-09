@@ -147,7 +147,6 @@ export async function GET(request: NextRequest) {
 
     const monthStart = startOfMonth(now);
     const monthEnd = endOfMonth(now);
-    const effectiveTo = now;
     const totalDaysInMonth = Math.max(
       1,
       Math.floor(
@@ -173,13 +172,29 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    const fixedSpentBgnCents = monthTransactions.reduce((acc, tx) => {
+    const activeMonthTransactions = await prisma.transaction.findMany({
+      where: {
+        userId: user.id,
+        transactionType: "expense",
+        transactionDate: { gte: monthStart, lte: now },
+        ...(accountId ? { accountId } : {}),
+      },
+      select: {
+        totalEur: true,
+        totalBgn: true,
+        totalOriginal: true,
+        currencyOriginal: true,
+        isFixed: true,
+      },
+    });
+
+    const fixedSpentBgnCents = activeMonthTransactions.reduce((acc, tx) => {
       if (!tx.isFixed) return acc;
       const resolved = resolveTotalsCents(tx);
       return acc + (resolved.bgnCents ?? 0);
     }, 0);
 
-    const variableSpentBgnCents = monthTransactions.reduce((acc, tx) => {
+    const variableSpentBgnCents = activeMonthTransactions.reduce((acc, tx) => {
       if (tx.isFixed) return acc;
       const resolved = resolveTotalsCents(tx);
       return acc + (resolved.bgnCents ?? 0);
@@ -188,7 +203,12 @@ export async function GET(request: NextRequest) {
     const averageDailyVariableBgn = variableSpentBgnCents / elapsedDaysInMonth;
     const remainingDaysInMonth = Math.max(0, totalDaysInMonth - elapsedDaysInMonth);
 
-    const totalFixedBgnCents = fixedSpentBgnCents + unpaidRecurringBgnCents;
+    const fixedPlannedBgnCents = monthTransactions.reduce((acc, tx) => {
+      if (!tx.isFixed) return acc;
+      const resolved = resolveTotalsCents(tx);
+      return acc + (resolved.bgnCents ?? 0);
+    }, 0);
+    const totalFixedBgnCents = fixedPlannedBgnCents + unpaidRecurringBgnCents;
     const projectedBgnCents =
       Math.round(averageDailyVariableBgn * remainingDaysInMonth) +
       variableSpentBgnCents +

@@ -1,9 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useAccounts } from "@/components/accounts/accounts-context";
-import { formatAccountLabel } from "@/lib/accounts";
 import { format } from "date-fns";
 import TransactionListItem from "@/components/transactions/transaction-list-item";
 import { getCategoryLabel, getRecurringLabelForName } from "@/lib/category-ui";
@@ -29,19 +27,9 @@ type TransactionRow = {
 };
 
 export default function RecentTransactions() {
-  const { accounts } = useAccounts();
   const { t, locale } = useI18n();
   const [rows, setRows] = useState<TransactionRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const now = Date.now();
-
-  const accountMap = useMemo(
-    () =>
-      new Map(
-        accounts.map((acc) => [acc.id, formatAccountLabel(acc, locale)]),
-      ),
-    [accounts],
-  );
 
   useEffect(() => {
     let active = true;

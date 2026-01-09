@@ -1,6 +1,7 @@
 "use client";
+/* eslint-disable react-hooks/static-components */
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import { fromCents } from "@/lib/currency";
 import { getCategoryIcon, getCategoryUI } from "@/lib/category-ui";
@@ -13,6 +14,7 @@ type TransactionListItemProps = {
   meta?: string;
   categoryName: string;
   icon?: LucideIcon;
+  uiOverride?: { backgroundColor: string; textColor: string };
   imageUrl?: string | null;
   badges?: React.ReactNode;
   transactionType?: "income" | "expense" | "transfer";
@@ -33,6 +35,7 @@ export default function TransactionListItem({
   meta,
   categoryName,
   icon,
+  uiOverride,
   imageUrl,
   badges,
   transactionType,
@@ -46,8 +49,13 @@ export default function TransactionListItem({
   className,
 }: TransactionListItemProps) {
   const { t } = useI18n();
-  const Icon = icon ?? getCategoryIcon(categoryName);
-  const ui = getCategoryUI(categoryName);
+  const Icon = useMemo(
+    () => icon ?? getCategoryIcon(categoryName),
+    [icon, categoryName],
+  );
+  const ui = uiOverride ?? getCategoryUI(categoryName);
+  void meta;
+  void imageUrl;
   const amountFormatter = useMemo(
     () =>
       new Intl.NumberFormat("en-US", {
@@ -56,8 +64,9 @@ export default function TransactionListItem({
       }),
     [],
   );
+  const [now] = useState(() => Date.now());
   const isFuture =
-    !!transactionDate && new Date(transactionDate).getTime() > Date.now();
+    !!transactionDate && new Date(transactionDate).getTime() > now;
   const statusLabel =
     statusLabelOverride ??
     (transactionType === "income"

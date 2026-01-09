@@ -1,6 +1,9 @@
 "use client";
+/* eslint-disable react-hooks/preserve-manual-memoization */
+/* eslint-disable react-hooks/set-state-in-effect */
 
 import { useEffect, useMemo, useState } from "react";
+import type { ComponentProps } from "react";
 import {
   LineChart,
   Line,
@@ -19,11 +22,13 @@ import { recurringGroups, getRecurringGroupLabel } from "@/lib/recurring";
 import { formatMoney, fromCents } from "@/lib/currency";
 import UpcomingPayments from "@/components/dashboard/upcoming-payments";
 import { Loader2, Store, TrendingUp } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import TransactionListItem from "@/components/transactions/transaction-list-item";
 import { getCategoryUI, getCategoryLabel } from "@/lib/category-ui";
 import { useI18n } from "@/components/i18n-provider";
+import NumberTicker from "@/components/ui/number-ticker";
 
-type Summary = {
+export type Summary = {
   totals: { eurCents: number; bgnCents: number };
   monthlyBudget: { eurCents: number | null; bgnCents: number | null };
   remainingBudget: { eurCents: number | null; bgnCents: number | null };
@@ -34,13 +39,13 @@ type Summary = {
   topMerchants: { merchant: string; eurCents: number; bgnCents: number }[];
 };
 
-type SeriesPoint = {
+export type SeriesPoint = {
   date: string;
   eurCents: number;
   bgnCents: number;
 };
 
-const glassCard =
+const baseGlassCard =
   "rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm backdrop-blur-md";
 
 type CategoryLegendItem = {
@@ -55,10 +60,11 @@ type CategoryLegendProps = {
   activeCategory: string | null;
   onActivate: (category: string) => void;
   labelForCategory: (value: string) => string;
-  iconForCategory: (value: string) => any;
+  iconForCategory: (value: string) => LucideIcon;
   formatPrimaryAmount: (cents: number | null) => string;
   formatSecondaryAmount: (cents: number | null) => string;
   totalEurCents: number;
+  uiForCategory?: (category: string) => { backgroundColor: string; textColor: string };
 };
 
 const CategoryLegend = ({
@@ -70,6 +76,7 @@ const CategoryLegend = ({
   formatPrimaryAmount,
   formatSecondaryAmount,
   totalEurCents,
+  uiForCategory,
 }: CategoryLegendProps) => {
   const hasOverflow = items.length > 3;
   return (
@@ -77,7 +84,7 @@ const CategoryLegend = ({
       <div className="relative">
         <div className="max-h-[240px] overflow-y-auto pr-1 scroll-smooth">
           {items.map((cat, index) => {
-        const ui = getCategoryUI(cat.category);
+        const ui = uiForCategory ? uiForCategory(cat.category) : getCategoryUI(cat.category);
         const label = labelForCategory(cat.category);
         const Icon = iconForCategory(cat.category);
         const percent =
@@ -132,10 +139,13 @@ type AnalyticsViewProps = {
   activeCategory: string | null;
   onActivateCategory: (category: string | null) => void;
   labelForCategory: (value: string) => string;
-  iconForCategory: (value: string) => any;
+  iconForCategory: (value: string) => LucideIcon;
   formatPrimaryAmount: (cents: number | null) => string;
   formatSecondaryAmount: (cents: number | null) => string;
+  uiForCategory?: (category: string) => { backgroundColor: string; textColor: string };
 };
+
+type ActiveShapeProps = ComponentProps<typeof Sector>;
 
 const AnalyticsView = ({
   summary,
@@ -145,6 +155,7 @@ const AnalyticsView = ({
   iconForCategory,
   formatPrimaryAmount,
   formatSecondaryAmount,
+  uiForCategory,
 }: AnalyticsViewProps) => {
   const sortedCategories = [...summary.byCategory].sort(
     (a, b) => b.eurCents - a.eurCents,
@@ -153,6 +164,8 @@ const AnalyticsView = ({
     (total, item) => total + item.eurCents,
     0,
   );
+  const resolveCategoryUI = (category: string) =>
+    uiForCategory ? uiForCategory(category) : getCategoryUI(category);
 
   return (
     <>
@@ -166,8 +179,8 @@ const AnalyticsView = ({
                 key: c.category,
                 bgnCents: c.bgnCents,
                 category: c.category,
-                strokeColor: getCategoryUI(c.category).textColor,
-                fillColor: getCategoryUI(c.category).backgroundColor,
+                strokeColor: resolveCategoryUI(c.category).textColor,
+                fillColor: resolveCategoryUI(c.category).backgroundColor,
               }))}
               dataKey="value"
               nameKey="name"
@@ -177,12 +190,9 @@ const AnalyticsView = ({
               activeIndex={summary.byCategory.findIndex(
                 (c) => c.category === activeCategory,
               )}
-             activeShape={(props: any) => (
-  <Sector
-    {...props}
-    outerRadius={(props.outerRadius ?? 0) + 8}
-  />
-)}
+              activeShape={(props: ActiveShapeProps) => (
+                <Sector {...props} outerRadius={(props.outerRadius ?? 0) + 8} />
+              )}
               onClick={(data) =>
                 onActivateCategory(data?.payload?.category ?? null)
               }
@@ -191,7 +201,7 @@ const AnalyticsView = ({
               }
             >
               {summary.byCategory.map((c) => {
-                const ui = getCategoryUI(c.category);
+                const ui = resolveCategoryUI(c.category);
                 return (
                   <Cell
                     key={c.category}
@@ -208,6 +218,7 @@ const AnalyticsView = ({
               const fontSize = words.length > 2 ? 10 : 12;
               const lineHeight = fontSize + 2;
               const firstDy = -((words.length - 1) * lineHeight) / 2;
+              const activeUi = resolveCategoryUI(activeCategory);
               return (
                 <text
                   x="50%"
@@ -216,7 +227,7 @@ const AnalyticsView = ({
                   dominantBaseline="middle"
                   fontSize={fontSize}
                   fontWeight={600}
-                  fill={getCategoryUI(activeCategory).textColor}
+                  fill={activeUi.textColor}
                 >
                   {words.map((word, index) => (
                     <tspan key={`${word}-${index}`} x="50%" dy={index === 0 ? firstDy : lineHeight}>
@@ -235,12 +246,16 @@ const AnalyticsView = ({
               labelStyle={{ color: "#0f172a" }}
               itemStyle={{ color: "#0f172a" }}
               wrapperStyle={{ color: "#0f172a" }}
-              formatter={(value: any, name: any, entry: any) => {
-  const entryName = entry?.payload?.name ?? "";
-  const bgnCents = entry?.payload?.bgnCents ?? 0;
-  const eurCents = Number(value ?? 0); 
-  return [formatMoney(eurCents, bgnCents), entryName];
-}}
+              formatter={(
+                value: number | string,
+                name: string,
+                entry: { payload?: { name?: string; bgnCents?: number } },
+              ) => {
+                const entryName = entry?.payload?.name ?? name;
+                const bgnCents = entry?.payload?.bgnCents ?? 0;
+                const eurCents = Number(value ?? 0);
+                return [formatMoney(eurCents, bgnCents), entryName];
+              }}
             />
           </PieChart>
         </ResponsiveContainer>
@@ -254,16 +269,60 @@ const AnalyticsView = ({
         formatPrimaryAmount={(cents) => formatPrimaryAmount(cents)}
         formatSecondaryAmount={(cents) => formatSecondaryAmount(cents)}
         totalEurCents={totalEurCents}
+        uiForCategory={uiForCategory}
       />
     </>
   );
 };
 
-export default function AnalyticsClient() {
+type AnalyticsClientProps = {
+  demoSummary?: Summary;
+  demoSeries?: SeriesPoint[];
+  demoFilters?: { from: string; to: string };
+  demoTopMerchants?: Array<{
+    merchant: string;
+    eurCents: number;
+    bgnCents: number;
+    categoryLabel: string;
+    categoryKey: string;
+  }>;
+  demoCategoryPalette?: Array<{ backgroundColor: string; textColor: string }>;
+  demoUpcomingPayments?: Array<{
+    id: string;
+    category: string;
+    merchantName: string | null;
+    transactionDate: string | null;
+    totalEurCents: number;
+    totalBgnCents: number;
+    transactionType: "income" | "expense" | "transfer";
+    isFixed: boolean;
+  }>;
+  demoUiForCategory?: (category: string) => { backgroundColor: string; textColor: string };
+  demoMode?: boolean;
+  showUpcoming?: boolean;
+  demoStyle?: boolean;
+};
+
+export default function AnalyticsClient({
+  demoSummary,
+  demoSeries,
+  demoFilters,
+  demoTopMerchants,
+  demoCategoryPalette,
+  demoUpcomingPayments,
+  demoUiForCategory,
+  demoMode = false,
+  showUpcoming = true,
+  demoStyle = false,
+}: AnalyticsClientProps = {}) {
   const { t, locale } = useI18n();
-  const range: "month" = "month";
-  const [summary, setSummary] = useState<Summary | null>(null);
-  const [series, setSeries] = useState<SeriesPoint[]>([]);
+  const range = "month" as const;
+  const isDemo = Boolean(demoSummary) || demoMode;
+  const demoCardClass =
+    "rounded-2xl border border-white/20 bg-white/40 p-4 shadow-[0_12px_30px_rgba(15,23,42,0.08)] backdrop-blur-lg transition hover:shadow-[0_0_0_2px_rgba(99,102,241,0.2)]";
+  const glassCard = isDemo || demoStyle ? demoCardClass : baseGlassCard;
+  const [summary, setSummary] = useState<Summary | null>(demoSummary ?? null);
+  const [series, setSeries] = useState<SeriesPoint[]>(demoSeries ?? []);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const toInputDate = (date: Date) => {
     const year = date.getFullYear();
@@ -278,12 +337,12 @@ export default function AnalyticsClient() {
     return { from: start, to: end };
   };
 
-  const [filters, setFilters] = useState(() => getCurrentMonthRange());
-  const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState(() => demoFilters ?? getCurrentMonthRange());
+  const [loading, setLoading] = useState(!demoSummary);
   const [error, setError] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState(0);
   const recurringLabelMap = useMemo(() => {
-    const map = new Map<string, { label: string; icon: any }>();
+    const map = new Map<string, { label: string; icon: LucideIcon }>();
     for (const group of recurringGroups) {
       map.set(group.value, { label: getRecurringGroupLabel(group, locale), icon: group.icon });
     }
@@ -296,6 +355,23 @@ export default function AnalyticsClient() {
     categoryConfig[value as keyof typeof categoryConfig]?.icon ||
     recurringLabelMap.get(value)?.icon ||
     categoryConfig.other.icon;
+
+  const categoryUiMap = useMemo(() => {
+    if (!isDemo || !demoCategoryPalette || !summary?.byCategory.length) return null;
+    return new Map(
+      summary.byCategory.map((item, index) => [
+        item.category,
+        demoCategoryPalette[index % demoCategoryPalette.length],
+      ]),
+    );
+  }, [demoCategoryPalette, isDemo, summary?.byCategory]);
+
+  const uiForCategory = (category: string) =>
+    categoryUiMap?.get(category) ??
+    (demoUiForCategory ? demoUiForCategory(category) : getCategoryUI(category));
+
+  const lineColor = isDemo ? "#6366f1" : "#0ea5e9";
+  const lineDotColor = isDemo ? "#22d3ee" : "#0ea5e9";
 
   const amountFormatter = useMemo(
     () =>
@@ -311,6 +387,34 @@ export default function AnalyticsClient() {
 
   const formatSecondaryAmount = (cents: number | null) =>
     cents == null ? "—" : `BGN ${amountFormatter.format(fromCents(cents))}`;
+
+  const renderPrimaryAmount = (cents: number | null) => {
+    if (cents == null) return "—";
+    const value = fromCents(cents);
+    if (!isDemo && !demoStyle) {
+      return `€${amountFormatter.format(value)}`;
+    }
+    return (
+      <span className="flex items-baseline gap-1">
+        <span>€</span>
+        <NumberTicker value={value} format={(val) => amountFormatter.format(val)} />
+      </span>
+    );
+  };
+
+  const renderSecondaryAmount = (cents: number | null) => {
+    if (cents == null) return "—";
+    const value = fromCents(cents);
+    if (!isDemo && !demoStyle) {
+      return `BGN ${amountFormatter.format(value)}`;
+    }
+    return (
+      <span>
+        BGN{" "}
+        <NumberTicker value={value} format={(val) => amountFormatter.format(val)} />
+      </span>
+    );
+  };
 
   const budgetState = summary?.monthlyBudget?.eurCents
     ? (() => {
@@ -329,10 +433,19 @@ export default function AnalyticsClient() {
     accentClassName: string,
   ) => {
     if (cents == null) return "—";
+    const value = fromCents(cents);
+    if (!isDemo && !demoStyle) {
+      return (
+        <span className={`flex items-baseline gap-1 ${accentClassName}`}>
+          <span>€</span>
+          <span>{amountFormatter.format(value)}</span>
+        </span>
+      );
+    }
     return (
       <span className={`flex items-baseline gap-1 ${accentClassName}`}>
         <span>€</span>
-        <span>{amountFormatter.format(fromCents(cents))}</span>
+        <NumberTicker value={value} format={(val) => amountFormatter.format(val)} />
       </span>
     );
   };
@@ -345,6 +458,7 @@ export default function AnalyticsClient() {
     dailyLimitBgnCents != null ? Math.round(dailyLimitBgnCents / 1.95583) : null;
 
   useEffect(() => {
+    if (isDemo) return;
     const load = async () => {
       setLoading(true);
       setError(null);
@@ -376,22 +490,24 @@ export default function AnalyticsClient() {
       setLoading(false);
     };
     load();
-  }, [range, filters, refreshToken]);
+  }, [range, filters, refreshToken, isDemo, t]);
 
   useEffect(() => {
+    if (isDemo) return;
     setRefreshToken((token) => token + 1);
-  }, [filters.from, filters.to]);
+  }, [filters.from, filters.to, isDemo]);
 
   useEffect(() => {
+    if (isDemo) return;
     const now = new Date();
     setFilters({
       from: toInputDate(new Date(now.getFullYear(), now.getMonth(), 1)),
       to: toInputDate(now),
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isDemo]);
 
   useEffect(() => {
+    if (isDemo) return;
     const handler = () => setRefreshToken((value) => value + 1);
     window.addEventListener("transactions:changed", handler);
     window.addEventListener("recurring:changed", handler);
@@ -399,7 +515,14 @@ export default function AnalyticsClient() {
       window.removeEventListener("transactions:changed", handler);
       window.removeEventListener("recurring:changed", handler);
     };
-  }, []);
+  }, [isDemo]);
+
+  useEffect(() => {
+    if (!isDemo) return;
+    setSummary(demoSummary ?? null);
+    setSeries(demoSeries ?? []);
+    setLoading(false);
+  }, [demoSummary, demoSeries, isDemo]);
 
   const toSaveAccent =
     summary?.toSave?.bgnCents != null && summary.toSave.bgnCents >= 0
@@ -468,10 +591,10 @@ export default function AnalyticsClient() {
                 {t("dashboard.totalForPeriod")}
               </p>
               <h3 className="mt-2 text-xl font-semibold text-slate-900">
-                {formatPrimaryAmount(summary.totals.eurCents)}
+                {renderPrimaryAmount(summary.totals.eurCents)}
               </h3>
               <p className="mt-1 text-sm text-slate-500">
-                {formatSecondaryAmount(summary.totals.bgnCents)}
+                {renderSecondaryAmount(summary.totals.bgnCents)}
               </p>
             </div>
             <div className={`${glassCard} h-full p-3 sm:p-4`}>
@@ -479,10 +602,10 @@ export default function AnalyticsClient() {
                 {t("dashboard.monthBudget")}
               </p>
               <h3 className="mt-2 text-xl font-semibold text-slate-900">
-                {formatPrimaryAmount(summary.monthlyBudget.eurCents)}
+                {renderPrimaryAmount(summary.monthlyBudget.eurCents)}
               </h3>
               <p className="mt-1 text-sm text-slate-500">
-                {formatSecondaryAmount(summary.monthlyBudget.bgnCents)}
+                {renderSecondaryAmount(summary.monthlyBudget.bgnCents)}
               </p>
             </div>
             <div className={`${glassCard} h-full p-3 sm:p-4`}>
@@ -490,10 +613,10 @@ export default function AnalyticsClient() {
                 {t("dashboard.remaining")}
               </p>
               <h3 className={`mt-2 text-xl font-semibold ${budgetState.className}`}>
-                {formatPrimaryAmount(summary.remainingBudget.eurCents)}
+                {renderPrimaryAmount(summary.remainingBudget.eurCents)}
               </h3>
               <p className="mt-1 text-sm text-slate-500">
-                {formatSecondaryAmount(summary.remainingBudget.bgnCents)}
+                {renderSecondaryAmount(summary.remainingBudget.bgnCents)}
               </p>
               {budgetState.over && (
                 <span className="mt-2 inline-flex rounded-full bg-rose-500/15 px-2 py-1 text-[10px] font-semibold text-rose-700">
@@ -506,10 +629,10 @@ export default function AnalyticsClient() {
                 {t("dashboard.forecast")}
               </p>
               <h3 className={`mt-2 text-xl font-semibold ${budgetState.className}`}>
-                {formatPrimaryAmount(summary.projectedTotal.eurCents)}
+                {renderPrimaryAmount(summary.projectedTotal.eurCents)}
               </h3>
               <p className="mt-1 text-sm text-slate-500">
-                {formatSecondaryAmount(summary.projectedTotal.bgnCents)}
+                {renderSecondaryAmount(summary.projectedTotal.bgnCents)}
               </p>
             </div>
             <div
@@ -525,7 +648,7 @@ export default function AnalyticsClient() {
                 )}
               </h3>
               <p className="mt-1 text-sm text-slate-500">
-                {formatSecondaryAmount(summary?.toSave?.bgnCents ?? null)}
+                {renderSecondaryAmount(summary?.toSave?.bgnCents ?? null)}
               </p>
             </div>
             <div className={`${glassCard} h-full p-3 sm:p-4`}>
@@ -533,12 +656,16 @@ export default function AnalyticsClient() {
                 {t("dashboard.dailyLimit")}
               </p>
               <h3 className="mt-2 text-xl font-semibold text-slate-900">
-                {formatPrimaryAmount(dailyLimitEurCents)}
+                {renderPrimaryAmount(dailyLimitEurCents)}
               </h3>
               <p className="mt-1 text-sm text-slate-500">
                 {dailyLimitBgnCents == null
                   ? "—"
-                  : `${formatSecondaryAmount(dailyLimitBgnCents)} ${t("dashboard.perDay")}`}
+                  : (
+                      <span>
+                        {renderSecondaryAmount(dailyLimitBgnCents)} {t("dashboard.perDay")}
+                      </span>
+                    )}
               </p>
             </div>
           </div>
@@ -580,9 +707,9 @@ export default function AnalyticsClient() {
                     <Line
                       type="monotone"
                       dataKey="eurCents"
-                      stroke="#0ea5e9"
+                      stroke={lineColor}
                       strokeWidth={3}
-                      dot={{ r: 4, fill: "#0ea5e9" }}
+                      dot={{ r: 4, fill: lineDotColor }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -598,59 +725,82 @@ export default function AnalyticsClient() {
                     {t("dashboard.noData")}
                   </div>
                 ) : (
-                  <AnalyticsView
-                    summary={summary}
-                    activeCategory={activeCategory}
-                    onActivateCategory={setActiveCategory}
-                    labelForCategory={labelForCategory}
-                    iconForCategory={iconForCategory}
-                    formatPrimaryAmount={formatPrimaryAmount}
-                    formatSecondaryAmount={formatSecondaryAmount}
-                  />
+                <AnalyticsView
+                  summary={summary}
+                  activeCategory={activeCategory}
+                  onActivateCategory={setActiveCategory}
+                  labelForCategory={labelForCategory}
+                  iconForCategory={iconForCategory}
+                  formatPrimaryAmount={formatPrimaryAmount}
+                  formatSecondaryAmount={formatSecondaryAmount}
+                  uiForCategory={uiForCategory}
+                />
                 )}
                 </div>
             </div>
           </div>
 
           <div className="grid gap-4 lg:grid-cols-5">
-            <div className="lg:col-span-3">
-              <UpcomingPayments
-                title={t("dashboard.upcomingPaymentsTitle")}
-                showEdit={false}
-                onlyUnpaid
-              />
-            </div>
-            <div className="flex w-full flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm lg:col-span-2">
+            {showUpcoming && (
+              <div className="lg:col-span-3">
+                <UpcomingPayments
+                  title={t("dashboard.upcomingPaymentsTitle")}
+                  showEdit={false}
+                  onlyUnpaid
+                  demoPayments={isDemo ? demoUpcomingPayments : undefined}
+                  uiForCategory={demoUiForCategory}
+                  demoMode={isDemo || demoStyle}
+                  badgeLabel={isDemo ? "Предстоящи" : undefined}
+                />
+              </div>
+            )}
+            <div
+              className={`flex w-full flex-col overflow-hidden ${
+                isDemo || demoStyle
+                  ? "rounded-3xl border border-white/20 bg-white/40 shadow-[0_12px_30px_rgba(15,23,42,0.08)] backdrop-blur-lg transition hover:shadow-[0_0_0_2px_rgba(99,102,241,0.2)]"
+                  : "rounded-3xl border border-slate-100 bg-white shadow-sm"
+              } ${showUpcoming ? "lg:col-span-2" : "lg:col-span-5"}`}
+            >
               <div className="px-4 py-4">
                 <h3 className="text-lg font-semibold text-slate-900">
                   {t("dashboard.topMerchants")}
                 </h3>
               </div>
               <div className="text-sm">
-                {summary.topMerchants.length === 0 ? (
+                {(summary.topMerchants.length === 0 && !demoTopMerchants) ||
+                (demoTopMerchants && demoTopMerchants.length === 0) ? (
                   <div className="flex items-center justify-center px-4 pb-4 text-sm text-slate-500">
                     {t("dashboard.noData")}
                   </div>
                 ) : (
                   <div className="max-h-[264px] overflow-y-auto px-4 scrollbar-hide touch-scroll">
-                    {summary.topMerchants.slice(0, 5).map((m, index) => {
-                      const merchantLabel = m.merchant?.trim()
-                        ? m.merchant
-                        : t("transactions.unknownMerchant");
-                      return (
-                      <TransactionListItem
-                        key={`${m.merchant || "unknown"}-${index}`}
-                        title={merchantLabel}
-                        subtitle={t("dashboard.categoryLabel")}
-                        categoryName={merchantLabel}
-                        icon={Store}
-                        transactionType="expense"
-                        amountEurCents={m.eurCents}
-                        amountBgnCents={m.bgnCents}
-                        className="px-0"
-                      />
-                    );
-                    })}
+                    {(demoTopMerchants ?? summary.topMerchants)
+                      .slice(0, 5)
+                      .map((m, index) => {
+                        const merchantLabel = m.merchant?.trim()
+                          ? m.merchant
+                          : t("transactions.unknownMerchant");
+                        const demoCategoryLabel =
+                          "categoryLabel" in m ? m.categoryLabel : null;
+                        const demoCategoryKey =
+                          "categoryKey" in m ? m.categoryKey : merchantLabel;
+                        return (
+                          <TransactionListItem
+                            key={`${m.merchant || "unknown"}-${index}`}
+                            title={merchantLabel}
+                            subtitle={demoCategoryLabel ?? t("dashboard.categoryLabel")}
+                            categoryName={demoCategoryKey}
+                            icon={Store}
+                            uiOverride={
+                              demoUiForCategory ? demoUiForCategory(demoCategoryKey) : undefined
+                            }
+                            transactionType="expense"
+                            amountEurCents={m.eurCents}
+                            amountBgnCents={m.bgnCents}
+                            className="px-0"
+                          />
+                        );
+                      })}
                   </div>
                 )}
               </div>

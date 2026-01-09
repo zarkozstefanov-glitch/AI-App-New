@@ -17,26 +17,23 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
-     authorize: async (credentials, req) => {
+      authorize: async (credentials, req) => {
       if (!credentials?.email || !credentials.password) return null;
 
       // Правилно извличане на IP адреса за rate limiting
-      const headers = (req as any)?.headers;
+      const headers = req?.headers;
       let ip = "unknown";
 
       if (headers) {
-        if (typeof headers.get === "function") {
-          ip = headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
-        } else if (typeof headers["x-forwarded-for"] === "string") {
-          ip = headers["x-forwarded-for"].split(",")[0];
-        }
+        ip = headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
       }
 
       // Проверка на лимита за опити
-const limited = await rateLimit(`login-${ip}`, { 
-  limit: 5, 
-  windowMs: 60000 // 1 минута в милисекунди
-});      if (!limited.success) {
+      const limited = await rateLimit(`login-${ip}`, {
+        limit: 5,
+        windowMs: 60000, // 1 минута в милисекунди
+      });
+      if (!limited.success) {
         throw new Error("Твърде много опити. Опитай след минута.");
       }
 

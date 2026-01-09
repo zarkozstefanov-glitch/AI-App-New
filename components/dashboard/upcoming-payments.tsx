@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect */
 
 import { useEffect, useMemo, useState } from "react";
 import { safeFetchJson } from "@/lib/safe-fetch";
@@ -7,6 +8,7 @@ import { categoryConfig } from "@/lib/categories";
 import TransactionListItem from "@/components/transactions/transaction-list-item";
 import { getCategoryLabel, getRecurringLabelForName } from "@/lib/category-ui";
 import { Loader2 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useI18n } from "@/components/i18n-provider";
 
 type UpcomingPayment = {
@@ -24,19 +26,27 @@ type UpcomingPaymentsProps = {
   title?: string;
   showEdit?: boolean;
   onlyUnpaid?: boolean;
+  demoPayments?: UpcomingPayment[];
+  uiForCategory?: (category: string) => { backgroundColor: string; textColor: string };
+  demoMode?: boolean;
+  badgeLabel?: string;
 };
 
 export default function UpcomingPayments({
   title,
   showEdit = true,
   onlyUnpaid = false,
+  demoPayments,
+  uiForCategory,
+  demoMode = false,
+  badgeLabel,
 }: UpcomingPaymentsProps) {
   const { t, locale } = useI18n();
   const resolvedTitle = title ?? t("dashboard.upcomingTitle");
   const [payments, setPayments] = useState<UpcomingPayment[]>([]);
   const [loading, setLoading] = useState(true);
   const recurringLabelMap = useMemo(() => {
-    const map = new Map<string, { label: string; icon: any; color: string }>();
+    const map = new Map<string, { label: string; icon: LucideIcon; color: string }>();
     for (const group of recurringGroups) {
       map.set(group.value, {
         label: getRecurringGroupLabel(group, locale),
@@ -48,6 +58,11 @@ export default function UpcomingPayments({
   }, [locale]);
 
   useEffect(() => {
+    if (demoPayments) {
+      setPayments(demoPayments);
+      setLoading(false);
+      return;
+    }
     const load = async () => {
       const res = await safeFetchJson<{ ok: true; data: UpcomingPayment[] }>(
         "/api/transactions/upcoming",
@@ -58,7 +73,7 @@ export default function UpcomingPayments({
       setLoading(false);
     };
     load();
-  }, [onlyUnpaid]);
+  }, [demoPayments, onlyUnpaid]);
   const metaForPayment = (payment: UpcomingPayment) => {
     const direct =
       categoryConfig[payment.category as keyof typeof categoryConfig] ||
@@ -79,8 +94,12 @@ export default function UpcomingPayments({
     return categoryConfig.other;
   };
 
+  const cardClassName = demoMode
+    ? "flex w-full flex-col overflow-hidden rounded-3xl border border-white/20 bg-white/40 shadow-[0_12px_30px_rgba(15,23,42,0.08)] backdrop-blur-lg transition hover:shadow-[0_0_0_2px_rgba(99,102,241,0.2)]"
+    : "flex w-full flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm";
+
   return (
-    <section className="flex w-full flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
+    <section className={cardClassName}>
       <div className="flex items-center justify-between px-4 py-4">
         <h3 className="text-lg font-semibold text-slate-900">{resolvedTitle}</h3>
         <span className="text-xs text-slate-500">{t("dashboard.nextSevenDays")}</span>
@@ -115,6 +134,7 @@ export default function UpcomingPayments({
                 }`}
                 categoryName={payment.category}
                 icon={meta.icon}
+                uiOverride={uiForCategory?.(payment.category)}
                 transactionType={payment.transactionType}
                 isFixed={payment.isFixed}
                 transactionDate={payment.transactionDate}
@@ -124,6 +144,10 @@ export default function UpcomingPayments({
                   showEdit ? (
                     <span className="rounded-full border border-slate-200 px-2 py-1 text-[9px] font-semibold text-slate-900 md:px-3 md:text-xs">
                       {t("dashboard.upcoming")}
+                    </span>
+                  ) : badgeLabel ? (
+                    <span className="rounded-full border border-indigo-100 bg-indigo-50 px-2 py-1 text-[9px] font-semibold text-indigo-600 md:px-3 md:text-xs">
+                      {badgeLabel}
                     </span>
                   ) : undefined
                 }

@@ -1,12 +1,15 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect */
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { format } from "date-fns";
 import { useAccounts } from "@/components/accounts/accounts-context";
-import { formatMoney } from "@/lib/currency";
+import TransactionListItem from "@/components/transactions/transaction-list-item";
+import { getCategoryLabel, getRecurringLabelForName } from "@/lib/category-ui";
 import { useI18n } from "@/components/i18n-provider";
 
-type TransactionItem = {
+export type TransactionItem = {
   id: string;
   merchantName: string | null;
   category: string;
@@ -17,13 +20,34 @@ type TransactionItem = {
   isFixed: boolean;
 };
 
-export default function AccountHistory() {
+type AccountHistoryProps = {
+  demoRows?: TransactionItem[];
+  headerLabel?: string;
+  headerTitle?: string;
+  showViewAll?: boolean;
+  uiForCategory?: (category: string) => { backgroundColor: string; textColor: string };
+  demoMode?: boolean;
+};
+
+export default function AccountHistory({
+  demoRows,
+  headerLabel,
+  headerTitle,
+  showViewAll = true,
+  uiForCategory,
+  demoMode = false,
+}: AccountHistoryProps) {
   const { currentAccountId } = useAccounts();
   const { t, locale } = useI18n();
   const [rows, setRows] = useState<TransactionItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (demoRows) {
+      setRows(demoRows);
+      setLoading(false);
+      return;
+    }
     if (!currentAccountId) return;
     let active = true;
     const load = async () => {
@@ -46,27 +70,33 @@ export default function AccountHistory() {
       active = false;
       window.removeEventListener("transactions:changed", handler);
     };
-  }, [currentAccountId]);
+  }, [currentAccountId, demoRows]);
 
-  if (!currentAccountId) return null;
+  if (!currentAccountId && !demoRows) return null;
+
+  const cardClassName = demoMode
+    ? "rounded-2xl border border-white/20 bg-white/40 p-6 shadow-[0_16px_40px_rgba(15,23,42,0.08)] backdrop-blur-lg transition hover:shadow-[0_0_0_2px_rgba(99,102,241,0.2)]"
+    : "rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-[0_10px_40px_rgba(0,0,0,0.06)] backdrop-blur-md";
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-[0_10px_40px_rgba(0,0,0,0.06)] backdrop-blur-md">
+    <section className={cardClassName}>
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
-            {t("accounts.accountHistory")}
+            {headerLabel ?? t("accounts.accountHistory")}
           </p>
           <h3 className="text-lg font-semibold text-slate-900">
-            {t("accounts.recentTransactions")}
+            {headerTitle ?? t("accounts.recentTransactions")}
           </h3>
         </div>
-        <Link
-          href="/transactions"
-          className="text-xs font-semibold text-slate-600 hover:text-slate-900"
-        >
-          {t("dashboard.viewAll")}
-        </Link>
+        {showViewAll && (
+          <Link
+            href="/transactions"
+            className="text-xs font-semibold text-slate-600 hover:text-slate-900"
+          >
+            {t("dashboard.viewAll")}
+          </Link>
+        )}
       </div>
       {loading ? (
         <p className="mt-4 text-sm text-slate-600">{t("common.loading")}</p>
@@ -75,34 +105,32 @@ export default function AccountHistory() {
           {t("accounts.noAccountTransactions")}
         </p>
       ) : (
-        <div className="mt-4 space-y-2">
-          {rows.map((tx) => (
-            <div
-              key={tx.id}
-              className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm"
-            >
-              <div>
-                <p className="font-semibold text-slate-900">
-                  {tx.merchantName || t("accounts.unknownSource")}
-                </p>
-                <p className="text-xs text-slate-500">
-                  {new Date(tx.transactionDate).toLocaleDateString(
-                    locale === "en" ? "en-US" : "bg-BG",
-                  )}{" "}
-                  ·{" "}
-                  {tx.transactionType === "income"
-                    ? t("transactions.income")
-                    : tx.transactionType === "transfer"
-                      ? t("transactions.transfer")
-                      : t("transactions.expense")}{" "}
-                  {tx.isFixed ? t("accounts.fixed") : t("accounts.variable")}
-                </p>
-              </div>
-              <div className="text-right font-semibold text-slate-900">
-                {formatMoney(tx.totalEurCents, tx.totalBgnCents)}
-              </div>
-            </div>
-          ))}
+        <div className="mt-4 text-sm">
+          {rows.map((tx) => {
+            const merchantLabel = tx.isFixed
+              ? getRecurringLabelForName(tx.merchantName, locale)
+              : tx.merchantName;
+            const dateLabel = tx.transactionDate
+              ? format(new Date(tx.transactionDate), "dd.MM.yyyy")
+              : t("common.noDate");
+            const categoryLabel = getCategoryLabel(tx.category, locale);
+            return (
+              <TransactionListItem
+                key={tx.id}
+                title={merchantLabel || t("accounts.unknownSource")}
+                subtitle={`${categoryLabel} • ${dateLabel}`}
+                categoryName={tx.category}
+                uiOverride={uiForCategory?.(tx.category)}
+                transactionType={
+                  tx.transactionType as "income" | "expense" | "transfer"
+                }
+                isFixed={tx.isFixed}
+                transactionDate={tx.transactionDate}
+                amountEurCents={tx.totalEurCents}
+                amountBgnCents={tx.totalBgnCents}
+              />
+            );
+          })}
         </div>
       )}
     </section>

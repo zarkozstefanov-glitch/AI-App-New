@@ -1,11 +1,12 @@
 "use client";
+/* eslint-disable react-hooks/static-components */
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { categoryConfig } from "@/lib/categories";
 import { recurringGroups } from "@/lib/recurring";
 import { safeFetchJson } from "@/lib/safe-fetch";
 import { formatMoney, fromCents } from "@/lib/currency";
-import { format } from "date-fns";
+import { endOfMonth, format, startOfMonth } from "date-fns";
 import { ChevronRight, Filter, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useAccounts } from "@/components/accounts/accounts-context";
@@ -52,7 +53,8 @@ const TransactionRow = ({
   actions,
 }: TransactionRowProps) => {
   const { t, locale } = useI18n();
-  const Icon = getCategoryIcon(tx.category);
+  const [now] = useState(() => Date.now());
+  const Icon = useMemo(() => getCategoryIcon(tx.category), [tx.category]);
   const ui = getCategoryUI(tx.category);
   const eurCents = Math.abs(tx.totalEurCents);
   const bgnCents = Math.abs(tx.totalBgnCents);
@@ -75,7 +77,7 @@ const TransactionRow = ({
         : t("transactions.variable")
       : null;
   const isFuture =
-    !!tx.transactionDate && new Date(tx.transactionDate).getTime() > Date.now();
+    !!tx.transactionDate && new Date(tx.transactionDate).getTime() > now;
   const statusLabel =
     tx.transactionType === "income"
       ? t("transactions.statusIncome")
@@ -156,13 +158,10 @@ export default function ListClient() {
   const [showCategoryFilters, setShowCategoryFilters] = useState(false);
   const getCurrentMonthRange = () => {
     const now = new Date();
-    const start = new Date(now.getFullYear(), now.getMonth(), 1)
-      .toISOString()
-      .slice(0, 10);
-    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-      .toISOString()
-      .slice(0, 10);
-    return { from: start, to: end };
+    return {
+      from: format(startOfMonth(now), "yyyy-MM-dd"),
+      to: format(endOfMonth(now), "yyyy-MM-dd"),
+    };
   };
 
   const [filters, setFilters] = useState(() => ({
@@ -237,10 +236,10 @@ export default function ListClient() {
     const params = new URLSearchParams();
     const activeFilters = nextFilters ?? filters;
     if (activeFilters.from) {
-      params.set("from", new Date(activeFilters.from).toISOString().slice(0, 10));
+      params.set("from", activeFilters.from);
     }
     if (activeFilters.to) {
-      params.set("to", new Date(activeFilters.to).toISOString().slice(0, 10));
+      params.set("to", activeFilters.to);
     }
     const res = await safeFetchJson<{ ok: true; data: Transaction[] }>(
       `/api/transactions?${params.toString()}`,

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
@@ -27,18 +28,22 @@ export default function Nav({ session }: { session: Session }) {
 
   return (
     <>
-      <header className="sticky top-0 z-30 border-b border-slate-200/60 bg-white/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-30 border-b border-blue-900/30 bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-8 lg:px-12">
           <div className="flex flex-1 items-center">
             <div className="mx-4 flex h-10 w-full items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-blue-700 text-white shadow-md">
-              <img
-                src="/novologo.png"
-                alt="Logo"
-                className="h-full w-full object-cover drop-shadow-sm brightness-0 invert"
-              />
+              <div className="relative h-full w-full">
+                <Image
+                  src="/novologo.png"
+                  alt="Logo"
+                  fill
+                  sizes="160px"
+                  className="object-cover drop-shadow-sm brightness-0 invert"
+                />
+              </div>
             </div>
           </div>
-          <nav className="hidden items-center gap-2 rounded-full bg-white px-2 py-1 text-sm font-medium text-slate-700 shadow-lg shadow-slate-200/70 md:flex">
+          <nav className="hidden items-center gap-2 rounded-full border border-white/20 bg-white/10 px-2 py-1 text-sm font-medium text-white shadow-lg shadow-black/20 md:flex">
             {links.map((link) => {
               const active = pathname === link.href;
               const Icon = link.icon;
@@ -48,8 +53,8 @@ export default function Nav({ session }: { session: Session }) {
                   href={link.href}
                   className={`flex items-center gap-2 rounded-full px-3 py-2 transition ${
                     active
-                      ? "bg-white text-slate-900 shadow-sm shadow-slate-200/80"
-                      : "hover:bg-slate-100"
+                      ? "bg-white/90 text-slate-900 shadow-sm shadow-slate-200/80"
+                      : "hover:bg-white/15"
                   }`}
                 >
                   <Icon size={16} strokeWidth={1.75} />
@@ -58,16 +63,16 @@ export default function Nav({ session }: { session: Session }) {
               );
             })}
           </nav>
-          <div className="flex items-center gap-3 rounded-full bg-white px-3 py-2 text-sm text-slate-800 shadow-lg shadow-slate-200/70">
+          <div className="flex items-center gap-3 rounded-full border border-white/20 bg-white/10 px-3 py-2 text-sm text-white shadow-lg shadow-black/20">
             <div className="hidden text-right md:block">
-              <p className="text-xs text-slate-500">{t("nav.welcome")}</p>
+              <p className="text-xs text-white/70">{t("nav.welcome")}</p>
               <p className="font-semibold">
                 {session.user.firstName} {session.user.lastName}
               </p>
             </div>
             <button
               onClick={() => signOut()}
-              className="flex items-center gap-1 rounded-full bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 transition hover:bg-rose-100"
+              className="flex items-center gap-1 rounded-full bg-white/10 px-3 py-2 text-xs font-semibold text-white transition hover:bg-white/20"
             >
               <LogOut size={14} />
               {t("nav.logout")}
@@ -75,8 +80,8 @@ export default function Nav({ session }: { session: Session }) {
           </div>
         </div>
       </header>
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white/80 backdrop-blur-md md:hidden">
-        <div className="flex items-center justify-around px-2 py-2 text-[10px] font-medium text-slate-700">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-blue-900/30 bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white backdrop-blur-md md:hidden">
+        <div className="flex items-center justify-around px-2 py-2 text-[10px] font-medium text-white">
           {links.map((link) => {
             const active = pathname === link.href;
             const Icon = link.icon;
@@ -87,16 +92,16 @@ export default function Nav({ session }: { session: Session }) {
                 href={link.href}
                 className={`flex flex-1 flex-col items-center gap-1 px-1 py-2 ${
                   isTransaction ? "relative -top-5" : ""
-                } ${active ? "text-indigo-600 font-semibold" : "text-slate-600"}`}
+                } ${active ? "text-cyan-200 font-semibold" : "text-white/70"}`}
               >
                 {isTransaction ? (
-                  <span className="flex h-14 w-14 items-center justify-center rounded-full border-4 border-white bg-indigo-600 text-white shadow-lg shadow-indigo-500/40">
+                  <span className="flex h-14 w-14 items-center justify-center rounded-full border-4 border-white bg-cyan-500 text-white shadow-lg shadow-cyan-500/40">
                     <Icon size={22} strokeWidth={2} />
                   </span>
                 ) : (
                   <span
                     className={`flex h-8 w-8 items-center justify-center rounded-xl ${
-                      active ? "bg-slate-100 text-indigo-600" : "text-slate-600"
+                      active ? "bg-white/20 text-cyan-200" : "text-white/70"
                     }`}
                   >
                     <Icon size={16} strokeWidth={1.75} />

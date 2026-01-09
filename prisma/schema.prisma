@@ -3,11 +3,9 @@ generator client {
 }
 
 datasource db {
-  // Промени от "sqlite" на "mysql"
-  provider     = "mysql" 
+  provider     = "mysql"
   url          = env("DATABASE_URL")
-  // Добави това, за да работи правилно с TiDB
-  relationMode = "prisma" 
+  relationMode = "prisma"
 }
 
 model User {
