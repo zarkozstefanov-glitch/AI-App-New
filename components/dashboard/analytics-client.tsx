@@ -246,15 +246,14 @@ const AnalyticsView = ({
               labelStyle={{ color: "#0f172a" }}
               itemStyle={{ color: "#0f172a" }}
               wrapperStyle={{ color: "#0f172a" }}
-              formatter={(
-                value: number | string | undefined,
-                name: string,
-                entry: { payload?: { name?: string; bgnCents?: number } },
-              ) => {
-                const entryName = entry?.payload?.name ?? name;
+              formatter={(value: any, name: any, entry: any) => {
+                if (value === undefined || value === null) {
+                  return ["€0.00", String(name ?? "")];
+                }
+                const entryName = entry?.payload?.name ?? name ?? "";
                 const bgnCents = entry?.payload?.bgnCents ?? 0;
-                const eurCents = Number(value ?? 0);
-                return [formatMoney(eurCents, bgnCents), entryName];
+                const eurCents = Number(value);
+                return [formatMoney(eurCents, bgnCents), String(entryName)] as [any, any];
               }}
             />
           </PieChart>
@@ -788,11 +787,13 @@ export default function AnalyticsClient({
                           <TransactionListItem
                             key={`${m.merchant || "unknown"}-${index}`}
                             title={merchantLabel}
-                            subtitle={demoCategoryLabel ?? t("dashboard.categoryLabel")}
-                            categoryName={demoCategoryKey}
+                            subtitle={String(demoCategoryLabel ?? t("dashboard.categoryLabel"))}
+                            categoryName={String(demoCategoryKey)}
                             icon={Store}
                             uiOverride={
-                              demoUiForCategory ? demoUiForCategory(demoCategoryKey) : undefined
+                              demoUiForCategory
+                                ? demoUiForCategory(String(demoCategoryKey))
+                                : undefined
                             }
                             transactionType="expense"
                             amountEurCents={m.eurCents}
