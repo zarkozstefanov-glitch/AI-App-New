@@ -7,6 +7,8 @@ import {
   Calculator,
   LayoutDashboard,
   ListOrdered,
+  Plus,
+  Tag,
 } from "lucide-react";
 import { AuthOpenButton } from "@/components/auth/auth-modal";
 import { useI18n } from "@/components/i18n-provider";
@@ -20,9 +22,11 @@ const navLinks = [
 ];
 
 const mobileLinks = [
+  { href: "#dashboard-demo", label: "Табло", icon: LayoutDashboard },
   { href: "#last-operations", label: "История", icon: ListOrdered },
+  { href: "#ai-scan", label: "Транзакция", icon: Plus, primary: true },
   { href: "#change-demo", label: "Ресто", icon: Calculator },
-  { href: "#dashboard-demo", label: "Табло", icon: LayoutDashboard, primary: true },
+  { href: "#pricing-trial", label: "Цени", icon: Tag },
 ];
 
 export default function LandingHeader() {
@@ -63,12 +67,11 @@ export default function LandingHeader() {
     "border-blue-900/40 bg-gradient-to-r from-blue-900 to-indigo-900 text-white backdrop-blur-md";
   const navClass = "border-white/15 bg-white/10 text-white";
   const buttonClass = "border-white/20 bg-white/10 text-white hover:bg-white/20";
-  const logoWrapClass = "border-white/70 bg-white/10 ring-white/20";
 
   return (
     <>
       <header
-        className={`h-16 w-full border-b ${headerClass}`}
+        className={`h-14 w-full border-b sm:h-16 ${headerClass}`}
         style={{
           position: "fixed",
           top: 0,
@@ -78,50 +81,22 @@ export default function LandingHeader() {
           transition: "transform 0.3s ease-in-out",
         }}
       >
-        <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 sm:gap-3 flex-nowrap whitespace-nowrap">
-            <Link href="/" className="flex items-center">
-              <span
-                className={`flex h-7 w-20 items-center justify-center overflow-hidden rounded-2xl border shadow-[0_8px_20px_rgba(15,23,42,0.08)] backdrop-blur-sm ring-1 ${logoWrapClass}`}
-              >
+        <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-2 sm:px-6 lg:px-8">
+          <Link href="/" className="flex items-center">
+            <span className="flex h-8 w-[128px] items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-blue-700 shadow-md sm:h-9 sm:w-[150px]">
+              <span className="relative h-full w-full">
                 <Image
                   src="/novologo.png"
                   alt="Logo"
-                  width={80}
-                  height={28}
-                  className="h-full w-full object-cover scale-240 brightness-0 invert"
+                  fill
+                  sizes="150px"
+                  className="object-cover brightness-0 invert"
                   priority
                 />
               </span>
-            </Link>
-            <div className="flex items-center gap-2 flex-nowrap whitespace-nowrap">
-              <div className="flex items-center rounded-full border border-white/20 bg-white/10 px-1 py-1 text-[10px] font-semibold sm:text-xs whitespace-nowrap">
-                <button
-                  type="button"
-                  onClick={() => setLocale("bg")}
-                  className={`rounded-full px-3 py-1 transition ${
-                    locale === "bg" ? "bg-white/20 text-white" : "text-white/70"
-                  }`}
-                >
-                  BG
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setLocale("en")}
-                  className={`rounded-full px-3 py-1 transition ${
-                    locale === "en" ? "bg-white/20 text-white" : "text-white/70"
-                  }`}
-                >
-                  EN
-                </button>
-              </div>
-            <AuthOpenButton
-              className={`rounded-full border px-3 py-1.5 text-[11px] font-semibold shadow-sm backdrop-blur transition sm:px-4 sm:py-2 sm:text-xs whitespace-nowrap ${buttonClass}`}
-            >
-              Вход / Регистрация
-            </AuthOpenButton>
-          </div>
-          </div>
+            </span>
+          </Link>
+
           <nav
             className={`hidden items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold shadow-[0_12px_30px_rgba(15,23,42,0.18)] backdrop-blur-md md:flex ${navClass}`}
           >
@@ -137,11 +112,40 @@ export default function LandingHeader() {
               </a>
             ))}
           </nav>
+
+          <div className="flex items-center gap-2 whitespace-nowrap sm:gap-3">
+            <div className="flex items-center rounded-full border border-white/20 bg-white/10 px-0.5 py-0.5 text-[9px] font-semibold sm:px-1.5 sm:py-1 sm:text-xs">
+              <button
+                type="button"
+                onClick={() => setLocale("bg")}
+                className={`rounded-full px-2 py-0.5 transition sm:px-3 sm:py-1 ${
+                  locale === "bg" ? "bg-white/20 text-white" : "text-white/70"
+                }`}
+              >
+                BG
+              </button>
+              <button
+                type="button"
+                onClick={() => setLocale("en")}
+                className={`rounded-full px-2 py-0.5 transition sm:px-3 sm:py-1 ${
+                  locale === "en" ? "bg-white/20 text-white" : "text-white/70"
+                }`}
+              >
+                EN
+              </button>
+            </div>
+            <AuthOpenButton
+              className={`rounded-full border px-2 py-1 text-[9px] font-semibold shadow-sm backdrop-blur transition whitespace-nowrap sm:px-4 sm:py-2 sm:text-xs ${buttonClass}`}
+            >
+              <span className="sm:hidden">Вход</span>
+              <span className="hidden sm:inline">Вход / Регистрация</span>
+            </AuthOpenButton>
+          </div>
         </div>
       </header>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white/90 backdrop-blur-md md:hidden">
-        <div className="flex items-center justify-around px-2 py-2 text-[10px] font-medium text-slate-700">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-blue-900/30 bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white backdrop-blur-md md:hidden">
+        <div className="flex items-center justify-around px-2 py-2 text-[10px] font-medium text-white">
           {mobileLinks.map((link) => {
             const Icon = link.icon;
             const isPrimary = link.primary;
@@ -151,18 +155,18 @@ export default function LandingHeader() {
                 href={link.href}
                 className={`flex flex-1 flex-col items-center gap-1 px-1 py-2 ${
                   isPrimary ? "relative -top-5" : ""
-                }`}
+                } ${isPrimary ? "text-cyan-200 font-semibold" : "text-white/70"}`}
               >
                 {isPrimary ? (
-                  <span className="flex h-14 w-14 items-center justify-center rounded-full border-4 border-white bg-blue-600 text-white shadow-lg shadow-blue-500/40">
+                  <span className="flex h-14 w-14 items-center justify-center rounded-full border-4 border-white bg-cyan-500 text-white shadow-lg shadow-cyan-500/40">
                     <Icon size={22} strokeWidth={2} />
                   </span>
                 ) : (
-                  <span className="flex h-8 w-8 items-center justify-center rounded-xl text-slate-600">
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl text-white/70">
                     <Icon size={16} strokeWidth={1.75} />
                   </span>
                 )}
-                <span className={isPrimary ? "mt-1 text-[10px]" : ""}>
+                <span className={isPrimary ? "mt-1 text-[10px]" : "text-[10px]"}>
                   {link.label}
                 </span>
               </a>

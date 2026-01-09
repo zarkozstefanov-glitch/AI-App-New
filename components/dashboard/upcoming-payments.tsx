@@ -95,8 +95,8 @@ export default function UpcomingPayments({
   };
 
   const cardClassName = demoMode
-    ? "flex w-full flex-col overflow-hidden rounded-3xl border border-white/20 bg-white/40 shadow-[0_12px_30px_rgba(15,23,42,0.08)] backdrop-blur-lg transition hover:shadow-[0_0_0_2px_rgba(99,102,241,0.2)]"
-    : "flex w-full flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm";
+    ? "flex h-full w-full flex-col overflow-hidden rounded-3xl border border-white/20 bg-white/40 shadow-[0_12px_30px_rgba(15,23,42,0.08)] backdrop-blur-lg transition hover:shadow-[0_0_0_2px_rgba(99,102,241,0.2)]"
+    : "flex h-full w-full flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm";
 
   return (
     <section className={cardClassName}>
@@ -113,7 +113,7 @@ export default function UpcomingPayments({
           {t("dashboard.noUpcoming")}
         </p>
       ) : (
-        <div className="text-sm">
+        <div className="flex flex-1 flex-col text-sm">
           {payments.map((payment) => {
             const meta = metaForPayment(payment);
             const merchantLabel = payment.isFixed

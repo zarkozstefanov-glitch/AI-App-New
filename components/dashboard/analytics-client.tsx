@@ -674,15 +674,15 @@ export default function AnalyticsClient({
           </div>
 
           <div className="grid gap-4 lg:grid-cols-5">
-            <div className={`flex min-h-[320px] flex-col ${glassCard} lg:col-span-3`}>
+            <div className={`flex min-h-[360px] flex-col ${glassCard} lg:col-span-3 lg:min-h-[420px]`}>
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-slate-900">
                   {t("dashboard.trend")}
                 </h3>
                 <TrendingUp className="h-4 w-4 text-cyan-600" />
               </div>
-              <div className="mt-4 flex-1 min-h-[300px]">
-                <ResponsiveContainer width="100%" height={300} minWidth={200}>
+              <div className="mt-4 flex-1 min-h-[320px]">
+                <ResponsiveContainer width="100%" height="100%" minWidth={200}>
                   <LineChart data={series}>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(148,163,184,0.4)" />
                     <XAxis dataKey="date" stroke="#94a3b8" />
@@ -718,11 +718,11 @@ export default function AnalyticsClient({
                 </ResponsiveContainer>
               </div>
             </div>
-            <div className={`${glassCard} lg:col-span-2`}>
+            <div className={`flex min-h-[360px] flex-col ${glassCard} lg:col-span-2 lg:min-h-[420px]`}>
               <h3 className="text-lg font-semibold text-slate-900">
                 {t("dashboard.categories")}
               </h3>
-              <div className="mt-4 flex flex-col gap-4">
+              <div className="mt-4 flex flex-1 flex-col gap-4">
                 {summary.byCategory.length === 0 ? (
                   <div className="flex h-56 items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white/70 text-sm text-slate-500">
                     {t("dashboard.noData")}
@@ -743,9 +743,9 @@ export default function AnalyticsClient({
             </div>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-5">
+          <div className="grid gap-4 lg:grid-cols-5 lg:items-stretch">
             {showUpcoming && (
-              <div className="lg:col-span-3">
+              <div className="lg:col-span-3 h-full">
                 <UpcomingPayments
                   title={t("dashboard.upcomingPaymentsTitle")}
                   showEdit={false}
@@ -758,7 +758,7 @@ export default function AnalyticsClient({
               </div>
             )}
             <div
-              className={`flex w-full flex-col overflow-hidden ${
+              className={`flex h-full w-full flex-col overflow-hidden ${
                 isDemo || demoStyle
                   ? "rounded-3xl border border-white/20 bg-white/40 shadow-[0_12px_30px_rgba(15,23,42,0.08)] backdrop-blur-lg transition hover:shadow-[0_0_0_2px_rgba(99,102,241,0.2)]"
                   : "rounded-3xl border border-slate-100 bg-white shadow-sm"
@@ -769,14 +769,14 @@ export default function AnalyticsClient({
                   {t("dashboard.topMerchants")}
                 </h3>
               </div>
-              <div className="text-sm">
+              <div className="flex flex-1 flex-col text-sm">
                 {(summary.topMerchants.length === 0 && !demoTopMerchants) ||
                 (demoTopMerchants && demoTopMerchants.length === 0) ? (
-                  <div className="flex items-center justify-center px-4 pb-4 text-sm text-slate-500">
+                  <div className="flex flex-1 items-center justify-center px-4 pb-4 text-sm text-slate-500">
                     {t("dashboard.noData")}
                   </div>
                 ) : (
-                  <div className="max-h-[264px] overflow-y-auto px-4 scrollbar-hide touch-scroll">
+                  <div className="flex-1 overflow-y-auto px-4 scrollbar-hide touch-scroll">
                     {(demoTopMerchants ?? summary.topMerchants)
                       .slice(0, 5)
                       .map((m, index) => {

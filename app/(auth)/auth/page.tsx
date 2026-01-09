@@ -365,8 +365,8 @@ export default async function AuthPage() {
 
       <LandingHeader />
 
-      <main className="relative pt-16">
-        <section className="mx-auto flex max-w-7xl flex-col gap-10 px-4 py-12 sm:px-6 lg:px-8 lg:py-20">
+      <main className="relative pt-14">
+        <section className="mx-auto flex max-w-7xl flex-col gap-10 px-4 pt-4 pb-12 sm:px-6 lg:px-8 lg:pt-14 lg:pb-20">
           <div className="grid items-center gap-8 lg:grid-cols-2">
             <div className="space-y-6 text-center lg:text-left">
               <div className="inline-flex items-center gap-3 rounded-full border border-white/70 bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-slate-600 shadow-sm backdrop-blur">
@@ -377,10 +377,11 @@ export default async function AuthPage() {
                 Freemium Demo
               </div>
               <h1 className="bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 bg-clip-text text-4xl font-bold leading-tight text-transparent sm:text-5xl lg:text-6xl">
-                Финансите ти, визуализирани нагледно.
+                Финансите ти, показани нагледно.
               </h1>
               <p className="max-w-xl text-sm text-slate-600 sm:text-base">
-                Разгледай как AI автоматизира всичко вместо теб. Без ангажименти.
+                Разбери къде отиват парите ти с помощта на AI. Бързо, лесно и без
+                излишни усилия.
               </p>
               <div className="flex flex-wrap justify-center gap-3 lg:justify-start">
                 <a

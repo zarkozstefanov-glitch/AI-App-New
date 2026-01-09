@@ -28,16 +28,16 @@ export default function Nav({ session }: { session: Session }) {
 
   return (
     <>
-      <header className="sticky top-0 z-30 border-b border-blue-900/30 bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-8 lg:px-12">
+      <header className="sticky top-0 z-30 h-16 border-b border-blue-900/30 bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white backdrop-blur-xl">
+        <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-8 lg:px-12">
           <div className="flex flex-1 items-center">
-            <div className="mx-4 flex h-10 w-full items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-blue-700 text-white shadow-md">
+            <div className="mx-4 flex h-8 w-[128px] items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-blue-700 text-white shadow-md sm:h-9 sm:w-[150px]">
               <div className="relative h-full w-full">
                 <Image
                   src="/novologo.png"
                   alt="Logo"
                   fill
-                  sizes="160px"
+                  sizes="150px"
                   className="object-cover drop-shadow-sm brightness-0 invert"
                 />
               </div>
@@ -63,7 +63,7 @@ export default function Nav({ session }: { session: Session }) {
               );
             })}
           </nav>
-          <div className="flex items-center gap-3 rounded-full border border-white/20 bg-white/10 px-3 py-2 text-sm text-white shadow-lg shadow-black/20">
+          <div className="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-2 py-1.5 text-xs text-white">
             <div className="hidden text-right md:block">
               <p className="text-xs text-white/70">{t("nav.welcome")}</p>
               <p className="font-semibold">
@@ -72,9 +72,9 @@ export default function Nav({ session }: { session: Session }) {
             </div>
             <button
               onClick={() => signOut()}
-              className="flex items-center gap-1 rounded-full bg-white/10 px-3 py-2 text-xs font-semibold text-white transition hover:bg-white/20"
+              className="flex items-center gap-1 rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-white transition hover:bg-white/20 sm:px-4 sm:py-2 sm:text-xs"
             >
-              <LogOut size={14} />
+              <LogOut size={12} />
               {t("nav.logout")}
             </button>
           </div>
@@ -99,15 +99,11 @@ export default function Nav({ session }: { session: Session }) {
                     <Icon size={22} strokeWidth={2} />
                   </span>
                 ) : (
-                  <span
-                    className={`flex h-8 w-8 items-center justify-center rounded-xl ${
-                      active ? "bg-white/20 text-cyan-200" : "text-white/70"
-                    }`}
-                  >
+                  <span className="flex h-8 w-8 items-center justify-center rounded-xl text-white/70">
                     <Icon size={16} strokeWidth={1.75} />
                   </span>
                 )}
-                <span className={isTransaction ? "mt-1 text-[10px]" : ""}>
+                <span className={isTransaction ? "mt-2 text-[10px]" : "text-[10px]"}>
                   {link.label}
                 </span>
               </Link>
