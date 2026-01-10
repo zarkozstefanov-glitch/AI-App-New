@@ -572,10 +572,10 @@ export default function LandingDemoGrid({
                 <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">
                   {t("dashboard.remaining")}
                 </p>
-              <h3 className="mt-2 text-lg font-semibold text-slate-900 sm:text-xl">
+              <h3 className="mt-2 text-lg font-semibold text-emerald-600 sm:text-xl">
                 {renderPrimaryAmount(demoSummary.remainingBudget.eurCents)}
               </h3>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-emerald-600">
                 {renderSecondaryAmount(demoSummary.remainingBudget.bgnCents)}
               </p>
               </div>
@@ -585,10 +585,10 @@ export default function LandingDemoGrid({
                 <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">
                   {t("dashboard.forecast")}
                 </p>
-              <h3 className="mt-2 text-lg font-semibold text-slate-900 sm:text-xl">
+              <h3 className="mt-2 text-lg font-semibold text-emerald-600 sm:text-xl">
                 {renderPrimaryAmount(demoSummary.projectedTotal.eurCents)}
               </h3>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-emerald-600">
                 {renderSecondaryAmount(demoSummary.projectedTotal.bgnCents)}
               </p>
               </div>
@@ -598,10 +598,10 @@ export default function LandingDemoGrid({
                 <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">
                   {t("dashboard.toSave")}
                 </p>
-              <h3 className="mt-2 text-lg font-semibold text-slate-900 sm:text-xl">
+              <h3 className="mt-2 text-lg font-semibold text-emerald-600 sm:text-xl">
                 {renderPrimaryAmount(demoSummary.toSave.eurCents)}
               </h3>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-emerald-600">
                 {renderSecondaryAmount(demoSummary.toSave.bgnCents)}
               </p>
               </div>
@@ -611,10 +611,10 @@ export default function LandingDemoGrid({
                 <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">
                   {t("dashboard.dailyLimit")}
                 </p>
-              <h3 className="mt-2 text-lg font-semibold text-slate-900 sm:text-xl">
+              <h3 className="mt-2 text-lg font-semibold text-emerald-600 sm:text-xl">
                 {renderPrimaryAmount(dailyLimitEurCents)}
               </h3>
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm text-emerald-600">
                 {dailyLimitBgnCents == null
                   ? "—"
                   : (

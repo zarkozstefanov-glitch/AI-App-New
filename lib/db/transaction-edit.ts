@@ -73,15 +73,18 @@ function buildUpdatePayload(data: EditTransactionPayload) {
       : new Date();
   }
   if (data.totalOriginal !== undefined && data.currencyOriginal) {
-    const amountCents = toCents(Number(data.totalOriginal));
-    const totals = convertCents(amountCents, data.currencyOriginal);
-    update.totalOriginalCents = amountCents;
-    update.currencyOriginal = data.currencyOriginal;
-    update.totalBgnCents = totals.bgnCents;
-    update.totalEurCents = totals.eurCents;
-    update.totalBgn = totals.bgnCents / 100;
-    update.totalEur = totals.eurCents / 100;
-    update.totalOriginal = amountCents / 100;
+    const numericTotal = Number(data.totalOriginal);
+    if (Number.isFinite(numericTotal)) {
+      const amountCents = toCents(numericTotal);
+      const totals = convertCents(amountCents, data.currencyOriginal);
+      update.totalOriginalCents = amountCents;
+      update.currencyOriginal = data.currencyOriginal;
+      update.totalBgnCents = totals.bgnCents;
+      update.totalEurCents = totals.eurCents;
+      update.totalBgn = totals.bgnCents / 100;
+      update.totalEur = totals.eurCents / 100;
+      update.totalOriginal = amountCents / 100;
+    }
   }
   update.isEdited = true;
   return update;
@@ -115,24 +118,27 @@ export async function updateTransactionWithHistory(
   };
 
   return prisma.$transaction(async (db) => {
+    const rawHistory = JSON.stringify({
+      accountId: existing.accountId,
+      transferAccountId: existing.transferAccountId,
+      transactionType: existing.transactionType,
+      merchantName: existing.merchantName,
+      category: existing.category,
+      isFixed: existing.isFixed,
+      notes: existing.notes,
+      transactionDate: existing.transactionDate,
+      totalBgnCents: existing.totalBgnCents,
+      totalEurCents: existing.totalEurCents,
+      totalOriginalCents: existing.totalOriginalCents,
+      currencyOriginal: existing.currencyOriginal,
+    });
+    const safeHistory = rawHistory.length > 60000 ? rawHistory.slice(0, 60000) : rawHistory;
+
     await db.transactionHistory.create({
       data: {
         userId,
         transactionId: existing.id,
-        oldData: JSON.stringify({
-          accountId: existing.accountId,
-          transferAccountId: existing.transferAccountId,
-          transactionType: existing.transactionType,
-          merchantName: existing.merchantName,
-          category: existing.category,
-          isFixed: existing.isFixed,
-          notes: existing.notes,
-          transactionDate: existing.transactionDate,
-          totalBgnCents: existing.totalBgnCents,
-          totalEurCents: existing.totalEurCents,
-          totalOriginalCents: existing.totalOriginalCents,
-          currencyOriginal: existing.currencyOriginal,
-        }),
+        oldData: safeHistory,
       },
     });
 

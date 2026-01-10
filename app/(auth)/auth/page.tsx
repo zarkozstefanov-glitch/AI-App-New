@@ -12,6 +12,7 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { getServerTranslator } from "@/lib/i18n/server";
 import { getCategoryLabel } from "@/lib/category-ui";
+import { bgnCentsToEurCents } from "@/lib/currency";
 import { Camera, Check, CheckCircle, Plane, ShieldCheck, Sparkles } from "lucide-react";
 import DynamicBackground from "@/components/landing/dynamic-background";
 import type { AccountSummary } from "@/components/accounts/accounts-context";
@@ -45,11 +46,9 @@ export default async function AuthPage() {
   }
   const { locale, t } = await getServerTranslator();
 
-  const eurCentsToBgnCents = (eurCents: number) =>
-    Math.round(eurCents * 1.95583);
-  const bgnCentsToEurCents = (bgnCents: number) =>
-    Math.round(bgnCents / 1.95583);
   const demoNow = new Date("2026-01-09T12:00:00Z");
+  const eurCentsToBgnCentsLocal = (eurCents: number) =>
+    Math.round(eurCents * 1.95583);
   const startOfDay = (date: Date) =>
     new Date(date.getFullYear(), date.getMonth(), date.getDate());
   const startOfMonth = (date: Date) =>
@@ -66,7 +65,7 @@ export default async function AuthPage() {
         kind: "cash",
         currency: "EUR",
         balanceEurCents: 5000,
-        balanceBgnCents: eurCentsToBgnCents(5000),
+        balanceBgnCents: eurCentsToBgnCentsLocal(5000),
       },
       {
         id: "demo-bank",
@@ -74,7 +73,7 @@ export default async function AuthPage() {
         kind: "bank",
         currency: "EUR",
         balanceEurCents: 124000,
-        balanceBgnCents: eurCentsToBgnCents(124000),
+        balanceBgnCents: eurCentsToBgnCentsLocal(124000),
       },
       {
         id: "demo-savings",
@@ -82,7 +81,7 @@ export default async function AuthPage() {
         kind: "savings",
         currency: "EUR",
         balanceEurCents: 500000,
-        balanceBgnCents: eurCentsToBgnCents(500000),
+        balanceBgnCents: eurCentsToBgnCentsLocal(500000),
       },
     ] satisfies AccountSummary[],
     transactions: [
@@ -147,8 +146,10 @@ export default async function AuthPage() {
     ] satisfies DemoUpcomingPayment[],
   };
 
+  const demoBudgetBgnCents = mockData.budgetBgnCents;
   const demoAccounts = mockData.accounts;
   const demoTransactions = mockData.transactions;
+  const demoUpcomingPayments = mockData.upcomingPayments;
   const spentToDateBgnCents = demoTransactions
     .filter((tx) => new Date(tx.transactionDate) <= demoNow)
     .reduce((sum, tx) => sum + tx.bgnCents, 0);
@@ -156,8 +157,8 @@ export default async function AuthPage() {
     (sum, tx) => sum + tx.bgnCents,
     0,
   );
-  const remainingBgnCents = Math.max(mockData.budgetBgnCents - spentToDateBgnCents, 0);
-  const upcomingFixedBgnCents = mockData.upcomingPayments
+  const remainingBgnCents = Math.max(demoBudgetBgnCents - spentToDateBgnCents, 0);
+  const upcomingFixedBgnCents = demoUpcomingPayments
     .filter((payment) => new Date(payment.transactionDate) >= startOfDay(demoNow))
     .reduce((sum, payment) => sum + payment.bgnCents, 0);
   const totalDaysInMonth = Math.max(
@@ -175,7 +176,7 @@ export default async function AuthPage() {
     Math.round(averageDailyVariableBgn * remainingDaysInMonth) +
     spentToDateBgnCents +
     upcomingFixedBgnCents;
-  const toSaveBgnCents = Math.max(mockData.budgetBgnCents - projectedBgnCents, 0);
+  const toSaveBgnCents = Math.max(demoBudgetBgnCents - projectedBgnCents, 0);
 
   const categoryTotals = new Map<
     CategoryKey,
@@ -223,8 +224,8 @@ export default async function AuthPage() {
       eurCents: bgnCentsToEurCents(totalSpentBgnCents),
     },
     monthlyBudget: {
-      bgnCents: mockData.budgetBgnCents,
-      eurCents: bgnCentsToEurCents(mockData.budgetBgnCents),
+      bgnCents: demoBudgetBgnCents,
+      eurCents: bgnCentsToEurCents(demoBudgetBgnCents),
     },
     remainingBudget: {
       bgnCents: remainingBgnCents,
@@ -277,8 +278,8 @@ export default async function AuthPage() {
     { label: t("landing.scan.fieldDate"), value: t("landing.scan.demoDate") },
   ];
   const demoFilters = {
-    from: "2026-01-01",
-    to: "2026-01-09",
+    from: startOfMonth(demoNow).toISOString().slice(0, 10),
+    to: demoNow.toISOString().slice(0, 10),
   };
 
   const demoCategoryPalette = [
@@ -309,7 +310,7 @@ export default async function AuthPage() {
       isFixed: false,
     }));
 
-  const demoUpcomingPayments = mockData.upcomingPayments.map((payment) => ({
+  const demoUpcomingPaymentsRows = mockData.upcomingPayments.map((payment) => ({
     id: payment.id,
     category: payment.category,
     merchantName:
@@ -602,7 +603,7 @@ export default async function AuthPage() {
                 demoFilters={demoFilters}
                 demoTopMerchants={demoTopMerchants}
                 demoCategoryPalette={demoCategoryPalette}
-                demoUpcomingPayments={demoUpcomingPayments}
+                demoUpcomingPayments={demoUpcomingPaymentsRows}
                 demoRecentTransactions={demoRecentTransactions}
                 demoCategoryUi={demoCategoryUi}
               />

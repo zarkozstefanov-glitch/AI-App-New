@@ -92,10 +92,11 @@ export default function DetailClient({ transaction }: { transaction: Transaction
     }
     startTransition(async () => {
       try {
+        const parsedTotal = Number(form.totalOriginal);
         await editTransactionAction(transaction.id, {
           ...form,
           transactionDate: form.transactionDate || null,
-          totalOriginal: Number(form.totalOriginal),
+          totalOriginal: Number.isFinite(parsedTotal) ? parsedTotal : undefined,
         });
         setMessage(t("profile.saved"));
         window.dispatchEvent(new CustomEvent("transactions:changed"));
