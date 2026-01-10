@@ -81,18 +81,18 @@ export default function AuthForm() {
             {title}
           </h2>
         </div>
-        <div className="flex rounded-full bg-slate-100 p-1 text-xs text-slate-700">
+        <div className="flex rounded-full border border-white/40 bg-white/30 p-1 text-xs text-slate-700 shadow-glow backdrop-blur-xl">
           <button
             type="button"
             onClick={() => setMode("login")}
-            className={`rounded-full px-4 py-2 text-[11px] font-semibold sm:text-xs ${mode === "login" ? "bg-white text-slate-900 shadow" : "hover:bg-white"}`}
+            className={`rounded-full px-4 py-2 text-[11px] font-semibold sm:text-xs ${mode === "login" ? "bg-white/70 text-slate-900 shadow-glow" : "hover:bg-white/40"}`}
           >
             {t("auth.login")}
           </button>
           <button
             type="button"
             onClick={() => setMode("register")}
-            className={`rounded-full px-4 py-2 text-[11px] font-semibold sm:text-xs ${mode === "register" ? "bg-white text-slate-900 shadow" : "hover:bg-white"}`}
+            className={`rounded-full px-4 py-2 text-[11px] font-semibold sm:text-xs ${mode === "register" ? "bg-white/70 text-slate-900 shadow-glow" : "hover:bg-white/40"}`}
           >
             {t("auth.register")}
           </button>

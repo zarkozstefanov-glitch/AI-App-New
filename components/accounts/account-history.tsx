@@ -75,17 +75,21 @@ export default function AccountHistory({
   if (!currentAccountId && !demoRows) return null;
 
   const cardClassName = demoMode
-    ? "rounded-2xl border border-white/20 bg-white/40 p-6 shadow-[0_16px_40px_rgba(15,23,42,0.08)] backdrop-blur-lg transition hover:shadow-[0_0_0_2px_rgba(99,102,241,0.2)]"
-    : "rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-[0_10px_40px_rgba(0,0,0,0.06)] backdrop-blur-md";
+    ? "rounded-2xl border border-white/40 bg-white/40 p-6 shadow-glow backdrop-blur-xl transition hover:scale-[1.05] hover:shadow-neon-strong"
+    : "rounded-2xl border border-white/40 bg-white/20 p-6 shadow-glow backdrop-blur-3xl animate-float transition hover:-translate-y-0.5 hover:shadow-neon-strong";
+  const labelClass = demoMode ? "text-slate-500" : "text-slate-500";
+  const titleClass = demoMode ? "text-slate-800" : "text-slate-900";
+
+  const visibleRows = rows.slice(0, 3);
 
   return (
     <section className={cardClassName}>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
+          <p className={`text-xs uppercase tracking-[0.2em] ${labelClass}`}>
             {headerLabel ?? t("accounts.accountHistory")}
           </p>
-          <h3 className="text-lg font-semibold text-slate-900">
+          <h3 className={`text-lg font-semibold ${titleClass}`}>
             {headerTitle ?? t("accounts.recentTransactions")}
           </h3>
         </div>
@@ -105,8 +109,8 @@ export default function AccountHistory({
           {t("accounts.noAccountTransactions")}
         </p>
       ) : (
-        <div className="mt-4 text-sm">
-          {rows.map((tx) => {
+        <div className="mt-4 max-h-[240px] overflow-y-auto text-sm scrollbar-hide">
+          {visibleRows.map((tx) => {
             const merchantLabel = tx.isFixed
               ? getRecurringLabelForName(tx.merchantName, locale)
               : tx.merchantName;

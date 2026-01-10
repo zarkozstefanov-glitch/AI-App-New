@@ -19,7 +19,7 @@ const { t } = await getServerTranslator(); // Добавяме await тук
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <div className="mb-6 rounded-[2rem] border border-slate-100/50 bg-white p-6 shadow-sm">
+      <div className="mb-6 rounded-[2rem] border border-white/40 bg-white/20 p-6 shadow-glow backdrop-blur-3xl">
         <PageHeader
           label={t("settings.label")}
           title={t("settings.title")}

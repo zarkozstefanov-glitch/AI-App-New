@@ -90,7 +90,7 @@ export default function ChangeCalculator({
 
   const content = (
     <div className="grid gap-4 md:grid-cols-2">
-      <div className="glass rounded-3xl border border-slate-200 bg-white/70 p-4 shadow-glow sm:p-6">
+      <div className="glass rounded-3xl border border-white/40 bg-white/40 p-4 shadow-glow backdrop-blur-xl transition hover:scale-[1.05] hover:shadow-neon-strong sm:p-6">
         <div className="grid gap-4">
           <label className="text-sm text-slate-700">
             {t("change.totalBillEur")}
@@ -109,10 +109,10 @@ export default function ChangeCalculator({
               }
               onFocus={(e) => e.target.select()}
               disabled={readOnly}
-              className="mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-xl font-semibold text-slate-900 outline-none disabled:opacity-70"
+              className="mt-2 w-full rounded-xl border border-white/40 bg-white/30 px-4 py-2 text-xl font-semibold text-slate-900 outline-none disabled:opacity-70"
             />
           </label>
-          <div className="rounded-2xl border border-slate-200 bg-white/70 px-4 py-3">
+          <div className="rounded-2xl border border-white/40 bg-white/30 px-4 py-3">
             <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
               {t("change.paidAmount")}
             </p>
@@ -134,7 +134,7 @@ export default function ChangeCalculator({
                   }
                   onFocus={(e) => e.target.select()}
                   disabled={readOnly}
-                  className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none disabled:opacity-70"
+                  className="mt-2 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-sm text-slate-900 outline-none disabled:opacity-70"
                 />
               </label>
               <label className="text-sm text-slate-700">
@@ -154,7 +154,7 @@ export default function ChangeCalculator({
                   }
                   onFocus={(e) => e.target.select()}
                   disabled={readOnly}
-                  className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none disabled:opacity-70"
+                  className="mt-2 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-sm text-slate-900 outline-none disabled:opacity-70"
                 />
               </label>
             </div>
@@ -163,7 +163,7 @@ export default function ChangeCalculator({
             <button
               type="button"
               onClick={clear}
-              className="ml-auto inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-[11px] font-semibold text-slate-700 transition hover:bg-slate-100"
+              className="ml-auto inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/30 px-3 py-1.5 text-[11px] font-semibold text-slate-700 transition hover:bg-white/40"
             >
               <RotateCcw className="h-3.5 w-3.5" />
               {t("change.clear")}
@@ -172,8 +172,8 @@ export default function ChangeCalculator({
         </div>
       </div>
 
-      <div className="glass flex w-full flex-col rounded-3xl border border-slate-200 bg-white/70 p-4 shadow-glow sm:p-6">
-        <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3">
+      <div className="glass flex w-full flex-col rounded-3xl border border-white/40 bg-white/40 p-4 shadow-glow backdrop-blur-xl transition hover:scale-[1.05] hover:shadow-neon-strong sm:p-6">
+        <div className="rounded-2xl border border-white/40 bg-white/30 px-4 py-3">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
@@ -198,7 +198,7 @@ export default function ChangeCalculator({
                 onClick={() =>
                   setShowCurrency((current) => (current === "BGN" ? "EUR" : "BGN"))
                 }
-                className="rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-semibold text-slate-900"
+                className="rounded-full border border-white/40 bg-white/30 px-3 py-1 text-[11px] font-semibold text-slate-900"
               >
                 {showCurrency === "BGN"
                   ? t("change.showInEur")
@@ -212,7 +212,7 @@ export default function ChangeCalculator({
           <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
             {t("change.breakdown")}
           </p>
-          <div className="space-y-2 rounded-2xl border border-slate-200 bg-white/70 px-4 py-3 text-xs text-slate-600">
+          <div className="space-y-2 rounded-2xl border border-white/40 bg-white/30/70 px-4 py-3 text-xs text-slate-600">
             {paidBgnValue === 0 && paidEurValue === 0 && (
               <div className="flex items-center justify-between">
                 <span>{t("change.payment")}</span>
@@ -266,7 +266,7 @@ export default function ChangeCalculator({
   return (
     <div className="min-h-[100dvh] w-full flex flex-col">
       <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 sm:gap-6">
-        <div className="mb-6 rounded-[2rem] border border-slate-100 bg-white p-6 shadow-sm">
+        <div className="mb-6 rounded-[2rem] border border-white/40 bg-white/20 p-6 shadow-sm">
           <PageHeader
             label={t("change.label")}
             title={t("change.title")}

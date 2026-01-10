@@ -69,7 +69,6 @@ export default function DetailClient({ transaction }: { transaction: Transaction
       ? transaction.transactionDate.slice(0, 16)
       : "",
     category: transaction.category,
-    paymentMethod: transaction.paymentMethod ?? "",
     notes: transaction.notes ?? "",
     totalOriginal: fromCents(transaction.totalOriginalCents),
     currencyOriginal: transaction.currencyOriginal,
@@ -141,7 +140,7 @@ export default function DetailClient({ transaction }: { transaction: Transaction
   }, [transaction.id]);
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-[0_10px_40px_rgba(0,0,0,0.06)] backdrop-blur-md">
+    <div className="rounded-2xl border border-white/40 bg-white/20 p-6 shadow-glow backdrop-blur-md">
       <button
         type="button"
         onClick={handleBack}
@@ -158,7 +157,7 @@ export default function DetailClient({ transaction }: { transaction: Transaction
               <select
                 value={form.accountId}
                 onChange={(e) => setForm((f) => ({ ...f, accountId: e.target.value }))}
-                className="mt-1 w-full rounded-lg border-2 border-slate-100 bg-slate-50 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+                className="mt-1 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
               >
                 {accounts.map((acc) => (
                   <option key={acc.id} value={acc.id}>
@@ -174,7 +173,7 @@ export default function DetailClient({ transaction }: { transaction: Transaction
                 onChange={(e) =>
                   setForm((f) => ({ ...f, transactionType: e.target.value }))
                 }
-                className="mt-1 w-full rounded-lg border-2 border-slate-100 bg-slate-50 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+                className="mt-1 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
               >
                 <option value="expense">{t("transactions.expense")}</option>
                 <option value="income">{t("transactions.income")}</option>
@@ -187,7 +186,7 @@ export default function DetailClient({ transaction }: { transaction: Transaction
                 onChange={(e) =>
                   setForm((f) => ({ ...f, merchantName: e.target.value }))
                 }
-                className="mt-1 w-full rounded-lg border-2 border-slate-100 bg-slate-50 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+                className="mt-1 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
               />
             </label>
             <label className="text-sm text-slate-700">
@@ -198,7 +197,7 @@ export default function DetailClient({ transaction }: { transaction: Transaction
                 onChange={(e) =>
                   setForm((f) => ({ ...f, transactionDate: e.target.value }))
                 }
-                className="mt-1 w-full rounded-lg border-2 border-slate-100 bg-slate-50 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+                className="mt-1 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
               />
             </label>
             <label className="text-sm text-slate-700">
@@ -211,7 +210,7 @@ export default function DetailClient({ transaction }: { transaction: Transaction
                     category: e.target.value,
                   }))
                 }
-                className="mt-1 w-full rounded-lg border-2 border-slate-100 bg-slate-50 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+                className="mt-1 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
               >
                 {!categoryConfig[form.category as keyof typeof categoryConfig] && (
                   <option value={form.category}>{form.category}</option>
@@ -238,21 +237,11 @@ export default function DetailClient({ transaction }: { transaction: Transaction
                 onChange={(e) =>
                   setForm((f) => ({ ...f, isFixed: e.target.value === "fixed" }))
                 }
-                className="mt-1 w-full rounded-lg border-2 border-slate-100 bg-slate-50 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+                className="mt-1 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
               >
                 <option value="variable">{t("transactions.variable")}</option>
                 <option value="fixed">{t("transactions.fixed")}</option>
               </select>
-            </label>
-            <label className="text-sm text-slate-700">
-              {t("transactionDetail.paymentMethod")}
-              <input
-                value={form.paymentMethod}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, paymentMethod: e.target.value }))
-                }
-                className="mt-1 w-full rounded-lg border-2 border-slate-100 bg-slate-50 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
-              />
             </label>
             <label className="text-sm text-slate-700">
               {t("transactionDetail.total")}
@@ -262,7 +251,7 @@ export default function DetailClient({ transaction }: { transaction: Transaction
                 onChange={(e) =>
                   setForm((f) => ({ ...f, totalOriginal: Number(e.target.value) }))
                 }
-                className="mt-1 w-full rounded-lg border-2 border-slate-100 bg-slate-50 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+                className="mt-1 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
               />
             </label>
             <label className="text-sm text-slate-700">
@@ -272,7 +261,7 @@ export default function DetailClient({ transaction }: { transaction: Transaction
                 onChange={(e) =>
                   setForm((f) => ({ ...f, currencyOriginal: e.target.value }))
                 }
-                className="mt-1 w-full rounded-lg border-2 border-slate-100 bg-slate-50 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+                className="mt-1 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
               >
                 <option value="BGN">BGN</option>
                 <option value="EUR">EUR</option>
@@ -284,7 +273,7 @@ export default function DetailClient({ transaction }: { transaction: Transaction
             <textarea
               value={form.notes}
               onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
-              className="mt-1 w-full rounded-lg border-2 border-slate-100 bg-slate-50 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+              className="mt-1 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
             />
           </label>
           {message && (
@@ -309,7 +298,7 @@ export default function DetailClient({ transaction }: { transaction: Transaction
               <button
                 onClick={rerun}
                 disabled={loading}
-                className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-xs font-semibold text-slate-900"
+                className="flex items-center gap-2 rounded-lg bg-white/70 px-4 py-2 text-xs font-semibold text-slate-900"
               >
                 <RotateCw size={14} /> {t("transactionDetail.rerunAi")}
               </button>
@@ -324,7 +313,7 @@ export default function DetailClient({ transaction }: { transaction: Transaction
           </div>
         </div>
         <div className="space-y-3">
-          <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-[0_10px_40px_rgba(0,0,0,0.06)]">
+          <div className="rounded-2xl border border-white/40 bg-white/20 p-4 shadow-glow">
             <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
               {t("transactionDetail.amountLabel")}
             </p>
@@ -343,7 +332,7 @@ export default function DetailClient({ transaction }: { transaction: Transaction
             )}
           </div>
           {transaction.originalImageUrl && (
-            <div className="rounded-2xl border border-slate-200 bg-white/80 p-3 shadow-[0_10px_40px_rgba(0,0,0,0.06)]">
+            <div className="rounded-2xl border border-white/40 bg-white/20 p-3 shadow-glow">
               <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
                 {t("transactionDetail.image")}
               </p>
@@ -351,12 +340,12 @@ export default function DetailClient({ transaction }: { transaction: Transaction
               <img
                 src={transaction.originalImageUrl}
                 alt="Receipt"
-                className="mt-2 w-full rounded-lg border border-slate-200/60"
+                className="mt-2 w-full rounded-lg border border-white/40"
               />
             </div>
           )}
           {transaction.lineItems?.length ? (
-            <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 text-sm text-slate-700 shadow-[0_10px_40px_rgba(0,0,0,0.06)]">
+            <div className="rounded-2xl border border-white/40 bg-white/20 p-4 text-sm text-slate-700 shadow-glow">
               <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
                 {t("transactionDetail.items")}
               </p>
@@ -364,7 +353,7 @@ export default function DetailClient({ transaction }: { transaction: Transaction
                 {transaction.lineItems.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between rounded-lg bg-white px-3 py-2"
+                    className="flex items-center justify-between rounded-lg bg-white/70 px-3 py-2"
                   >
                     <div>
                       <p className="font-semibold text-slate-900">
@@ -386,7 +375,7 @@ export default function DetailClient({ transaction }: { transaction: Transaction
           ) : null}
         </div>
       </div>
-      <div id="history" className="mt-6 rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-[0_10px_40px_rgba(0,0,0,0.06)]">
+      <div id="history" className="mt-6 rounded-2xl border border-white/40 bg-white/20 p-4 shadow-glow">
         <div className="flex items-center justify-between">
           <h4 className="text-sm font-semibold text-slate-900">
             {t("transactionDetail.history")}
@@ -402,7 +391,7 @@ export default function DetailClient({ transaction }: { transaction: Transaction
             {history.map((entry) => (
               <div
                 key={entry.id}
-                className="rounded-xl border border-slate-200 bg-white px-3 py-2"
+                className="rounded-xl border border-white/40 bg-white/30 px-3 py-2"
               >
                 <div className="flex items-center justify-between text-xs text-slate-500">
                   <span>
@@ -417,7 +406,7 @@ export default function DetailClient({ transaction }: { transaction: Transaction
                       },
                     )}
                   </span>
-                  <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
+                  <span className="rounded-full border border-white/40 bg-white/30 px-2 py-0.5 text-[10px] font-semibold text-slate-600">
                     {t("transactionDetail.snapshot")}
                   </span>
                 </div>

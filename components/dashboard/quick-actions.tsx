@@ -15,7 +15,7 @@ export default function QuickActions() {
       </Link>
       <Link
         href="/transactions"
-        className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 transition hover:border-slate-300"
+        className="flex items-center justify-between rounded-2xl border border-white/40 bg-white/20 px-4 py-3 text-sm font-semibold text-slate-800 shadow-glow backdrop-blur-3xl transition hover:-translate-y-0.5 hover:shadow-neon-strong"
       >
         <span>{t("dashboard.viewHistory")}</span>
         <ListFilter size={18} />

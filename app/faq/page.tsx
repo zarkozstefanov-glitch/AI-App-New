@@ -14,13 +14,13 @@ export default async function FaqPage() {
   return (
     // ... останалият код
     <div className="mx-auto w-full max-w-4xl px-4 pb-12 pt-8 sm:px-8">
-      <div className="glass rounded-3xl border border-slate-200 bg-white/70 p-6 shadow-glow">
+      <div className="glass rounded-3xl border border-white/40 bg-white/20 p-6 shadow-glow">
         <h1 className="text-2xl font-semibold text-slate-900">{t("faq.title")}</h1>
         <div className="mt-6 space-y-4">
           {faqs.map((item) => (
             <div
               key={item.q}
-              className="rounded-2xl border border-slate-200 bg-white px-4 py-4"
+              className="rounded-2xl border border-white/40 bg-white/30 px-4 py-4"
             >
               <p className="text-sm font-semibold text-slate-900">{item.q}</p>
               <p className="mt-2 text-sm text-slate-600">{item.a}</p>
@@ -29,7 +29,7 @@ export default async function FaqPage() {
         </div>
         <Link
           href="/"
-          className="mt-6 inline-flex rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-900 transition hover:bg-slate-100"
+          className="mt-6 inline-flex rounded-full border border-white/40 bg-white/20 px-4 py-2 text-xs font-semibold text-slate-900 transition hover:bg-white/40"
         >
           {t("common.backToDashboard")}
         </Link>

@@ -17,12 +17,9 @@ import {
   Cell,
   Sector,
 } from "recharts";
-import { categoryConfig } from "@/lib/categories";
-import { recurringGroups, getRecurringGroupLabel } from "@/lib/recurring";
 import { formatMoney, fromCents } from "@/lib/currency";
 import UpcomingPayments from "@/components/dashboard/upcoming-payments";
 import { Loader2, Store, TrendingUp } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import TransactionListItem from "@/components/transactions/transaction-list-item";
 import { getCategoryUI, getCategoryLabel } from "@/lib/category-ui";
 import { useI18n } from "@/components/i18n-provider";
@@ -46,7 +43,7 @@ export type SeriesPoint = {
 };
 
 const baseGlassCard =
-  "rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm backdrop-blur-md";
+  "rounded-2xl border border-white/40 bg-white/20 p-4 shadow-glow backdrop-blur-3xl animate-float transition hover:-translate-y-0.5 hover:shadow-neon-strong";
 
 type CategoryLegendItem = {
   category: string;
@@ -60,11 +57,9 @@ type CategoryLegendProps = {
   activeCategory: string | null;
   onActivate: (category: string) => void;
   labelForCategory: (value: string) => string;
-  iconForCategory: (value: string) => LucideIcon;
   formatPrimaryAmount: (cents: number | null) => string;
   formatSecondaryAmount: (cents: number | null) => string;
   totalEurCents: number;
-  uiForCategory?: (category: string) => { backgroundColor: string; textColor: string };
 };
 
 const CategoryLegend = ({
@@ -72,62 +67,76 @@ const CategoryLegend = ({
   activeCategory,
   onActivate,
   labelForCategory,
-  iconForCategory,
   formatPrimaryAmount,
   formatSecondaryAmount,
   totalEurCents,
-  uiForCategory,
 }: CategoryLegendProps) => {
-  const hasOverflow = items.length > 3;
+  const shouldScroll = items.length > 4;
+  const emojiMap: Record<string, string> = {
+    food_supermarket: "🛒",
+    restaurants_cafe: "🍽️",
+    transport: "🚗",
+    home_bills: "🏠",
+    clothing: "👕",
+    subscriptions: "📺",
+    entertainment: "🎧",
+    health: "💊",
+    alcohol: "🍸",
+    tobacco: "🚬",
+    beauty: "✨",
+    gifts: "🎁",
+    other: "🧩",
+    transfer: "🔁",
+  };
   return (
-    <div className="mt-6 -mx-4 px-4">
+    <div className="mt-4 -mx-4 px-4 lg:mt-0 lg:px-0">
       <div className="relative">
-        <div className="max-h-[240px] overflow-y-auto pr-1 scroll-smooth">
+        <div
+          className={`pr-1 scroll-smooth ${
+            shouldScroll
+              ? "max-h-[160px] overflow-y-auto"
+              : "max-h-none overflow-visible"
+          } lg:max-h-none lg:overflow-visible`}
+        >
           {items.map((cat, index) => {
-        const ui = uiForCategory ? uiForCategory(cat.category) : getCategoryUI(cat.category);
-        const label = labelForCategory(cat.category);
-        const Icon = iconForCategory(cat.category);
-        const percent =
-          totalEurCents > 0 ? Math.round((cat.eurCents / totalEurCents) * 100) : 0;
-        const isActive = activeCategory === cat.category;
-        return (
-          <button
-            key={cat.category}
-            type="button"
-            onClick={() => onActivate(cat.category)}
-            onMouseEnter={() => onActivate(cat.category)}
-            className={`flex w-full items-center justify-between border-b border-slate-100 px-2 py-4 text-left transition last:border-0 ${
-              isActive ? "bg-slate-50/80" : "bg-transparent"
-            }`}
-          >
-            <span className="flex min-w-0 items-center gap-3">
+            const label = labelForCategory(cat.category);
+            const percent =
+              totalEurCents > 0 ? Math.round((cat.eurCents / totalEurCents) * 100) : 0;
+            const isActive = activeCategory === cat.category;
+            const emoji = emojiMap[cat.category] ?? "•";
+            return (
+              <button
+                key={cat.category}
+                type="button"
+                onClick={() => onActivate(cat.category)}
+                onMouseEnter={() => onActivate(cat.category)}
+                className={`flex w-full items-center justify-between border-b border-white/30 px-2 py-3 text-left transition last:border-0 ${
+                  isActive ? "bg-white/30" : "bg-transparent hover:bg-white/20"
+                }`}
+              >
+            <span className="flex min-w-0 items-center gap-2">
               <span className="text-xs font-semibold text-slate-400">
                 {index + 1}.
               </span>
-              <span
-                className="flex h-10 w-10 items-center justify-center rounded-2xl"
-                style={{ backgroundColor: ui.backgroundColor }}
-              >
-                <Icon className="h-5 w-5" style={{ color: ui.textColor }} aria-hidden />
-              </span>
-              <span className="min-w-0 text-sm font-bold text-slate-900">
+              <span className="text-sm">{emoji}</span>
+              <span className="min-w-0 text-sm font-bold text-slate-800">
                 {label}
               </span>
             </span>
-            <span className="flex shrink-0 flex-col items-end gap-1 text-right">
-              <span className="text-sm font-bold text-slate-900">
-                {formatPrimaryAmount(cat.eurCents)}
-              </span>
-              <span className="text-[10px] text-slate-400">
-                {percent}% · {formatSecondaryAmount(cat.bgnCents)}
-              </span>
-            </span>
-          </button>
-        );
+                <span className="flex shrink-0 flex-col items-end gap-1 text-right">
+                  <span className="text-sm font-bold text-slate-800">
+                    {formatPrimaryAmount(cat.eurCents)}
+                  </span>
+                  <span className="text-[10px] text-slate-500">
+                    {percent}% · {formatSecondaryAmount(cat.bgnCents)}
+                  </span>
+                </span>
+              </button>
+            );
           })}
         </div>
-        {hasOverflow && (
-          <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-b from-transparent to-white" />
+        {shouldScroll && (
+          <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-10 bg-gradient-to-b from-transparent to-white/70" />
         )}
       </div>
     </div>
@@ -139,7 +148,6 @@ type AnalyticsViewProps = {
   activeCategory: string | null;
   onActivateCategory: (category: string | null) => void;
   labelForCategory: (value: string) => string;
-  iconForCategory: (value: string) => LucideIcon;
   formatPrimaryAmount: (cents: number | null) => string;
   formatSecondaryAmount: (cents: number | null) => string;
   uiForCategory?: (category: string) => { backgroundColor: string; textColor: string };
@@ -152,7 +160,6 @@ const AnalyticsView = ({
   activeCategory,
   onActivateCategory,
   labelForCategory,
-  iconForCategory,
   formatPrimaryAmount,
   formatSecondaryAmount,
   uiForCategory,
@@ -168,9 +175,9 @@ const AnalyticsView = ({
     uiForCategory ? uiForCategory(category) : getCategoryUI(category);
 
   return (
-    <>
-      <div className="flex h-[300px] w-full items-center justify-center">
-        <ResponsiveContainer width="100%" height={300} minWidth={200}>
+    <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+      <div className="flex h-[280px] w-full items-center justify-center lg:h-[300px] lg:w-1/2">
+        <ResponsiveContainer width="100%" height="100%" minWidth={200}>
           <PieChart>
             <Pie
               data={summary.byCategory.map((c) => ({
@@ -239,42 +246,41 @@ const AnalyticsView = ({
             })()}
             <Tooltip
               contentStyle={{
-                background: "#ffffff",
-                border: "1px solid rgba(148,163,184,0.35)",
+                background: "rgba(255,255,255,0.9)",
+                border: "1px solid rgba(255,255,255,0.5)",
                 color: "#0f172a",
+                fontSize: "11px",
+                backdropFilter: "blur(12px)",
               }}
-              labelStyle={{ color: "#0f172a" }}
+              labelStyle={{ fontSize: "10px" }}
               itemStyle={{ color: "#0f172a" }}
               wrapperStyle={{ color: "#0f172a" }}
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               formatter={(value: any, name: any, entry: any) => {
                 if (value === undefined || value === null) {
-                  return ["€0.00", String(name ?? "")];
+                  return ["€0.00", "Amount"];
                 }
-                const entryName = entry?.payload?.name ?? name ?? "";
                 const bgnCents = entry?.payload?.bgnCents ?? 0;
                 const eurCents = Number(value);
-                return [formatMoney(eurCents, bgnCents), String(entryName)] as [
-                  string,
-                  string,
-                ];
+                return [formatMoney(eurCents, bgnCents), "Amount"] as [string, string];
               }}
+              labelFormatter={() => ""}
             />
           </PieChart>
         </ResponsiveContainer>
       </div>
-      <CategoryLegend
-        items={sortedCategories}
-        activeCategory={activeCategory}
-        onActivate={(category) => onActivateCategory(category)}
-        labelForCategory={labelForCategory}
-        iconForCategory={iconForCategory}
-        formatPrimaryAmount={(cents) => formatPrimaryAmount(cents)}
-        formatSecondaryAmount={(cents) => formatSecondaryAmount(cents)}
-        totalEurCents={totalEurCents}
-        uiForCategory={uiForCategory}
-      />
-    </>
+      <div className="w-full lg:w-1/2">
+        <CategoryLegend
+          items={sortedCategories}
+          activeCategory={activeCategory}
+          onActivate={(category) => onActivateCategory(category)}
+          labelForCategory={labelForCategory}
+          formatPrimaryAmount={(cents) => formatPrimaryAmount(cents)}
+          formatSecondaryAmount={(cents) => formatSecondaryAmount(cents)}
+          totalEurCents={totalEurCents}
+        />
+      </div>
+    </div>
   );
 };
 
@@ -322,7 +328,7 @@ export default function AnalyticsClient({
   const range = "month" as const;
   const isDemo = Boolean(demoSummary) || demoMode;
   const demoCardClass =
-    "rounded-2xl border border-white/20 bg-white/40 p-4 shadow-[0_12px_30px_rgba(15,23,42,0.08)] backdrop-blur-lg transition hover:shadow-[0_0_0_2px_rgba(99,102,241,0.2)]";
+    "rounded-2xl border border-white/40 bg-white/20 p-4 shadow-glow backdrop-blur-3xl animate-float transition hover:-translate-y-0.5 hover:shadow-neon-strong";
   const glassCard = isDemo || demoStyle ? demoCardClass : baseGlassCard;
   const [summary, setSummary] = useState<Summary | null>(demoSummary ?? null);
   const [series, setSeries] = useState<SeriesPoint[]>(demoSeries ?? []);
@@ -344,20 +350,7 @@ export default function AnalyticsClient({
   const [loading, setLoading] = useState(!demoSummary);
   const [error, setError] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState(0);
-  const recurringLabelMap = useMemo(() => {
-    const map = new Map<string, { label: string; icon: LucideIcon }>();
-    for (const group of recurringGroups) {
-      map.set(group.value, { label: getRecurringGroupLabel(group, locale), icon: group.icon });
-    }
-    return map;
-  }, [locale]);
-
   const labelForCategory = (value: string) => getCategoryLabel(value, locale);
-
-  const iconForCategory = (value: string) =>
-    categoryConfig[value as keyof typeof categoryConfig]?.icon ||
-    recurringLabelMap.get(value)?.icon ||
-    categoryConfig.other.icon;
 
   const categoryUiMap = useMemo(() => {
     if (!isDemo || !demoCategoryPalette || !summary?.byCategory.length) return null;
@@ -559,7 +552,7 @@ export default function AnalyticsClient({
                 type="date"
                 value={filters.from}
                 onChange={(e) => setFilters((f) => ({ ...f, from: e.target.value }))}
-                className="mt-1 h-9 w-full rounded-lg border-2 border-slate-100 bg-slate-50 px-2 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+                className="mt-1 h-9 w-full rounded-lg border border-white/40 bg-white/30 px-2 text-xs text-slate-800 outline-none transition focus:border-blue-400/60 focus:bg-white/60"
               />
             </label>
             <label className="text-xs text-slate-600">
@@ -568,7 +561,7 @@ export default function AnalyticsClient({
                 type="date"
                 value={filters.to}
                 onChange={(e) => setFilters((f) => ({ ...f, to: e.target.value }))}
-                className="mt-1 h-9 w-full rounded-lg border-2 border-slate-100 bg-slate-50 px-2 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+                className="mt-1 h-9 w-full rounded-lg border border-white/40 bg-white/30 px-2 text-xs text-slate-800 outline-none transition focus:border-blue-400/60 focus:bg-white/60"
               />
             </label>
           </div>
@@ -576,7 +569,7 @@ export default function AnalyticsClient({
       </form>
 
       {error && (
-        <div className="rounded-2xl border border-slate-200 bg-rose-500/10 px-4 py-3 text-sm text-rose-700">
+        <div className="rounded-2xl border border-white/40 bg-rose-500/10 px-4 py-3 text-sm text-rose-700 shadow-glow backdrop-blur-xl">
           {error}
         </div>
       )}
@@ -693,9 +686,10 @@ export default function AnalyticsClient({
                     />
                     <Tooltip
                       contentStyle={{
-                        background: "#ffffff",
-                        border: "1px solid rgba(148,163,184,0.35)",
+                        background: "rgba(255,255,255,0.9)",
+                        border: "1px solid rgba(255,255,255,0.5)",
                         color: "#0f172a",
+                        backdropFilter: "blur(12px)",
                       }}
                       labelStyle={{ color: "#0f172a" }}
                       formatter={(_value, _name, entry) => {
@@ -724,7 +718,7 @@ export default function AnalyticsClient({
               </h3>
               <div className="mt-4 flex flex-1 flex-col gap-4">
                 {summary.byCategory.length === 0 ? (
-                  <div className="flex h-56 items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white/70 text-sm text-slate-500">
+                  <div className="flex h-56 items-center justify-center rounded-xl border border-dashed border-white/40 bg-white/20 text-sm text-slate-500 shadow-glow backdrop-blur-xl">
                     {t("dashboard.noData")}
                   </div>
                 ) : (
@@ -733,7 +727,6 @@ export default function AnalyticsClient({
                   activeCategory={activeCategory}
                   onActivateCategory={setActiveCategory}
                   labelForCategory={labelForCategory}
-                  iconForCategory={iconForCategory}
                   formatPrimaryAmount={formatPrimaryAmount}
                   formatSecondaryAmount={formatSecondaryAmount}
                   uiForCategory={uiForCategory}
@@ -758,11 +751,9 @@ export default function AnalyticsClient({
               </div>
             )}
             <div
-              className={`flex h-full w-full flex-col overflow-hidden ${
-                isDemo || demoStyle
-                  ? "rounded-3xl border border-white/20 bg-white/40 shadow-[0_12px_30px_rgba(15,23,42,0.08)] backdrop-blur-lg transition hover:shadow-[0_0_0_2px_rgba(99,102,241,0.2)]"
-                  : "rounded-3xl border border-slate-100 bg-white shadow-sm"
-              } ${showUpcoming ? "lg:col-span-2" : "lg:col-span-5"}`}
+              className={`flex h-full w-full flex-col overflow-hidden rounded-3xl border border-white/40 bg-white/20 shadow-glow backdrop-blur-3xl animate-float transition hover:-translate-y-0.5 hover:shadow-neon-strong ${
+                showUpcoming ? "lg:col-span-2" : "lg:col-span-5"
+              }`}
             >
               <div className="px-4 py-4">
                 <h3 className="text-lg font-semibold text-slate-900">

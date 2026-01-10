@@ -6,16 +6,21 @@ import { getServerTranslator } from "@/lib/i18n/server";
 import { getServerSession } from "next-auth";
 import { notFound, redirect } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
+
 export default async function TransactionDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
+  const { id } = await params;
   const session = await getServerSession(authOptions);
   if (!session) redirect("/auth");
   const { t } = await getServerTranslator();
   const transaction = await prisma.transaction.findFirst({
-    where: { id: params.id, userId: session.user.id },
+    where: { id, userId: session.user.id },
     include: { lineItems: true },
   });
 
@@ -34,7 +39,7 @@ export default async function TransactionDetailPage({
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <div className="glass shadow-glow rounded-3xl border border-slate-200 bg-gradient-to-r from-emerald-500/20 via-cyan-500/10 to-transparent p-6">
+      <div className="glass shadow-glow rounded-3xl border border-white/40 bg-white/20 p-6">
         <p className="text-xs uppercase tracking-[0.2em] text-slate-600">
           {t("common.details")}
         </p>

@@ -38,7 +38,6 @@ export default function UpcomingPayments({
   onlyUnpaid = false,
   demoPayments,
   uiForCategory,
-  demoMode = false,
   badgeLabel,
 }: UpcomingPaymentsProps) {
   const { t, locale } = useI18n();
@@ -94,9 +93,8 @@ export default function UpcomingPayments({
     return categoryConfig.other;
   };
 
-  const cardClassName = demoMode
-    ? "flex h-full w-full flex-col overflow-hidden rounded-3xl border border-white/20 bg-white/40 shadow-[0_12px_30px_rgba(15,23,42,0.08)] backdrop-blur-lg transition hover:shadow-[0_0_0_2px_rgba(99,102,241,0.2)]"
-    : "flex h-full w-full flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm";
+  const cardClassName =
+    "flex h-full w-full flex-col overflow-hidden rounded-3xl border border-white/40 bg-white/20 shadow-glow backdrop-blur-3xl transition hover:shadow-neon-strong animate-float";
 
   return (
     <section className={cardClassName}>
@@ -142,7 +140,7 @@ export default function UpcomingPayments({
                 amountBgnCents={payment.totalBgnCents}
                 actions={
                   showEdit ? (
-                    <span className="rounded-full border border-slate-200 px-2 py-1 text-[9px] font-semibold text-slate-900 md:px-3 md:text-xs">
+                    <span className="rounded-full border border-white/40 bg-white/30 px-2 py-1 text-[9px] font-semibold text-slate-900 shadow-glow md:px-3 md:text-xs">
                       {t("dashboard.upcoming")}
                     </span>
                   ) : badgeLabel ? (

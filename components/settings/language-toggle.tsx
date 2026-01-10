@@ -6,12 +6,12 @@ export default function LanguageToggle() {
   const { locale, setLocale, t } = useI18n();
 
   return (
-    <div className="flex items-center justify-between rounded-2xl border border-slate-100/50 bg-white p-4 shadow-sm">
+    <div className="flex items-center justify-between rounded-2xl border border-white/40 bg-white/20 p-4 shadow-glow">
       <div>
         <p className="text-sm font-semibold text-slate-900">{t("settings.language")}</p>
         <p className="text-xs text-slate-500">BG / EN</p>
       </div>
-      <div className="flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-1 py-1">
+      <div className="flex items-center gap-2 rounded-full border border-white/40 bg-white/30 px-1 py-1">
         <button
           type="button"
           onClick={() => setLocale("bg")}

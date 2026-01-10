@@ -19,10 +19,9 @@ export default async function RootLayout({
 
   return (
     <html lang={locale}>
-      <body className="min-h-[100dvh] overflow-x-hidden antialiased text-slate-900">
-<Providers>
-  {children}
-</Providers>
+      <body className="min-h-[100dvh] overflow-x-hidden bg-transparent antialiased text-slate-900">
+        <div className="css-liquid-bg" aria-hidden />
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { type AccountSummary, useAccounts } from "@/components/accounts/accounts-context";
 import { fromCents } from "@/lib/currency";
-import { Landmark, PiggyBank, Wallet } from "lucide-react";
 import NumberTicker from "@/components/ui/number-ticker";
 import IncomeModal from "@/components/accounts/income-modal";
 import PageHeader from "@/components/page-header";
@@ -23,6 +22,8 @@ export default function AccountHeader({
   const accountsSource = demoAccounts ?? accounts;
   const isDemo = Boolean(demoAccounts);
   const [showIncome, setShowIncome] = useState(false);
+  const [activeCard, setActiveCard] = useState(0);
+  const carouselRef = useRef<HTMLDivElement | null>(null);
   const { t, locale } = useI18n();
   const amountFormatter = useMemo(
     () =>
@@ -63,39 +64,45 @@ export default function AccountHeader({
   );
 
   const headerCardClass = isDemo
-    ? "rounded-[2rem] border border-white/20 bg-white/40 p-6 shadow-[0_16px_40px_rgba(15,23,42,0.08)] backdrop-blur-lg transition hover:shadow-[0_0_0_2px_rgba(99,102,241,0.2)]"
-    : "rounded-[2rem] border border-slate-100 bg-white p-6 shadow-sm";
-  const accountCardBase = isDemo
-    ? "w-full rounded-2xl border border-white/20 bg-white/40 p-5 text-left shadow-[0_12px_30px_rgba(15,23,42,0.08)] backdrop-blur-lg transition hover:shadow-[0_0_0_2px_rgba(99,102,241,0.2)] lg:h-[120px] lg:px-10 lg:py-6"
-    : "w-full rounded-2xl border border-blue-100/50 border-t-2 bg-blue-50/30 p-5 text-left shadow-sm shadow-indigo-500/5 lg:h-[120px] lg:px-10 lg:py-6";
+    ? "rounded-[2rem] border border-white/40 bg-white/40 p-6 shadow-glow backdrop-blur-xl transition hover:scale-[1.05] hover:shadow-neon-strong"
+    : "rounded-[2rem] border border-white/40 bg-white/20 p-6 shadow-glow backdrop-blur-3xl animate-float transition hover:-translate-y-0.5 hover:shadow-neon-strong";
+  const accountCardBase =
+    "w-full rounded-2xl border border-white/40 border-t-2 bg-white/40 p-5 text-left shadow-glow backdrop-blur-xl transition hover:scale-[1.05] hover:shadow-neon-strong lg:h-[120px] lg:px-10 lg:py-6";
+  const accountCardBaseLive =
+    "w-full rounded-2xl border border-white/40 border-t-2 bg-white/20 p-5 text-left shadow-glow backdrop-blur-3xl transition hover:-translate-y-0.5 hover:shadow-neon-strong lg:h-[120px] lg:px-10 lg:py-6";
+  const demoAccountColors: Record<
+    AccountSummary["kind"],
+    { accent: string; text: string }
+  > = {
+    cash: { accent: "#60A5FA", text: "#2563EB" },
+    bank: { accent: "#3B82F6", text: "#1E40AF" },
+    savings: { accent: "#A855F7", text: "#7C3AED" },
+  };
 
-  const summaryCards = isDemo
-    ? [
-        {
-          id: "total",
-          title: t("dashboard.totalBalance"),
-          label: "Обща наличност",
-          eurCents: totals.eurCents,
-          bgnCents: totals.bgnCents,
-          icon: Wallet,
-          highlight: true,
-        },
-        ...sorted.map((account) => ({
-          id: account.id,
-          title:
-            account.kind === "cash"
-              ? t("accounts.cash")
-              : account.kind === "bank"
-                ? t("accounts.bank")
-                : t("accounts.savings"),
-          label: formatAccountLabel(account, locale),
-          eurCents: account.balanceEurCents,
-          bgnCents: account.balanceBgnCents,
-          icon: account.kind === "cash" ? Wallet : account.kind === "bank" ? Landmark : PiggyBank,
-          highlight: false,
-        })),
-      ]
-    : [];
+  useEffect(() => {
+    if (!isDemo || !carouselRef.current) return;
+    const container = carouselRef.current;
+    let raf = 0;
+    const handler = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const items = container.querySelectorAll<HTMLElement>("[data-carousel-item]");
+        if (!items.length) return;
+        const first = items[0];
+        const second = items[1];
+        const gap = second ? second.offsetLeft - first.offsetLeft - first.offsetWidth : 0;
+        const itemWidth = first.offsetWidth + gap;
+        const index = Math.round(container.scrollLeft / itemWidth);
+        setActiveCard(Math.max(0, Math.min(index, items.length - 1)));
+      });
+    };
+    handler();
+    container.addEventListener("scroll", handler, { passive: true });
+    return () => {
+      container.removeEventListener("scroll", handler);
+      cancelAnimationFrame(raf);
+    };
+  }, [isDemo, sorted.length]);
 
   return (
     <section className="space-y-4">
@@ -115,86 +122,110 @@ export default function AccountHeader({
                   {t("dashboard.addIncome")}
                 </button>
               )}
-              <span className="text-[10px] font-medium text-slate-500">
+              <span className="text-[10px] font-medium text-slate-500 lg:text-xs">
                 {t("dashboard.totalBalance")}
               </span>
-              <span className="text-[10px] font-medium text-slate-500">
-                €{amountFormatter.format(fromCents(totals.eurCents))} · BGN{" "}
-                {amountFormatter.format(fromCents(totals.bgnCents))}
-              </span>
+              <div className="flex items-center gap-2 text-[10px] font-medium text-slate-500 lg:text-sm lg:font-semibold">
+                <span>€{amountFormatter.format(fromCents(totals.eurCents))}</span>
+                <span>BGN {amountFormatter.format(fromCents(totals.bgnCents))}</span>
+              </div>
             </div>
           }
         />
       </div>
 
       {isDemo ? (
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {summaryCards.map((card) => {
-            const Icon = card.icon;
-            return (
+        <div className="mt-6 space-y-3">
+          <div
+            ref={carouselRef}
+            className="flex gap-4 overflow-x-auto px-2 pb-2 -mx-2 snap-x snap-mandatory scrollbar-hide touch-pan-x lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-4 lg:overflow-visible lg:px-0"
+            style={{ WebkitOverflowScrolling: "touch" }}
+          >
+            {sorted.map((account) => {
+              const colors = demoAccountColors[account.kind];
+              return (
               <div
-                key={card.id}
-                className={`${accountCardBase} ${
-                  card.highlight
-                    ? "ring-1 ring-indigo-200/60 shadow-[0_20px_50px_rgba(79,70,229,0.2)]"
-                    : ""
-                }`}
+                key={account.id}
+                data-carousel-item
+                className={`${accountCardBase} relative min-w-[260px] snap-center pl-5 overflow-visible lg:min-w-0`}
+                style={{ borderTopColor: colors.accent }}
               >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">
-                      {card.label}
-                    </p>
-                  <p className="mt-2 text-[18px] font-semibold text-slate-800">
-                    €
-                    <NumberTicker
-                      value={fromCents(card.eurCents)}
-                      format={(val) => amountFormatter.format(val)}
-                    />
-                  </p>
-                  <p className="mt-1 text-[11px] text-slate-400">
-                    BGN{" "}
-                    <NumberTicker
-                      value={fromCents(card.bgnCents)}
-                      format={(val) => amountFormatter.format(val)}
-                    />
-                  </p>
+                <span
+                  className="pointer-events-none absolute left-0.5 top-4 bottom-4 z-10 w-1.5 rounded-full shadow-glow"
+                  style={{ backgroundColor: colors.accent }}
+                  aria-hidden
+                />
+                <div className="flex w-full items-stretch gap-4">
+                  <div className="flex flex-1 items-center gap-3">
+                    <div className="flex min-w-0 flex-1 flex-col justify-center">
+                      <p
+                        className="text-[14px] font-bold lg:text-[18px] leading-tight whitespace-normal"
+                        style={{ color: colors.text }}
+                      >
+                        {account.kind === "cash"
+                          ? t("accounts.cash")
+                          : account.kind === "bank"
+                            ? t("accounts.bank")
+                            : t("accounts.savings")}
+                      </p>
+                      <p className="text-[9px] uppercase tracking-wide text-slate-500">
+                        {formatAccountLabel(account, locale)}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 flex-col items-end justify-center text-right">
+                      <p
+                        className="text-[20px] font-extrabold lg:text-[24px] drop-shadow-[0_4px_12px_rgba(30,64,175,0.15)]"
+                        style={{ color: colors.text }}
+                      >
+                        €
+                        <NumberTicker
+                          value={fromCents(account.balanceEurCents)}
+                          format={(val) => amountFormatter.format(val)}
+                        />
+                      </p>
+                      <p className="text-[10px] font-medium text-slate-500 lg:text-[14px]">
+                        BGN{" "}
+                        <NumberTicker
+                          value={fromCents(account.balanceBgnCents)}
+                          format={(val) => amountFormatter.format(val)}
+                        />
+                      </p>
+                    </div>
                   </div>
-                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
-                    <Icon className="h-5 w-5" />
-                  </span>
                 </div>
               </div>
             );
-          })}
+            })}
+          </div>
+          <div className="flex items-center justify-center gap-2 lg:hidden">
+            {sorted.map((account, index) => (
+              <span
+                key={account.id}
+                className={`h-2 w-2 rounded-full transition ${
+                  activeCard === index ? "bg-indigo-500" : "bg-white/50"
+                }`}
+              />
+            ))}
+          </div>
         </div>
       ) : (
         <div className="mt-6 grid gap-y-4 md:grid-cols-3 md:gap-4">
-          {sorted.map((account) => (
-            <div
-              key={account.id}
-              className={`${accountCardBase} ${
-                account.kind === "cash"
-                  ? "border-t-emerald-400"
-                  : account.kind === "bank"
-                    ? "border-t-blue-400"
-                    : "border-t-purple-400"
-              }`}
-            >
+          {sorted.map((account) => {
+            const colors = demoAccountColors[account.kind];
+            return (
+            <div key={account.id} className={accountCardBaseLive}>
               <div className="flex w-full items-center gap-4">
                 <span
-                  className={`h-10 w-1 rounded-full lg:w-2 ${
-                    account.kind === "cash"
-                      ? "bg-emerald-400"
-                      : account.kind === "bank"
-                        ? "bg-blue-400"
-                        : "bg-purple-400"
-                  }`}
+                  className="h-10 w-1 rounded-full shadow-glow lg:w-2"
+                  style={{ backgroundColor: colors.accent }}
                   aria-hidden
                 />
                 <div className="flex flex-1 items-center justify-between">
                   <div className="flex flex-col justify-center">
-                    <p className="text-[16px] font-bold text-slate-800 lg:text-[20px]">
+                    <p
+                      className="text-[16px] font-bold lg:text-[20px]"
+                      style={{ color: colors.text }}
+                    >
                       {account.kind === "cash"
                         ? t("accounts.cash")
                         : account.kind === "bank"
@@ -206,7 +237,10 @@ export default function AccountHeader({
                     </p>
                   </div>
                   <div className="ml-auto flex flex-col items-end justify-center text-right">
-                    <p className="text-[20px] font-extrabold text-blue-700 lg:text-[24px]">
+                    <p
+                      className="text-[20px] font-extrabold lg:text-[24px]"
+                      style={{ color: colors.text }}
+                    >
                       €{amountFormatter.format(fromCents(account.balanceEurCents))}
                     </p>
                     <p className="text-[10px] font-medium text-slate-400 lg:text-[14px]">
@@ -216,7 +250,8 @@ export default function AccountHeader({
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

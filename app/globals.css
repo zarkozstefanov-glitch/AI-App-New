@@ -3,34 +3,151 @@
 @tailwind utilities;
 
 :root {
-  --background: #f0f7ff;
-  --foreground: #0f172a;
+  --background: #f8fafc;
+  --foreground: #1e293b;
 }
 
 * {
   box-sizing: border-box;
 }
 
+html,
 body {
-  background: #f4f7fe;
+  background: transparent;
+}
+
+body {
   color: var(--foreground);
   font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
 }
 
+.ethereal-canvas {
+  background: transparent;
+}
+
+.ethereal-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(60px);
+  opacity: 0.9;
+  animation: blobFloat 18s ease-in-out infinite;
+}
+
+.ethereal-blob--blue {
+  background: #e0f2fe;
+}
+
+.ethereal-blob--pink {
+  background: #fdf2f8;
+}
+
+.ethereal-blob--violet {
+  background: #ede9fe;
+}
+
+.css-liquid-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(700px 700px at 8% 12%, rgba(147, 197, 253, 0.95), transparent 70%),
+    radial-gradient(720px 720px at 88% 10%, rgba(167, 197, 255, 0.9), transparent 72%),
+    radial-gradient(660px 660px at 36% 72%, rgba(129, 198, 253, 0.75), transparent 70%),
+    radial-gradient(620px 620px at 72% 78%, rgba(253, 205, 236, 0.7), transparent 72%),
+    radial-gradient(560px 560px at 18% 82%, rgba(252, 231, 243, 0.6), transparent 70%),
+    linear-gradient(135deg, #e0f2fe 0%, #f8fafc 48%, #fce7f3 100%);
+  animation: morph 26s ease-in-out infinite;
+  will-change: transform, border-radius;
+}
+
+.liquid-bg {
+  position: fixed;
+  inset: -20% -10%;
+  z-index: -10;
+  pointer-events: none;
+  background:
+    radial-gradient(35% 35% at 10% 20%, rgba(224, 242, 254, 0.85), transparent 70%),
+    radial-gradient(40% 40% at 80% 25%, rgba(245, 243, 255, 0.75), transparent 65%),
+    radial-gradient(35% 35% at 45% 60%, rgba(253, 242, 248, 0.65), transparent 70%),
+    radial-gradient(45% 45% at 70% 75%, rgba(224, 242, 254, 0.55), transparent 75%);
+  animation: liquidShift 26s ease-in-out infinite;
+  will-change: transform;
+}
+
+.bubble-layer {
+  position: fixed;
+  inset: 0;
+  z-index: -9;
+  pointer-events: none;
+}
+
+.glass-bubble {
+  position: absolute;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(32px);
+  box-shadow: 0 20px 50px rgba(30, 64, 175, 0.08);
+  animation: bubbleFloat 18s ease-in-out infinite;
+  will-change: transform;
+}
+
+.glass-bubble--one {
+  width: 140px;
+  height: 140px;
+  top: 8%;
+  left: 6%;
+  animation-duration: 22s;
+}
+
+.glass-bubble--two {
+  width: 90px;
+  height: 90px;
+  top: 18%;
+  right: 12%;
+  animation-duration: 18s;
+}
+
+.glass-bubble--three {
+  width: 120px;
+  height: 120px;
+  bottom: 22%;
+  left: 15%;
+  animation-duration: 20s;
+}
+
+.glass-bubble--four {
+  width: 160px;
+  height: 160px;
+  bottom: 12%;
+  right: 8%;
+  animation-duration: 26s;
+}
+
+.glass-bubble--five {
+  width: 110px;
+  height: 110px;
+  top: 48%;
+  left: 48%;
+  animation-duration: 24s;
+}
+
 .glass {
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid #e2e8f0;
-  backdrop-filter: blur(14px);
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(36px);
+  animation: float 12s ease-in-out infinite;
 }
 
 .shadow-glow {
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 20px 50px rgba(30, 64, 175, 0.05);
 }
 
 @layer utilities {
   .shadow-sm {
-    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.05);
+    box-shadow: 0 16px 40px rgba(30, 64, 175, 0.06);
   }
 
   .border-slate-100,
@@ -75,6 +192,50 @@ body {
   .animate-float-slow {
     animation: float 14s ease-in-out infinite;
   }
+
+  .shadow-neon {
+    box-shadow: 0 20px 50px rgba(30, 64, 175, 0.06);
+  }
+
+  .shadow-neon-strong {
+    box-shadow: 0 28px 70px rgba(30, 64, 175, 0.1);
+  }
+
+.animate-neon-pulse {
+  animation: neonPulse 4.5s ease-in-out infinite;
+}
+
+.animate-glass-pulse {
+  animation: glassPulse 6s ease-in-out infinite;
+}
+
+  .diagonal-clip {
+    clip-path: polygon(0 5%, 100% 0%, 100% 95%, 0 100%);
+  }
+
+  .diagonal-flow {
+    opacity: 0.3;
+    background-image:
+      linear-gradient(110deg, rgba(147, 197, 253, 0.55), rgba(244, 114, 182, 0.4)),
+      repeating-linear-gradient(
+        102deg,
+        rgba(99, 102, 241, 0.34) 0px,
+        rgba(99, 102, 241, 0.34) 2px,
+        transparent 2px,
+        transparent 14px
+      );
+    animation: diagonalFlow 14s ease-in-out infinite;
+    transition: transform 5s ease-in-out, opacity 5s ease-in-out;
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+  }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(36px);
+    animation: float 14s ease-in-out infinite;
+  }
 }
 
 @keyframes float {
@@ -84,5 +245,182 @@ body {
   }
   50% {
     transform: translateY(-14px);
+  }
+}
+
+@keyframes neonPulse {
+  0%,
+  100% {
+    box-shadow: 0 20px 50px rgba(30, 64, 175, 0.06);
+  }
+  50% {
+    box-shadow: 0 28px 70px rgba(30, 64, 175, 0.1);
+  }
+}
+
+@keyframes blobFloat {
+  0%,
+  100% {
+    transform: translateY(0px) translateX(0px);
+  }
+  50% {
+    transform: translateY(-18px) translateX(12px);
+  }
+}
+
+@keyframes diagonalFlow {
+  0%,
+  100% {
+    transform: skewY(-2deg) rotate(-0.5deg);
+    opacity: 0.18;
+  }
+  50% {
+    transform: skewY(2deg) rotate(0.5deg);
+    opacity: 0.26;
+  }
+}
+
+@keyframes morph {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(-2%, -3%, 0);
+  }
+}
+
+.mesh-blob {
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  border-radius: 9999px;
+  filter: blur(100px);
+  opacity: 0.8;
+  animation: blobOrbit 28s ease-in-out infinite;
+  will-change: transform;
+}
+
+.mesh-blob--one {
+  top: -80px;
+  left: -120px;
+  background: #bae6fd;
+  animation-duration: 28s;
+}
+
+.mesh-blob--two {
+  top: 40px;
+  right: -140px;
+  background: #fce7f3;
+  animation-duration: 30s;
+}
+
+.mesh-blob--three {
+  top: 35%;
+  left: 18%;
+  background: #f5f3ff;
+  animation-duration: 26s;
+}
+
+.mesh-blob--four {
+  bottom: 10%;
+  right: 12%;
+  background: #bae6fd;
+  animation-duration: 32s;
+}
+
+.glass-bubble {
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(32px);
+  box-shadow: 0 20px 50px rgba(30, 64, 175, 0.08);
+  will-change: transform;
+}
+
+.glass-bubble--one {
+  top: 8%;
+  left: 6%;
+}
+
+.glass-bubble--two {
+  top: 18%;
+  right: 12%;
+  width: 110px;
+  height: 110px;
+}
+
+.glass-bubble--three {
+  bottom: 18%;
+  left: 16%;
+  width: 130px;
+  height: 130px;
+}
+
+.glass-bubble--four {
+  bottom: 12%;
+  right: 8%;
+  width: 160px;
+  height: 160px;
+}
+
+.glass-bubble--five {
+  top: 46%;
+  left: 48%;
+  width: 120px;
+  height: 120px;
+}
+
+.glass-bubble--six {
+  top: 65%;
+  right: 28%;
+  width: 90px;
+  height: 90px;
+}
+
+.ethereal-canvas section {
+  background-color: transparent !important;
+}
+
+@keyframes blobOrbit {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(0.95);
+  }
+  50% {
+    transform: translate3d(30px, -20px, 0) scale(1.1);
+  }
+}
+
+@keyframes glassPulse {
+  0%,
+  100% {
+    border-color: rgba(255, 255, 255, 0.4);
+  }
+  50% {
+    border-color: rgba(255, 255, 255, 0.65);
+  }
+}
+
+@keyframes liquidShift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-2%, -3%, 0) scale(1.05);
+  }
+}
+
+@keyframes bubbleFloat {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -18px, 0);
   }
 }

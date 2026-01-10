@@ -72,11 +72,11 @@ export default function TransferForm() {
   return (
     <div className="w-full max-w-full box-border overflow-x-hidden space-y-2">
       <div className="grid w-full max-w-full gap-2 lg:grid-cols-2 lg:auto-rows-fr lg:gap-4">
-        <div className="w-full max-w-full rounded-xl border border-slate-100/50 bg-white px-3 py-2 text-center shadow-sm shadow-indigo-500/5 sm:p-5 box-border">
-          <p className="mb-1 text-center text-[10px] font-bold uppercase tracking-tighter text-slate-400 inline-flex items-center justify-center rounded-md bg-slate-100/70 px-2 py-0.5 mx-auto">
+        <div className="w-full max-w-full rounded-xl border border-white/40 bg-white/20 px-3 py-2 text-center shadow-glow backdrop-blur-3xl sm:p-5 box-border">
+          <p className="mb-1 text-center text-[10px] font-bold uppercase tracking-tighter text-slate-400 inline-flex items-center justify-center rounded-md bg-white/30 px-2 py-0.5 mx-auto">
             {t("transactions.amount")}
           </p>
-          <div className="flex min-h-[44px] h-auto flex-nowrap items-center rounded-xl border border-slate-200/60 bg-slate-50/50 focus-within:border-indigo-500/50 focus-within:ring-2 focus-within:ring-indigo-500/20 px-2 py-1 box-border sm:h-[52px] sm:px-4">
+          <div className="flex min-h-[44px] h-auto flex-nowrap items-center rounded-xl border border-white/40 bg-white/30 focus-within:border-indigo-500/50 focus-within:ring-2 focus-within:ring-indigo-500/20 px-2 py-1 box-border sm:h-[52px] sm:px-4">
             <div className="relative mr-2 flex items-center">
               <select
                 value={form.currency}
@@ -90,7 +90,7 @@ export default function TransferForm() {
                 ⌄
               </span>
             </div>
-            <span className="mx-2 h-4 w-px bg-slate-100 sm:mx-3 sm:h-5" />
+            <span className="mx-2 h-4 w-px bg-white/30 sm:mx-3 sm:h-5" />
             <input
               type="number"
               step="0.01"
@@ -101,14 +101,14 @@ export default function TransferForm() {
           </div>
         </div>
 
-        <div className="h-full w-full max-w-full rounded-xl border border-slate-100/50 bg-white px-3 py-2 text-center shadow-sm shadow-indigo-500/5 sm:p-5 box-border">
-          <p className="mb-1 text-center text-[10px] font-bold uppercase tracking-tighter text-slate-400 inline-flex items-center justify-center rounded-md bg-slate-100/70 px-2 py-0.5 mx-auto">
+        <div className="h-full w-full max-w-full rounded-xl border border-white/40 bg-white/20 px-3 py-2 text-center shadow-glow backdrop-blur-3xl sm:p-5 box-border">
+          <p className="mb-1 text-center text-[10px] font-bold uppercase tracking-tighter text-slate-400 inline-flex items-center justify-center rounded-md bg-white/30 px-2 py-0.5 mx-auto">
             {t("transactions.fromAccount")}
           </p>
           <select
             value={form.fromAccountId}
             onChange={(e) => setForm((f) => ({ ...f, fromAccountId: e.target.value }))}
-            className="mt-1.5 min-h-[44px] h-auto w-full max-w-full rounded-xl border border-slate-200/60 bg-slate-50/50 focus-within:border-indigo-500/50 focus-within:ring-2 focus-within:ring-indigo-500/20 px-2 py-1 text-center text-[13px] text-slate-700 leading-tight whitespace-normal break-words outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 box-border sm:h-[52px] sm:px-6"
+            className="mt-1.5 min-h-[44px] h-auto w-full max-w-full rounded-xl border border-white/40 bg-white/30 focus-within:border-indigo-500/50 focus-within:ring-2 focus-within:ring-indigo-500/20 px-2 py-1 text-center text-[13px] text-slate-700 leading-tight whitespace-normal break-words outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 box-border sm:h-[52px] sm:px-6"
           >
             {accounts.map((acc) => (
               <option key={acc.id} value={acc.id}>
@@ -118,14 +118,14 @@ export default function TransferForm() {
           </select>
         </div>
 
-        <div className="h-full w-full max-w-full rounded-xl border border-slate-100/50 bg-white px-3 py-2 text-center shadow-sm shadow-indigo-500/5 sm:p-5 box-border">
-          <p className="mb-1 text-center text-[10px] font-bold uppercase tracking-tighter text-slate-400 inline-flex items-center justify-center rounded-md bg-slate-100/70 px-2 py-0.5 mx-auto">
+        <div className="h-full w-full max-w-full rounded-xl border border-white/40 bg-white/20 px-3 py-2 text-center shadow-glow backdrop-blur-3xl sm:p-5 box-border">
+          <p className="mb-1 text-center text-[10px] font-bold uppercase tracking-tighter text-slate-400 inline-flex items-center justify-center rounded-md bg-white/30 px-2 py-0.5 mx-auto">
             {t("transactions.toAccount")}
           </p>
           <select
             value={form.toAccountId}
             onChange={(e) => setForm((f) => ({ ...f, toAccountId: e.target.value }))}
-            className="mt-1.5 min-h-[44px] h-auto w-full max-w-full rounded-xl border border-slate-200/60 bg-slate-50/50 focus-within:border-indigo-500/50 focus-within:ring-2 focus-within:ring-indigo-500/20 px-2 py-1 text-center text-[13px] text-slate-700 leading-tight whitespace-normal break-words outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 box-border sm:h-[52px] sm:px-6"
+            className="mt-1.5 min-h-[44px] h-auto w-full max-w-full rounded-xl border border-white/40 bg-white/30 focus-within:border-indigo-500/50 focus-within:ring-2 focus-within:ring-indigo-500/20 px-2 py-1 text-center text-[13px] text-slate-700 leading-tight whitespace-normal break-words outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 box-border sm:h-[52px] sm:px-6"
           >
             {accounts.map((acc) => (
               <option key={acc.id} value={acc.id}>
@@ -135,15 +135,15 @@ export default function TransferForm() {
           </select>
         </div>
 
-        <div className="h-full w-full max-w-full rounded-xl border border-slate-100/50 bg-white px-3 py-2 text-center shadow-sm shadow-indigo-500/5 sm:p-5 box-border">
-          <p className="mb-1 text-center text-[10px] font-bold uppercase tracking-tighter text-slate-400 inline-flex items-center justify-center rounded-md bg-slate-100/70 px-2 py-0.5 mx-auto">
+        <div className="h-full w-full max-w-full rounded-xl border border-white/40 bg-white/20 px-3 py-2 text-center shadow-glow backdrop-blur-3xl sm:p-5 box-border">
+          <p className="mb-1 text-center text-[10px] font-bold uppercase tracking-tighter text-slate-400 inline-flex items-center justify-center rounded-md bg-white/30 px-2 py-0.5 mx-auto">
             {t("transactions.date")}
           </p>
           <input
             type="date"
             value={form.date}
             onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-            className="mt-1.5 min-h-[44px] h-auto w-full max-w-full rounded-xl border border-slate-200/60 bg-slate-50/50 focus-within:border-indigo-500/50 focus-within:ring-2 focus-within:ring-indigo-500/20 px-2 py-1 text-center text-[13px] text-slate-700 leading-tight whitespace-normal break-words outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 box-border sm:h-[52px] sm:px-6"
+            className="mt-1.5 min-h-[44px] h-auto w-full max-w-full rounded-xl border border-white/40 bg-white/30 focus-within:border-indigo-500/50 focus-within:ring-2 focus-within:ring-indigo-500/20 px-2 py-1 text-center text-[13px] text-slate-700 leading-tight whitespace-normal break-words outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 box-border sm:h-[52px] sm:px-6"
           />
         </div>
       </div>

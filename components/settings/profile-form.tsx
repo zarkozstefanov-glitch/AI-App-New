@@ -63,14 +63,14 @@ export default function ProfileForm({
   };
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur-md">
+    <div className="rounded-2xl border border-white/40 bg-white/20 p-6 shadow-glow backdrop-blur-3xl">
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
         <label className="text-sm text-slate-700">
           {t("profile.firstName")}
           <input
             value={form.firstName}
             onChange={(e) => setForm((f) => ({ ...f, firstName: e.target.value }))}
-            className="mt-1 w-full rounded-lg border-2 border-slate-100 bg-slate-50 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+            className="mt-1 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
           />
         </label>
         <label className="text-sm text-slate-700">
@@ -78,7 +78,7 @@ export default function ProfileForm({
           <input
             value={form.lastName}
             onChange={(e) => setForm((f) => ({ ...f, lastName: e.target.value }))}
-            className="mt-1 w-full rounded-lg border-2 border-slate-100 bg-slate-50 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+            className="mt-1 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
           />
         </label>
         <label className="text-sm text-slate-700">
@@ -86,7 +86,7 @@ export default function ProfileForm({
           <input
             value={form.phone}
             onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-            className="mt-1 w-full rounded-lg border-2 border-slate-100 bg-slate-50 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+            className="mt-1 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
           />
         </label>
         <label className="text-sm text-slate-500">
@@ -97,7 +97,7 @@ export default function ProfileForm({
               value={email}
               readOnly
               disabled
-              className="w-full rounded-lg border-2 border-slate-100 bg-slate-50 px-9 py-2 text-slate-700"
+              className="w-full rounded-lg border border-white/40 bg-white/30 px-9 py-2 text-slate-700"
             />
           </div>
         </label>
@@ -109,7 +109,7 @@ export default function ProfileForm({
             onChange={(e) =>
               setForm((f) => ({ ...f, monthlyBudgetGoal: e.target.value }))
             }
-            className="mt-1 w-full rounded-lg border-2 border-slate-100 bg-slate-50 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+            className="mt-1 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
           />
         </label>
         <label className="text-sm text-slate-700">
@@ -117,7 +117,7 @@ export default function ProfileForm({
           <select
             value={form.budgetCurrency}
             onChange={(e) => setForm((f) => ({ ...f, budgetCurrency: e.target.value }))}
-            className="mt-1 w-full rounded-lg border-2 border-slate-100 bg-slate-50 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+            className="mt-1 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
           >
             <option value="BGN">BGN</option>
             <option value="EUR">EUR</option>

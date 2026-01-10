@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import {
   Calculator,
   LayoutDashboard,
@@ -13,25 +14,25 @@ import {
 import { AuthOpenButton } from "@/components/auth/auth-modal";
 import { useI18n } from "@/components/i18n-provider";
 
-const navLinks = [
-  { href: "#dashboard-demo", label: "Табло" },
-  { href: "#last-operations", label: "История" },
-  { href: "#ai-scan", label: "Транзакция" },
-  { href: "#change-demo", label: "Ресто" },
-  { href: "#pricing-trial", label: "Цени", highlight: true },
-];
-
-const mobileLinks = [
-  { href: "#dashboard-demo", label: "Табло", icon: LayoutDashboard },
-  { href: "#last-operations", label: "История", icon: ListOrdered },
-  { href: "#ai-scan", label: "Транзакция", icon: Plus, primary: true },
-  { href: "#change-demo", label: "Ресто", icon: Calculator },
-  { href: "#pricing-trial", label: "Цени", icon: Tag },
-];
-
 export default function LandingHeader() {
-  const { locale, setLocale } = useI18n();
+  const { locale, setLocale, t } = useI18n();
+  const pathname = usePathname();
   const [hidden, setHidden] = useState(false);
+  const navLinks = [
+    { href: "#dashboard-demo", label: t("nav.dashboard") },
+    { href: "#last-operations", label: t("nav.history") },
+    { href: "#ai-scan", label: t("nav.transaction") },
+    { href: "#change-demo", label: t("nav.change") },
+    { href: "#pricing-trial", label: t("landing.nav.plans"), highlight: true },
+  ];
+
+  const mobileLinks = [
+    { href: "#dashboard-demo", label: t("nav.dashboard"), icon: LayoutDashboard },
+    { href: "#last-operations", label: t("nav.history"), icon: ListOrdered },
+    { href: "#ai-scan", label: t("nav.transaction"), icon: Plus, primary: true },
+    { href: "#change-demo", label: t("nav.change"), icon: Calculator },
+    { href: "#pricing-trial", label: t("landing.nav.plans"), icon: Tag },
+  ];
 
   useEffect(() => {
     let lastY = window.scrollY;
@@ -63,15 +64,15 @@ export default function LandingHeader() {
     };
   }, []);
 
-  const headerClass =
-    "border-blue-900/40 bg-gradient-to-r from-blue-900 to-indigo-900 text-white backdrop-blur-md";
-  const navClass = "border-white/15 bg-white/10 text-white";
-  const buttonClass = "border-white/20 bg-white/10 text-white hover:bg-white/20";
+  const headerClass = "bg-transparent text-slate-800";
+  const navClass = "border-white/50 bg-white/50 text-slate-700 shadow-glow";
+  const buttonClass =
+    "border-white/60 bg-white/50 text-slate-700 shadow-glow hover:shadow-neon-strong";
 
   return (
     <>
       <header
-        className={`h-14 w-full border-b sm:h-16 ${headerClass}`}
+        className={`h-14 w-full sm:h-16 ${headerClass}`}
         style={{
           position: "fixed",
           top: 0,
@@ -82,8 +83,9 @@ export default function LandingHeader() {
         }}
       >
         <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-2 sm:px-6 lg:px-8">
-          <Link href="/" className="flex items-center">
-            <span className="flex h-8 w-[128px] items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 via-blue-600 to-blue-700 shadow-md sm:h-9 sm:w-[150px]">
+          <div className="flex h-12 w-full items-center justify-between rounded-full border border-white/50 bg-white/50 px-3 shadow-glow backdrop-blur-2xl sm:h-14 sm:px-5">
+            <Link href="/" className="flex items-center">
+            <span className="flex h-8 w-[128px] items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-r from-violet-300 via-indigo-300 to-sky-300 shadow-glow sm:h-9 sm:w-[150px]">
               <span className="relative h-full w-full">
                 <Image
                   src="/novologo.png"
@@ -98,28 +100,26 @@ export default function LandingHeader() {
           </Link>
 
           <nav
-            className={`hidden items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold shadow-[0_12px_30px_rgba(15,23,42,0.18)] backdrop-blur-md md:flex ${navClass}`}
+            className={`hidden items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold backdrop-blur-md lg:flex ${navClass}`}
           >
             {navLinks.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
-                className={`rounded-full px-4 py-2 transition ${
-                  link.highlight ? "text-cyan-200" : ""
-                } hover:bg-white/15`}
+                className="rounded-full px-4 py-2 text-slate-700 transition hover:scale-[1.05] hover:bg-white/10"
               >
                 {link.label}
               </a>
             ))}
           </nav>
 
-          <div className="flex items-center gap-2 whitespace-nowrap sm:gap-3">
-            <div className="flex items-center rounded-full border border-white/20 bg-white/10 px-0.5 py-0.5 text-[9px] font-semibold sm:px-1.5 sm:py-1 sm:text-xs">
+          <div className="hidden items-center gap-2 whitespace-nowrap sm:gap-3 lg:flex">
+            <div className="flex items-center rounded-full border border-white/50 bg-white/50 px-0.5 py-0.5 text-[9px] font-semibold shadow-glow sm:px-1.5 sm:py-1 sm:text-xs">
               <button
                 type="button"
                 onClick={() => setLocale("bg")}
-                className={`rounded-full px-2 py-0.5 transition sm:px-3 sm:py-1 ${
-                  locale === "bg" ? "bg-white/20 text-white" : "text-white/70"
+                className={`rounded-full px-2 py-0.5 transition hover:scale-[1.05] sm:px-3 sm:py-1 ${
+                  locale === "bg" ? "bg-white/70 text-slate-800" : "text-slate-500"
                 }`}
               >
                 BG
@@ -127,43 +127,68 @@ export default function LandingHeader() {
               <button
                 type="button"
                 onClick={() => setLocale("en")}
-                className={`rounded-full px-2 py-0.5 transition sm:px-3 sm:py-1 ${
-                  locale === "en" ? "bg-white/20 text-white" : "text-white/70"
+                className={`rounded-full px-2 py-0.5 transition hover:scale-[1.05] sm:px-3 sm:py-1 ${
+                  locale === "en" ? "bg-white/70 text-slate-800" : "text-slate-500"
                 }`}
               >
                 EN
               </button>
             </div>
             <AuthOpenButton
-              className={`rounded-full border px-2 py-1 text-[9px] font-semibold shadow-sm backdrop-blur transition whitespace-nowrap sm:px-4 sm:py-2 sm:text-xs ${buttonClass}`}
+              className={`rounded-full border px-2 py-1 text-[9px] font-semibold backdrop-blur transition hover:scale-[1.05] whitespace-nowrap sm:px-4 sm:py-2 sm:text-xs ${buttonClass}`}
             >
-              <span className="sm:hidden">Вход</span>
-              <span className="hidden sm:inline">Вход / Регистрация</span>
+              <span className="sm:hidden">{t("auth.login")}</span>
+              <span className="hidden sm:inline">
+                {t("auth.login")} / {t("auth.register")}
+              </span>
             </AuthOpenButton>
+          </div>
+          <div className="flex items-center gap-2 lg:hidden">
+            <AuthOpenButton className="rounded-full border border-white/40 bg-white/10 px-4 py-2 text-xs font-semibold text-slate-700 shadow-glow backdrop-blur-xl transition hover:scale-[1.05]">
+              {t("landing.hero.ctaPrimary")}
+            </AuthOpenButton>
+          </div>
           </div>
         </div>
       </header>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-blue-900/30 bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white backdrop-blur-md md:hidden">
-        <div className="flex items-center justify-around px-2 py-2 text-[10px] font-medium text-white">
+      <nav className="fixed bottom-4 left-4 right-4 z-50 h-20 overflow-visible rounded-3xl border border-white/70 bg-white/40 text-slate-700 shadow-glow backdrop-blur-xl md:hidden">
+        <div className="flex h-full items-center justify-around px-3 py-2 text-[12px] font-semibold text-slate-900">
           {mobileLinks.map((link) => {
             const Icon = link.icon;
             const isPrimary = link.primary;
+            const active = pathname === link.href;
             return (
               <a
                 key={link.href}
                 href={link.href}
                 className={`flex flex-1 flex-col items-center gap-1 px-1 py-2 ${
-                  isPrimary ? "relative -top-5" : ""
-                } ${isPrimary ? "text-cyan-200 font-semibold" : "text-white/70"}`}
+                  isPrimary ? "relative -top-6" : ""
+                } text-slate-900`}
               >
                 {isPrimary ? (
-                  <span className="flex h-14 w-14 items-center justify-center rounded-full border-4 border-white bg-cyan-500 text-white shadow-lg shadow-cyan-500/40">
-                    <Icon size={22} strokeWidth={2} />
+                  <span
+                    className={`flex h-[84px] w-[84px] items-center justify-center rounded-full border-4 border-white/80 shadow-glow ${
+                      active ? "bg-white" : "bg-indigo-500"
+                    }`}
+                  >
+                    <Icon
+                      size={26}
+                      strokeWidth={2}
+                      className={active ? "text-violet-600" : "text-violet-100"}
+                    />
                   </span>
                 ) : (
-                  <span className="flex h-8 w-8 items-center justify-center rounded-xl text-white/70">
-                    <Icon size={16} strokeWidth={1.75} />
+                  <span
+                    className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
+                      active ? "bg-white" : "bg-indigo-500/70"
+                    }`}
+                  >
+                    <Icon
+                      size={22}
+                      strokeWidth={1.9}
+                      className={active ? "text-violet-600" : "text-violet-100"}
+                    />
                   </span>
                 )}
                 <span className={isPrimary ? "mt-1 text-[10px]" : "text-[10px]"}>

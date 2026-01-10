@@ -1,4 +1,3 @@
-import Link from "next/link";
 import Image from "next/image";
 import LandingHeader from "@/components/landing/landing-header";
 import LandingDemoGrid from "@/components/landing/landing-demo-grid";
@@ -7,25 +6,16 @@ import type { Summary, SeriesPoint } from "@/components/dashboard/analytics-clie
 import type { TransactionItem } from "@/components/accounts/account-history";
 import ChangeCalculator from "@/components/change/change-calculator";
 import { AuthModalHost, AuthOpenButton } from "@/components/auth/auth-modal";
+import Footer from "@/components/footer";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { getServerTranslator } from "@/lib/i18n/server";
-import {
-  Camera,
-  Check,
-  PencilLine,
-  Save,
-  Sparkles,
-} from "lucide-react";
+import { getCategoryLabel } from "@/lib/category-ui";
+import { Camera, Check, CheckCircle, Plane, ShieldCheck, Sparkles } from "lucide-react";
+import DynamicBackground from "@/components/landing/dynamic-background";
 import type { AccountSummary } from "@/components/accounts/accounts-context";
 import type { CategoryKey } from "@/lib/categories";
-
-type WorkflowStep = {
-  title: string;
-  description: string;
-  icon: typeof Camera;
-};
 
 type ScanField = {
   label: string;
@@ -53,7 +43,7 @@ export default async function AuthPage() {
   if (session) {
     redirect("/");
   }
-  await getServerTranslator();
+  const { locale, t } = await getServerTranslator();
 
   const eurCentsToBgnCents = (eurCents: number) =>
     Math.round(eurCents * 1.95583);
@@ -65,7 +55,7 @@ export default async function AuthPage() {
     accounts: [
       {
         id: "demo-cash",
-        name: "Кеш",
+        name: "Cash",
         kind: "cash",
         currency: "EUR",
         balanceEurCents: 5000,
@@ -73,7 +63,7 @@ export default async function AuthPage() {
       },
       {
         id: "demo-bank",
-        name: "Основна банка",
+        name: "Bank account",
         kind: "bank",
         currency: "EUR",
         balanceEurCents: 124000,
@@ -81,7 +71,7 @@ export default async function AuthPage() {
       },
       {
         id: "demo-savings",
-        name: "Спестявания",
+        name: "Savings",
         kind: "savings",
         currency: "EUR",
         balanceEurCents: 500000,
@@ -157,22 +147,6 @@ export default async function AuthPage() {
     0,
   );
   const remainingBgnCents = Math.max(mockData.budgetBgnCents - totalSpentBgnCents, 0);
-
-  const categoryLabelMap: Record<CategoryKey, string> = {
-    food_supermarket: "Храна",
-    restaurants_cafe: "Храна",
-    transport: "Транспорт",
-    home_bills: "Дом",
-    clothing: "Дрехи",
-    subscriptions: "Абонаменти",
-    entertainment: "Забавления",
-    health: "Здраве",
-    alcohol: "Алкохол",
-    tobacco: "Тютюн",
-    beauty: "Козметика",
-    gifts: "Подаръци",
-    other: "Онлайн",
-  };
 
   const categoryTotals = new Map<
     CategoryKey,
@@ -266,34 +240,11 @@ export default async function AuthPage() {
     [],
   );
 
-  const workflowSteps: WorkflowStep[] = [
-    {
-      title: "1. Качи",
-      description: "Снимка или скрийншот от банки и касови бележки.",
-      icon: Camera,
-    },
-    {
-      title: "2. AI",
-      description: "AI открива търговец, сума, дата и валута.",
-      icon: Sparkles,
-    },
-    {
-      title: "3. Редакция",
-      description: "Бърза проверка и корекция при нужда.",
-      icon: PencilLine,
-    },
-    {
-      title: "4. Запис",
-      description: "Запазваш и виждаш ефект в таблото веднага.",
-      icon: Save,
-    },
-  ];
-
   const scanFields: ScanField[] = [
-    { label: "Търговец", value: "Магазин 1" },
-    { label: "Сума", value: "42.50 BGN" },
-    { label: "Категория", value: "Food" },
-    { label: "Дата", value: "12.01.2025" },
+    { label: t("landing.scan.fieldMerchant"), value: t("landing.scan.demoMerchant") },
+    { label: t("landing.scan.fieldAmount"), value: t("landing.scan.demoAmount") },
+    { label: t("landing.scan.fieldCategory"), value: t("landing.scan.demoCategory") },
+    { label: t("landing.scan.fieldDate"), value: t("landing.scan.demoDate") },
   ];
   const demoFilters = {
     from: "2026-01-01",
@@ -301,17 +252,17 @@ export default async function AuthPage() {
   };
 
   const demoCategoryPalette = [
-    { backgroundColor: "#2563eb", textColor: "#1e3a8a" },
-    { backgroundColor: "#7c3aed", textColor: "#4c1d95" },
-    { backgroundColor: "#22d3ee", textColor: "#0e7490" },
-    { backgroundColor: "#6366f1", textColor: "#3730a3" },
+    { backgroundColor: "#93c5fd", textColor: "#1e40af" },
+    { backgroundColor: "#f9a8d4", textColor: "#9d174d" },
+    { backgroundColor: "#5eead4", textColor: "#0f766e" },
+    { backgroundColor: "#fde68a", textColor: "#a16207" },
   ];
 
   const demoTopMerchants = sortedMerchants.map((item) => ({
     merchant: item.merchant,
     bgnCents: item.bgnCents,
     eurCents: bgnCentsToEurCents(item.bgnCents),
-    categoryLabel: categoryLabelMap[item.category],
+    categoryLabel: getCategoryLabel(item.category, locale),
     categoryKey: item.category,
   }));
 
@@ -331,7 +282,12 @@ export default async function AuthPage() {
   const demoUpcomingPayments = mockData.upcomingPayments.map((payment) => ({
     id: payment.id,
     category: payment.category,
-    merchantName: payment.merchantName,
+    merchantName:
+      payment.id === "up-1"
+        ? t("landing.demo.upcomingRent")
+        : payment.id === "up-2"
+          ? t("landing.demo.upcomingNetflix")
+          : t("landing.demo.upcomingIcloud"),
     transactionDate: payment.transactionDate,
     totalEurCents: bgnCentsToEurCents(payment.bgnCents),
     totalBgnCents: payment.bgnCents,
@@ -355,69 +311,98 @@ export default async function AuthPage() {
     other: { backgroundColor: "#e0f2fe", textColor: "#0369a1" },
   };
 
+  const benefitCards = [
+    {
+      title: t("landing.benefits.title1"),
+      desc: t("landing.benefits.desc1"),
+      icon: Plane,
+    },
+    {
+      title: t("landing.benefits.title2"),
+      desc: t("landing.benefits.desc2"),
+      icon: Sparkles,
+    },
+    {
+      title: t("landing.benefits.title3"),
+      desc: t("landing.benefits.desc3"),
+      icon: ShieldCheck,
+    },
+  ];
+
+  const steps = [
+    {
+      icon: Camera,
+      text: t("landing.steps.step1"),
+      iconClass: "text-sky-500 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]",
+    },
+    {
+      icon: Sparkles,
+      text: t("landing.steps.step2"),
+      iconClass: "text-pink-400 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]",
+    },
+    {
+      icon: CheckCircle,
+      text: t("landing.steps.step3"),
+      iconClass: "text-teal-500 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]",
+    },
+  ];
+
 
   return (
-    <div className="min-h-[100dvh] bg-gradient-to-br from-blue-50 via-white to-slate-50 text-slate-900">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -left-24 top-24 h-72 w-72 rounded-full bg-indigo-200/40 blur-3xl motion-safe:animate-float" />
-        <div className="absolute right-0 top-10 h-80 w-80 rounded-full bg-sky-200/40 blur-3xl motion-safe:animate-float-slow" />
-      </div>
+    <div className="ethereal-canvas relative min-h-[100dvh] bg-transparent text-slate-800">
+      <DynamicBackground />
 
       <LandingHeader />
 
-      <main className="relative pt-14">
-        <section className="mx-auto flex max-w-7xl flex-col gap-10 px-4 pt-4 pb-12 sm:px-6 lg:px-8 lg:pt-14 lg:pb-20">
-          <div className="grid items-center gap-8 lg:grid-cols-2">
-            <div className="space-y-6 text-center lg:text-left">
-              <div className="inline-flex items-center gap-3 rounded-full border border-white/70 bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-slate-600 shadow-sm backdrop-blur">
-                <span
-                  className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-600"
-                  aria-hidden
-                />
-                Freemium Demo
+      <main className="relative pt-20">
+        <section className="relative overflow-hidden pb-8 pt-4 sm:pb-12">
+          <div className="pointer-events-none absolute inset-0 diagonal-clip diagonal-flow" />
+          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+              <div className="space-y-6 text-left">
+                <h1 className="text-4xl font-bold leading-tight text-[#1E40AF] sm:text-5xl lg:text-6xl">
+                  {t("landing.hero.title")}
+                </h1>
+                <p className="max-w-xl text-sm text-[#1E293B] sm:text-base">
+                  {t("landing.hero.subtitle")}
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <AuthOpenButton className="rounded-full bg-gradient-to-r from-sky-300 via-indigo-300 to-violet-300 px-7 py-3 text-sm font-semibold text-slate-800 shadow-glow transition hover:-translate-y-0.5 hover:scale-[1.05] hover:shadow-neon-strong">
+                    {t("landing.hero.ctaPrimary")}
+                  </AuthOpenButton>
+                  <a
+                    href="#dashboard-demo"
+                    className="rounded-full border border-blue-200/60 bg-white/40 px-6 py-3 text-sm font-semibold text-[#1E40AF] shadow-glow backdrop-blur-xl transition hover:-translate-y-0.5 hover:scale-[1.05] hover:shadow-neon-strong"
+                  >
+                    {t("landing.hero.ctaSecondary")}
+                  </a>
+                </div>
+                <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-blue-50/60 px-3 py-1">
+                    <Check className="h-3 w-3 text-indigo-500" />
+                    {t("landing.hero.badgeNoRegistration")}
+                  </span>
+                  <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-blue-50/60 px-3 py-1">
+                    <Check className="h-3 w-3 text-indigo-500" />
+                    {t("landing.hero.badgeBulgarian")}
+                  </span>
+                </div>
               </div>
-              <h1 className="bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 bg-clip-text text-4xl font-bold leading-tight text-transparent sm:text-5xl lg:text-6xl">
-                Финансите ти, показани нагледно.
-              </h1>
-              <p className="max-w-xl text-sm text-slate-600 sm:text-base">
-                Разбери къде отиват парите ти с помощта на AI. Бързо, лесно и без
-                излишни усилия.
-              </p>
-              <div className="flex flex-wrap justify-center gap-3 lg:justify-start">
-                <a
-                  href="#dashboard-demo"
-                  className="rounded-full bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 px-7 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/40 transition hover:-translate-y-0.5 hover:brightness-110 motion-safe:animate-pulse"
-                >
-                  Изпробвай демо таблото
-                </a>
-                <AuthOpenButton className="rounded-full border border-white/70 bg-white/70 px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:bg-white">
-                  Вход / Регистрация
-                </AuthOpenButton>
-              </div>
-              <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-slate-500 lg:justify-start">
-                <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1">
-                  <Check className="h-3 w-3 text-indigo-500" />
-                  Без регистрация
-                </span>
-                <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1">
-                  <Check className="h-3 w-3 text-indigo-500" />
-                  Изцяло на български
-                </span>
-              </div>
-            </div>
-            <div className="lg:ml-auto lg:max-w-xl">
-              <div className="rounded-[32px] bg-gradient-to-r from-indigo-500/30 via-purple-500/20 to-sky-500/20 p-[1px]">
-                <div className="space-y-3 rounded-[31px] border border-white/20 bg-white/40 p-6 text-center shadow-[0_20px_50px_rgba(79,70,229,0.15)] backdrop-blur-lg lg:text-right">
-                  <p className="bg-gradient-to-r from-sky-500 via-indigo-500 to-purple-500 bg-clip-text text-xs font-semibold uppercase tracking-[0.3em] text-transparent">
-                    Разгледай Интелекта
+
+              <div
+                className="relative ml-auto w-full max-w-md rounded-[32px] border border-white/40 bg-white/50 p-6 text-center shadow-[0_20px_50px_rgba(0,0,0,0.05)] backdrop-blur-3xl animate-float animate-glass-pulse transition hover:-translate-y-0.5 hover:scale-[1.03] sm:p-8"
+                style={{ animationDelay: "0.6s" }}
+              >
+                <div className="pointer-events-none absolute inset-0 rounded-[32px] bg-gradient-to-br from-sky-200/30 via-transparent to-pink-200/30" />
+                <div className="relative space-y-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#0EA5E9]">
+                    {t("landing.explore.label")}
                   </p>
-                  <h2 className="text-2xl font-semibold text-slate-900 sm:text-3xl">
-                    Демо табло с реалистични данни в реално време.
+                  <h2 className="text-2xl font-semibold text-[#1E40AF] sm:text-3xl">
+                    {t("landing.explore.title")}
                   </h2>
-                  <p className="mx-auto max-w-2xl text-sm text-slate-600 sm:text-base lg:ml-auto">
-                    Виж как нашият AI превръща хаоса от касови бележки в чиста
-                    статистика. Разгледай ключовите панели с автоматизирани метрики,
-                    динамични графики и интелигентно управление на сметки.
+                  <p className="text-sm leading-relaxed text-[#1E293B] sm:text-base">
+                    {t("landing.explore.description")}
                   </p>
                 </div>
               </div>
@@ -425,263 +410,287 @@ export default async function AuthPage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-4 pb-8 sm:px-6 lg:px-8">
-          <AccountHeader demoAccounts={demoAccounts} hideIncomeAction />
-        </section>
+        <section id="ai-scan" className="relative overflow-hidden pb-12 pt-6">
+          <div className="pointer-events-none absolute inset-0 diagonal-clip diagonal-flow" />
+          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="rounded-[36px] border border-white/40 bg-white/40 p-6 shadow-glow backdrop-blur-xl transition hover:scale-[1.05] hover:shadow-neon-strong">
+              <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
+                <div className="space-y-4 text-left">
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#0EA5E9]">
+                    {t("landing.problem.label")}
+                  </p>
+                  <h2 className="text-2xl font-semibold text-[#1E40AF] sm:text-3xl">
+                    {t("landing.problem.title")}
+                  </h2>
+                  <ul className="space-y-3 text-sm text-[#1E293B] sm:text-base">
+                    <li className="flex items-start gap-2">
+                      <Check className="mt-1 h-4 w-4 text-indigo-600" />
+                      {t("landing.problem.bullet1")}
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="mt-1 h-4 w-4 text-indigo-600" />
+                      {t("landing.problem.bullet2")}
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="mt-1 h-4 w-4 text-indigo-600" />
+                      {t("landing.problem.bullet3")}
+                    </li>
+                  </ul>
+                </div>
 
-        <section
-          id="dashboard-demo"
-          className="mx-auto max-w-7xl space-y-8 px-4 pb-16 sm:px-6 lg:px-8"
-        >
-          <div id="history-demo" className="space-y-8">
-            <LandingDemoGrid
-              demoAccounts={demoAccounts}
-              demoSummary={demoSummary}
-              demoSeries={demoSeries}
-              demoFilters={demoFilters}
-              demoTopMerchants={demoTopMerchants}
-              demoCategoryPalette={demoCategoryPalette}
-              demoUpcomingPayments={demoUpcomingPayments}
-              demoRecentTransactions={demoRecentTransactions}
-              demoCategoryUi={demoCategoryUi}
-            />
+                <div className="rounded-[28px] border border-white/40 bg-white/40 p-5 shadow-glow backdrop-blur-xl transition hover:scale-[1.05] hover:shadow-neon-strong">
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#0EA5E9]">
+                    {t("landing.scan.label")}
+                  </p>
+                  <div className="mt-4 grid gap-6 lg:grid-cols-[1fr_1fr]">
+                    <div className="space-y-3">
+                      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                        {t("landing.scan.before")}
+                      </p>
+                      <div className="rounded-2xl border border-white/60 bg-white/40 p-4 shadow-glow backdrop-blur-xl">
+                        <Image
+                          src="/receipt-demo.svg"
+                          alt="Receipt preview"
+                          width={320}
+                          height={420}
+                          className="h-56 w-full object-contain opacity-90"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500">
+                        {t("landing.scan.aiData")}
+                      </p>
+                      <div className="space-y-3 rounded-2xl border border-white/60 bg-white/40 p-4 text-sm text-[#1E293B] shadow-glow backdrop-blur-xl">
+                        {scanFields.map((field) => (
+                          <div
+                            key={field.label}
+                            className="flex items-center justify-between"
+                          >
+                            <span className="text-xs uppercase tracking-[0.2em] text-[#0EA5E9]">
+                              {field.label}
+                            </span>
+                            <span className="font-semibold text-[#1E40AF]">
+                              {field.value}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
-        <section
-          id="change-demo"
-          className="mx-auto max-w-7xl space-y-6 px-4 pb-16 sm:px-6 lg:px-8"
-        >
-          <div className="space-y-3 text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500">
-              Ресто
-            </p>
-            <h2 className="text-2xl font-semibold text-slate-900 sm:text-3xl">
-              Демонстрация на калкулатора.
-            </h2>
-            <p className="mx-auto max-w-2xl text-sm text-slate-600 sm:text-base">
-              Виж автоматичния разчет с примерни стойности за плащане.
-            </p>
+        <section className="relative overflow-hidden pb-12">
+          <div className="pointer-events-none absolute inset-0 diagonal-clip diagonal-flow" />
+          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="grid gap-6 md:grid-cols-3">
+              {benefitCards.map((card) => {
+                const Icon = card.icon;
+                return (
+                  <div
+                    key={card.title}
+                    className="rounded-[28px] border border-white/40 bg-white/40 p-6 text-sm text-[#1E293B] shadow-glow backdrop-blur-xl transition hover:scale-[1.05] hover:shadow-neon-strong"
+                  >
+                    <span className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/60 text-[#0EA5E9] shadow-glow">
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <h3 className="text-base font-semibold text-[#1E40AF]">
+                      {card.title}
+                    </h3>
+                    <p className="mt-2 text-[#1E293B]">{card.desc}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section className="relative overflow-hidden pb-12 pt-2">
+          <div className="pointer-events-none absolute inset-0 diagonal-clip diagonal-flow" />
+          <div className="relative mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
+            <div className="space-y-2 text-center">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#0EA5E9]">
+                {t("landing.steps.label")}
+              </p>
+              <h2 className="text-2xl font-semibold text-[#1E40AF] sm:text-3xl">
+                {t("landing.steps.title")}
+              </h2>
+            </div>
+            <div className="grid gap-8 md:grid-cols-3 justify-items-center">
+              {steps.map((step) => {
+                const Icon = step.icon;
+                return (
+                  <div
+                    key={step.text}
+                    className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-white/40 bg-white/40 p-8 text-center text-sm text-[#1E293B] shadow-glow backdrop-blur-xl transition hover:scale-[1.05] hover:bg-white/40 hover:shadow-neon-strong"
+                  >
+                    <span
+                      className={`flex h-12 w-12 items-center justify-center rounded-full border border-white/60 bg-white/70 transition hover:scale-125 ${step.iconClass}`}
+                    >
+                      <Icon className="h-5 w-5" />
+                    </span>
+                    <p className="mx-auto w-full max-w-[280px] text-center font-medium text-[#1E293B]">
+                      {step.text}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
+          <div className="rounded-full border border-white/40 bg-white/40 px-6 py-3 text-center text-sm font-semibold text-[#1E293B] shadow-glow backdrop-blur-xl transition hover:scale-[1.02]">
+            🚀{" "}
+            <span className="bg-gradient-to-r from-blue-700 to-cyan-400 bg-clip-text text-transparent">
+              1,000+
+            </span>{" "}
+            {t("landing.socialProof")}
+          </div>
+        </section>
+
+        <section className="relative overflow-hidden pb-6 pt-2">
+          <div className="pointer-events-none absolute inset-0 diagonal-clip diagonal-flow" />
+          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <AccountHeader demoAccounts={demoAccounts} hideIncomeAction />
+          </div>
+        </section>
+
+        <section id="dashboard-demo" className="relative overflow-hidden py-20">
+          <div className="pointer-events-none absolute inset-0 diagonal-clip diagonal-flow" />
+          <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="space-y-8">
+              <LandingDemoGrid
+                demoAccounts={demoAccounts}
+                demoSummary={demoSummary}
+                demoSeries={demoSeries}
+                demoFilters={demoFilters}
+                demoTopMerchants={demoTopMerchants}
+                demoCategoryPalette={demoCategoryPalette}
+                demoUpcomingPayments={demoUpcomingPayments}
+                demoRecentTransactions={demoRecentTransactions}
+                demoCategoryUi={demoCategoryUi}
+              />
+            </div>
+          </div>
+        </section>
+
+        <section id="change-demo" className="relative overflow-hidden pb-12 pt-2">
+          <div className="pointer-events-none absolute inset-0 diagonal-clip diagonal-flow" />
+          <div className="relative mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
+            <div className="space-y-3 text-center">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#0EA5E9]">
+                {t("landing.change.label")}
+              </p>
+              <h2 className="text-2xl font-semibold text-[#1E40AF] sm:text-3xl">
+                {t("landing.change.title")}
+              </h2>
+              <p className="mx-auto max-w-2xl text-sm text-[#1E293B] sm:text-base">
+                {t("landing.change.subtitle")}
+              </p>
           </div>
           <ChangeCalculator
             mode="embed"
-            readOnly
-            demoValues={{
-              billEur: "21.73",
-              paidBgn: "50.00",
-              paidEur: "0.00",
-            }}
           />
+          </div>
         </section>
 
-        <section
-          id="ai-scan"
-          className="mx-auto max-w-7xl space-y-8 px-4 pb-20 sm:px-6 lg:px-8"
-        >
-          <div className="space-y-3 text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500">
-              Interactive AI Scan
-            </p>
-            <h2 className="text-2xl font-semibold text-slate-900 sm:text-3xl">
-              Виж AI сканирането в действие.
-            </h2>
-            <p className="mx-auto max-w-2xl text-sm text-slate-600 sm:text-base">
-              Симулирана транзакция с преди/след и ясно разграфени стъпки.
-            </p>
-          </div>
-
-          <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="rounded-3xl border border-white/70 bg-white/80 p-6 shadow-sm backdrop-blur">
-              <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
-                <div className="space-y-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
-                    Преди
-                  </p>
-                  <div className="rounded-2xl border border-white/70 bg-white/70 p-4">
-                    <Image
-                      src="/receipt-demo.svg"
-                      alt="Receipt preview"
-                      width={320}
-                      height={420}
-                      className="h-56 w-full object-contain"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
-                    AI Данни ✨
-                  </p>
-                  <div className="space-y-3 rounded-2xl border border-white/70 bg-white/70 p-4 text-sm text-slate-600">
-                    {scanFields.map((field) => (
-                      <div
-                        key={field.label}
-                        className="flex items-center justify-between"
-                      >
-                        <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                          {field.label}
-                        </span>
-                        <span className="font-semibold text-slate-900">
-                          {field.value}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+        <section id="pricing" className="relative overflow-hidden pb-20 pt-2">
+          <div className="pointer-events-none absolute inset-0 diagonal-clip diagonal-flow" />
+          <div className="relative mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#0EA5E9]">
+                {t("landing.pricing.label")}
+              </p>
+              <h2 className="mt-3 text-2xl font-semibold text-[#1E40AF] sm:text-3xl">
+                {t("landing.pricing.title")}
+              </h2>
+              <p className="mt-3 text-sm text-[#1E293B] sm:text-base">
+                {t("landing.pricing.subtitle")}
+              </p>
             </div>
 
-            <div className="space-y-4">
-              <div className="rounded-3xl border border-white/70 bg-white/80 p-6 shadow-sm backdrop-blur">
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
-                  Стъпки
+            <div className="grid gap-6 md:grid-cols-2">
+              <div
+                id="pricing-trial"
+                className="relative overflow-hidden rounded-3xl border border-white/40 bg-white/40 p-6 shadow-glow backdrop-blur-xl transition hover:scale-[1.03] hover:shadow-neon-strong"
+              >
+                <div className="absolute right-6 top-6 rounded-full bg-white/70 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-indigo-600">
+                  {t("landing.pricing.badgeFree")}
+                </div>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#0EA5E9] drop-shadow-sm">
+                  {t("landing.pricing.badgeTrial")}
                 </p>
-                <div className="mt-4 grid gap-3">
-                  {workflowSteps.map((step) => {
-                    const Icon = step.icon;
-                    return (
-                      <div
-                        key={step.title}
-                        className="flex items-start gap-3 rounded-2xl border border-white/70 bg-white/70 px-4 py-3 shadow-sm"
-                      >
-                        <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-600 text-white">
-                          <Icon className="h-4 w-4" />
-                        </span>
-                        <div>
-                          <p className="text-sm font-semibold text-slate-900">
-                            {step.title}
-                          </p>
-                          <p className="text-xs text-slate-600">
-                            {step.description}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section
-          id="pricing"
-          className="mx-auto max-w-7xl space-y-8 px-4 pb-20 sm:px-6 lg:px-8"
-        >
-          <div className="text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500">
-              Планове
-            </p>
-            <h2 className="mt-3 text-2xl font-semibold text-slate-900 sm:text-3xl">
-              Пробвай премиум без риск.
-            </h2>
-            <p className="mt-3 text-sm text-slate-600 sm:text-base">
-              Започни с 1 месец безплатно и отключи всички AI функции още днес.
-            </p>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            <div
-              id="pricing-trial"
-              className="relative overflow-hidden rounded-3xl border border-indigo-200/70 bg-gradient-to-br from-indigo-500/15 via-violet-500/10 to-white/80 p-6 shadow-[0_20px_60px_rgba(99,102,241,0.25)] backdrop-blur-sm"
-            >
-              <div className="absolute right-6 top-6 rounded-full bg-white/70 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-indigo-600">
-                Free
-              </div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-indigo-100 drop-shadow-sm">
-                Trial
-              </p>
-              <h3 className="mt-3 text-2xl font-semibold text-slate-900">
-                1 месец БЕЗПЛАТНО
-              </h3>
-              <p className="mt-2 text-sm text-slate-600">
-                Без карта. Без ангажименти.
-              </p>
-              <ul className="mt-6 space-y-3 text-sm text-slate-700">
-                {[
-                  "Всички AI функции",
-                  "Пълен достъп до анализи",
-                  "Неограничени транзакции",
-                  "Приоритетна поддръжка",
-                ].map((feature) => (
-                  <li key={feature} className="flex items-center gap-2">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600 text-white shadow-sm">
-                      <Check className="h-3 w-3" />
-                    </span>
-                    {feature}
+                <h3 className="mt-3 text-2xl font-semibold text-[#1E40AF]">
+                  {t("landing.pricing.trialTitle")}
+                </h3>
+                <p className="mt-2 text-sm text-[#1E293B]">
+                  {t("landing.pricing.trialSubtitle")}
+                </p>
+                <ul className="mt-6 space-y-3 text-sm text-[#1E293B]">
+                  {[
+                    t("landing.pricing.feature1"),
+                    t("landing.pricing.feature2"),
+                    t("landing.pricing.feature3"),
+                    t("landing.pricing.feature4"),
+                  ].map((feature) => (
+                    <li key={feature} className="flex items-center gap-2">
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-white shadow-glow">
+                        <Check className="h-3 w-3" />
+                      </span>
+                      {feature}
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div className="relative overflow-hidden rounded-3xl border border-blue-200 bg-gradient-to-br from-white via-blue-50/60 to-indigo-50/80 p-6 shadow-[0_20px_60px_rgba(59,130,246,0.2)] backdrop-blur-sm">
-              <div className="absolute -right-12 -top-12 h-28 w-28 rounded-full bg-indigo-400/30 blur-2xl" />
+            <div className="relative overflow-hidden rounded-3xl border border-white/40 bg-white/40 p-6 shadow-glow backdrop-blur-xl transition hover:scale-[1.03] hover:shadow-neon-strong">
+              <div className="absolute -right-12 -top-12 h-28 w-28 rounded-full bg-sky-300/40 blur-2xl" />
               <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-blue-600">
-                  Premium
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#0EA5E9]">
+                  {t("landing.pricing.premiumLabel")}
                 </p>
-                <span className="rounded-full bg-blue-50 px-3 py-1 text-[10px] font-semibold text-blue-600">
-                  Най-популярен
+                <span className="rounded-full bg-white/60 px-3 py-1 text-[10px] font-semibold text-indigo-500">
+                  {t("landing.pricing.popular")}
                 </span>
               </div>
-              <h3 className="mt-3 text-2xl font-semibold text-slate-900">
-                4.49 EUR / месец
+              <h3 className="mt-3 text-2xl font-semibold text-[#1E40AF]">
+                {t("landing.pricing.premiumTitle")}
               </h3>
-              <p className="mt-2 text-sm text-slate-600">
-                След пробния период продължаваш с пълен достъп.
+              <p className="mt-2 text-sm text-[#1E293B]">
+                {t("landing.pricing.premiumSubtitle")}
               </p>
-              <ul className="mt-6 space-y-3 text-sm text-slate-700">
+              <ul className="mt-6 space-y-3 text-sm text-[#1E293B]">
                 {[
-                  "Всички AI функции",
-                  "Пълен достъп до анализи",
-                  "Неограничени транзакции",
-                  "Приоритетна поддръжка",
+                  t("landing.pricing.feature1"),
+                  t("landing.pricing.feature2"),
+                  t("landing.pricing.feature3"),
+                  t("landing.pricing.feature4"),
                 ].map((feature) => (
                   <li key={feature} className="flex items-center gap-2">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-white shadow-glow">
                       <Check className="h-3 w-3" />
                     </span>
                     {feature}
                   </li>
                 ))}
               </ul>
-              <AuthOpenButton className="mt-6 inline-flex w-full items-center justify-center rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/40 transition hover:-translate-y-0.5 hover:bg-blue-700">
-                Започни безплатно
-              </AuthOpenButton>
             </div>
+          </div>
+          <div className="flex justify-center">
+            <AuthOpenButton className="inline-flex w-full max-w-md items-center justify-center rounded-full bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-400 px-6 py-3 text-sm font-semibold text-white shadow-glow transition hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-neon-strong">
+              {t("landing.pricing.cta")}
+            </AuthOpenButton>
+          </div>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-blue-900/20 bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 py-8 text-xs text-white/80 sm:px-6 lg:flex-row lg:px-8">
-          <Link href="/" className="flex items-center gap-3">
-            <span className="flex h-12 w-32 items-center justify-center overflow-hidden rounded-3xl border border-white/20 bg-white/10 shadow-[0_12px_30px_rgba(15,23,42,0.18)] backdrop-blur-sm ring-1 ring-white/20">
-              <Image
-                src="/novologo.png"
-                alt="Logo"
-                width={160}
-                height={48}
-                className="h-full w-full object-cover scale-240 brightness-0 invert"
-                priority
-              />
-            </span>
-          </Link>
-          <div className="flex flex-wrap items-center justify-center gap-4 uppercase tracking-[0.2em]">
-            <Link href="/contact" className="hover:text-white">
-              Контакти
-            </Link>
-            <Link href="/faq" className="hover:text-white">
-              Често задавани въпроси
-            </Link>
-            <Link href="/policies" className="hover:text-white">
-              Политики
-            </Link>
-            <Link href="/privacy" className="hover:text-white">
-              Поверителност
-            </Link>
-          </div>
-        </div>
-      </footer>
+      <Footer className="mt-6" />
       <AuthModalHost />
     </div>
   );

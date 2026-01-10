@@ -61,21 +61,14 @@ const TransactionRow = ({
   const dateLabel = tx.transactionDate
     ? format(new Date(tx.transactionDate), "dd.MM.yyyy HH:mm")
     : t("common.noDate");
-  const merchantLabel = tx.isFixed
+  const rawMerchantLabel = tx.isFixed
     ? getRecurringLabelForName(tx.merchantName, locale)
     : tx.merchantName;
-  const typeLabel =
-    tx.transactionType === "income"
-      ? t("transactions.income")
-      : tx.transactionType === "transfer"
-        ? t("transactions.transfer")
-        : t("transactions.expense");
-  const methodLabel =
-    tx.transactionType === "expense"
-      ? tx.isFixed
-        ? t("transactions.fixed")
-        : t("transactions.variable")
-      : null;
+  const merchantLabel =
+    tx.transactionType === "transfer" &&
+    (!rawMerchantLabel || ["transfer", "transfers"].includes(rawMerchantLabel.trim().toLowerCase()))
+      ? t("transactions.transfer")
+      : rawMerchantLabel;
   const isFuture =
     !!tx.transactionDate && new Date(tx.transactionDate).getTime() > now;
   const statusLabel =
@@ -88,21 +81,21 @@ const TransactionRow = ({
             ? t("transactions.statusFixedExpense")
             : t("transactions.statusExpense")
           : t("transactions.statusExpense");
-  const statusTone = isFuture
+  const statusTone = isFuture ? "text-violet-400" : "text-violet-600";
+  const amountTone = isFuture
     ? "text-slate-400"
     : tx.transactionType === "income"
       ? "text-emerald-500"
       : tx.transactionType === "expense"
         ? "text-rose-600"
         : "text-sky-500";
-  const amountTone = isFuture ? "text-slate-400" : statusTone;
   const titleTone = isFuture ? "text-slate-400" : "text-slate-800";
   const categoryTone = isFuture ? "text-slate-400" : "text-slate-500";
   const metaTone = isFuture ? "text-slate-400" : "text-slate-400";
   const editTone = isFuture ? "text-slate-400" : "text-slate-500";
 
   return (
-    <div className="flex w-full items-center justify-between border-b border-slate-100 px-4 py-4 last:border-0">
+    <div className="flex w-full items-center justify-between border-b border-white/30 px-4 py-4 last:border-0">
       <div className="flex shrink-0 items-center justify-center">
         <div
           className="flex h-10 w-10 items-center justify-center rounded-2xl md:h-14 md:w-14"
@@ -117,10 +110,6 @@ const TransactionRow = ({
         </p>
         <span className={`text-[10px] ${categoryTone}`}>{categoryLabel}</span>
         <div className={`flex flex-col text-[10px] leading-tight ${metaTone}`}>
-          <span className="truncate">
-            {typeLabel}
-            {methodLabel ? ` · ${methodLabel}` : ""}
-          </span>
           <span className="truncate">{dateLabel}</span>
         </div>
       </div>
@@ -183,6 +172,13 @@ export default function ListClient() {
         return (order[a.kind] ?? 99) - (order[b.kind] ?? 99);
       }),
     [accounts],
+  );
+  const accountLabelById = useMemo(
+    () =>
+      new Map(
+        accounts.map((account) => [account.id, formatAccountLabel(account, locale)]),
+      ),
+    [accounts, locale],
   );
   const labelForCategory = (value: string) => getCategoryLabel(value, locale);
   const amountFormatter = useMemo(
@@ -359,7 +355,7 @@ export default function ListClient() {
     <div className="w-full space-y-4">
       <form
         onSubmit={handleFilter}
-        className="w-full rounded-2xl border border-slate-100 bg-white p-4 shadow-sm lg:p-6"
+        className="w-full rounded-2xl border border-white/40 bg-white/20 p-4 shadow-glow backdrop-blur-3xl lg:p-6"
       >
         <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-6">
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-2 sm:col-span-2 lg:col-span-2">
@@ -369,7 +365,7 @@ export default function ListClient() {
                 type="date"
                 value={filters.from}
                 onChange={(e) => setFilters((f) => ({ ...f, from: e.target.value }))}
-                className="mt-1 h-9 w-full rounded-lg border-2 border-slate-100 bg-slate-50 px-2 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+                className="mt-1 h-9 w-full rounded-lg border border-white/40 bg-white/30 px-2 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
               />
             </label>
             <label className="text-xs text-slate-600">
@@ -378,7 +374,7 @@ export default function ListClient() {
                 type="date"
                 value={filters.to}
                 onChange={(e) => setFilters((f) => ({ ...f, to: e.target.value }))}
-                className="mt-1 h-9 w-full rounded-lg border-2 border-slate-100 bg-slate-50 px-2 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+                className="mt-1 h-9 w-full rounded-lg border border-white/40 bg-white/30 px-2 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
               />
             </label>
           </div>
@@ -387,7 +383,7 @@ export default function ListClient() {
             <select
               value={filters.accountId}
               onChange={(e) => setFilters((f) => ({ ...f, accountId: e.target.value }))}
-              className="mt-1 h-9 w-full rounded-xl border border-slate-100 bg-slate-50 px-3 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+              className="mt-1 h-9 w-full rounded-xl border border-white/40 bg-white/30 px-3 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
             >
               <option value="">{t("common.all")}</option>
               {sortedAccounts.map((acc) => (
@@ -409,7 +405,7 @@ export default function ListClient() {
                   category: "",
                 }))
               }
-              className="mt-1 h-9 w-full rounded-xl border border-slate-100 bg-slate-50 px-3 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+              className="mt-1 h-9 w-full rounded-xl border border-white/40 bg-white/30 px-3 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
             >
               <option value="">{t("common.all")}</option>
               <option value="income">{t("transactions.income")}</option>
@@ -429,7 +425,7 @@ export default function ListClient() {
                     category: "",
                   }))
                 }
-                className="mt-1 h-9 w-full rounded-xl border border-slate-100 bg-slate-50 px-3 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+                className="mt-1 h-9 w-full rounded-xl border border-white/40 bg-white/30 px-3 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
               >
                 <option value="">{t("common.all")}</option>
                 <option value="manual">{t("transactions.manual")}</option>
@@ -454,7 +450,7 @@ export default function ListClient() {
                 onChange={(e) =>
                   setFilters((f) => ({ ...f, category: e.target.value }))
                 }
-                className="mt-1 h-9 w-full rounded-xl border border-slate-100 bg-slate-50 px-3 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+                className="mt-1 h-9 w-full rounded-xl border border-white/40 bg-white/30 px-3 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
               >
                 <option value="">{t("common.all")}</option>
                 {categoryOptionsForType.map((option) => (
@@ -471,7 +467,7 @@ export default function ListClient() {
               value={filters.search}
               onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
               placeholder={t("transactions.searchPlaceholder")}
-              className="mt-1 h-9 w-full rounded-xl border border-slate-100 bg-slate-50 px-3 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+              className="mt-1 h-9 w-full rounded-xl border border-white/40 bg-white/30 px-3 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
             />
           </label>
         </div>
@@ -491,13 +487,13 @@ export default function ListClient() {
               setFilters(cleared);
               fetchData(cleared);
             }}
-            className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 sm:flex-none"
+            className="flex-1 rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-white/40 sm:flex-none"
           >
             {t("common.clear")}
           </button>
           <button
             type="submit"
-            className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-900 shadow-sm transition hover:bg-slate-50 sm:flex-none"
+            className="flex-1 rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-xs font-semibold text-slate-900 shadow-sm transition hover:bg-white/40 sm:flex-none"
           >
             {t("common.filter")}
           </button>
@@ -511,14 +507,14 @@ export default function ListClient() {
       )}
 
       {loading ? (
-        <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm text-slate-700 shadow-[0_10px_40px_rgba(0,0,0,0.06)]">
+        <div className="flex items-center gap-2 rounded-xl border border-white/40 bg-white/20 px-3 py-2 text-sm text-slate-700 shadow-glow backdrop-blur-3xl">
           <Loader2 className="h-4 w-4 animate-spin" />
           {t("common.loading")}
         </div>
       ) : (
         <div className="grid gap-3">
           {categoryTotals.length > 0 && (
-            <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-[0_10px_40px_rgba(0,0,0,0.06)] backdrop-blur-md">
+            <div className="rounded-2xl border border-white/40 bg-white/20 p-4 shadow-glow backdrop-blur-3xl">
               <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
                 {t("transactions.amountCategoryTitle")}
               </p>
@@ -526,13 +522,13 @@ export default function ListClient() {
                 <button
                   type="button"
                   onClick={() => setShowCategoryFilters((open) => !open)}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/40 bg-white/30 px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm"
                 >
                   <Filter className="h-4 w-4 text-slate-600" />
                   {t("transactions.filterByCategory")}
                 </button>
                 {showCategoryFilters && (
-                  <div className="mt-2 max-h-56 overflow-y-auto rounded-xl border border-slate-200 bg-white p-2">
+                  <div className="mt-2 max-h-56 overflow-y-auto rounded-xl border border-white/40 bg-white/30 p-2">
                     {categoryTotals.map((cat) => (
                       <button
                         key={cat.category}
@@ -542,7 +538,7 @@ export default function ListClient() {
                           fetchData(next);
                           setShowCategoryFilters(false);
                         }}
-                        className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs text-slate-700 hover:bg-slate-50"
+                        className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs text-slate-700 hover:bg-white/40"
                       >
                         <span className="text-slate-900">
                           {labelForCategory(cat.category)}
@@ -564,7 +560,7 @@ export default function ListClient() {
                       setFilters(next);
                       fetchData(next);
                     }}
-                    className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 hover:bg-slate-50"
+                    className="flex items-center justify-between rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-xs text-slate-700 hover:bg-white/40"
                   >
                     <span className="text-slate-900">
                       {labelForCategory(cat.category)}
@@ -584,18 +580,26 @@ export default function ListClient() {
                 <div className="px-2 text-sm font-bold uppercase tracking-wider text-slate-400">
                   {group.label}
                 </div>
-                <div className="w-full overflow-hidden rounded-[2rem] border border-slate-100 bg-white shadow-sm">
+                <div className="mx-auto w-full max-w-[560px] overflow-hidden rounded-[2rem] border border-white/40 bg-white/20 shadow-glow backdrop-blur-3xl sm:max-w-none">
                   {items.map((tx) => {
                       return (
                         <TransactionRow
                           key={tx.id}
                           tx={tx}
                           amountFormatter={amountFormatter}
-                          categoryLabel={getCategoryLabel(tx.category, locale)}
+                          categoryLabel={
+                            tx.transactionType === "transfer"
+                              ? `${accountLabelById.get(tx.accountId) ?? t("transactions.fromAccount")} → ${
+                                  accountLabelById.get(tx.transferAccountId ?? "") ??
+                                  t("transactions.toAccount")
+                                }`
+                              : getCategoryLabel(tx.category, locale)
+                          }
                           actions={
                             <Link
                               href={`/transactions/${tx.id}`}
-                              className="rounded-full border border-slate-200 bg-white p-1 text-slate-600 transition hover:bg-slate-50"
+                              prefetch={false}
+                              className="rounded-full border border-white/40 bg-white/30 p-1 text-slate-600 transition hover:bg-white/40"
                               aria-label={t("common.details")}
                             >
                               <ChevronRight className="h-4 w-4" />
@@ -609,7 +613,7 @@ export default function ListClient() {
             );
           })}
           {!filteredTransactions.length && (
-            <div className="rounded-xl border border-dashed border-slate-200 bg-white/70 p-6 text-center text-sm text-slate-600">
+            <div className="rounded-xl border border-dashed border-white/40 bg-white/20 p-6 text-center text-sm text-slate-600 shadow-glow backdrop-blur-3xl">
               {t("transactions.noTransactions")}
             </div>
           )}

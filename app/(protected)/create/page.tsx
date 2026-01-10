@@ -10,7 +10,7 @@ export default async function CreateTransactionPage() {
   return (
     // ... останалата част от кода
     <div className="mx-auto max-w-6xl space-y-6">
-      <div className="mb-6 rounded-[2rem] border border-slate-100/50 bg-white p-4 shadow-sm">
+      <div className="mb-6 rounded-[2rem] border border-white/40 bg-white/20 p-4 shadow-glow backdrop-blur-3xl">
         <PageHeader
           label={t("transactions.createLabel")}
           title={t("transactions.createTitle")}

@@ -41,11 +41,11 @@ export default function NewTransaction() {
 
   return (
     <div className="w-full max-w-full space-y-6 overflow-x-hidden">
-      <div className="w-full max-w-full rounded-[2rem] border border-slate-100/50 bg-white p-4 shadow-sm sm:p-6">
+      <div className="w-full max-w-full rounded-[2rem] border border-white/40 bg-white/20 p-4 shadow-glow backdrop-blur-3xl animate-float sm:p-6">
         <div className="mx-auto w-full max-w-full px-4 box-border sm:max-w-md">
-          <div className="relative grid h-[46px] w-full grid-cols-3 items-center rounded-2xl border border-slate-200/40 bg-slate-100/50 p-1 sm:h-[52px]">
+          <div className="relative grid h-[46px] w-full grid-cols-3 items-center rounded-2xl border border-white/40 bg-white/20 p-1 backdrop-blur-xl sm:h-[52px]">
             <span
-              className={`absolute inset-y-1 w-1/3 rounded-xl bg-white shadow-lg shadow-blue-500/10 transition-[transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+              className={`absolute inset-y-1 w-1/3 rounded-xl bg-white/70 shadow-glow transition-[transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
                 tab === "income"
                   ? "translate-x-0"
                   : tab === "expense"
@@ -58,7 +58,7 @@ export default function NewTransaction() {
               onClick={() => setTab("income")}
               className={`relative z-10 h-8 w-full rounded-xl text-[12px] font-semibold transition whitespace-nowrap sm:h-10 sm:text-[14px] ${
                 tab === "income"
-                  ? "bg-slate-100 border border-slate-300 rounded-lg text-emerald-600 font-bold"
+                  ? "border border-white/60 bg-white/60 text-emerald-600 font-bold"
                   : "text-slate-500"
               }`}
             >
@@ -69,7 +69,7 @@ export default function NewTransaction() {
               onClick={() => setTab("expense")}
               className={`relative z-10 h-8 w-full rounded-xl text-[12px] font-semibold transition whitespace-nowrap sm:h-10 sm:text-[14px] ${
                 tab === "expense"
-                  ? "bg-slate-100 border border-slate-300 rounded-lg text-rose-600 font-bold"
+                  ? "border border-white/60 bg-white/60 text-rose-600 font-bold"
                   : "text-slate-500"
               }`}
             >
@@ -80,7 +80,7 @@ export default function NewTransaction() {
               onClick={() => setTab("transfer")}
               className={`relative z-10 h-8 w-full rounded-xl text-[12px] font-semibold transition whitespace-nowrap sm:h-10 sm:text-[14px] ${
                 tab === "transfer"
-                  ? "bg-slate-100 border border-slate-300 rounded-lg text-blue-600 font-bold"
+                  ? "border border-white/60 bg-white/60 text-blue-600 font-bold"
                   : "text-slate-500"
               }`}
             >
@@ -90,16 +90,16 @@ export default function NewTransaction() {
         </div>
 
         {tab === "income" && (
-          <div className="mt-6 mb-6 rounded-[2rem] border border-slate-100/50 bg-white p-6 shadow-sm">
+          <div className="mt-6 mb-6 rounded-[2rem] border border-white/40 bg-white/20 p-6 shadow-glow backdrop-blur-3xl animate-float">
             <IncomeForm />
           </div>
         )}
         {tab === "expense" && (
           <div className="mt-2 flex flex-col gap-2">
             <div className="mx-auto w-full max-w-full px-4 box-border sm:max-w-md">
-              <div className="relative grid h-[38px] w-full grid-cols-3 items-center rounded-2xl border border-slate-200/40 bg-slate-100/50 p-1 sm:h-[42px]">
+              <div className="relative grid h-[38px] w-full grid-cols-3 items-center rounded-2xl border border-white/40 bg-white/20 p-1 backdrop-blur-xl sm:h-[42px]">
                 <span
-                  className={`absolute inset-y-1 w-1/3 rounded-xl bg-white shadow-lg shadow-blue-500/10 transition-[transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                  className={`absolute inset-y-1 w-1/3 rounded-xl bg-white/70 shadow-glow transition-[transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
                     expenseTab === "manual"
                       ? "translate-x-0"
                       : expenseTab === "ai"
@@ -123,7 +123,7 @@ export default function NewTransaction() {
                   onClick={() => setExpenseTab("ai")}
                   className={`relative z-10 h-7 w-full rounded-xl border border-transparent text-[10px] font-medium transition whitespace-nowrap sm:h-8 sm:text-[11px] ${
                     expenseTab === "ai"
-                      ? "border-blue-500/50 bg-gradient-to-r from-blue-400/30 to-purple-400/30 text-blue-900 font-extrabold shadow-[0_0_15px_rgba(59,130,246,0.4)]"
+                      ? "border-blue-400/60 bg-gradient-to-r from-blue-400/30 to-purple-400/30 text-blue-900 font-extrabold shadow-neon-strong"
                       : "text-slate-500"
                   }`}
                 >
@@ -145,24 +145,24 @@ export default function NewTransaction() {
             {expenseTab === "ai" ? (
               <div className="grid w-full max-w-full gap-4 lg:grid-cols-2">
                 <UploadWizard />
-                <div className="w-full max-w-full rounded-[2rem] border border-slate-100/50 bg-white p-4 text-center shadow-sm">
+                <div className="w-full max-w-full rounded-[2rem] border border-white/40 bg-white/20 p-4 text-center shadow-glow backdrop-blur-3xl animate-float">
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
                     {t("upload.aiData")} ✨
                   </p>
                   <div className="mt-3 grid gap-2 text-left text-[11px] text-slate-500">
-                    <div className="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2">
+                    <div className="rounded-2xl border border-white/40 bg-white/30 px-3 py-2 shadow-glow">
                       {t("transactions.amount")} ·{" "}
                       <span className="italic">{t("upload.autoFill")}</span>
                     </div>
-                    <div className="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2">
+                    <div className="rounded-2xl border border-white/40 bg-white/30 px-3 py-2 shadow-glow">
                       {t("transactions.category")} ·{" "}
                       <span className="italic">{t("upload.autoFill")}</span>
                     </div>
-                    <div className="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2">
+                    <div className="rounded-2xl border border-white/40 bg-white/30 px-3 py-2 shadow-glow">
                       {t("transactions.account")} ·{" "}
                       <span className="italic">{t("upload.autoFill")}</span>
                     </div>
-                    <div className="rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2">
+                    <div className="rounded-2xl border border-white/40 bg-white/30 px-3 py-2 shadow-glow">
                       {t("transactions.note")} ·{" "}
                       <span className="italic">{t("upload.autoFill")}</span>
                     </div>
@@ -177,7 +177,7 @@ export default function NewTransaction() {
           </div>
         )}
         {tab === "transfer" && (
-          <div className="mt-6 mb-6 rounded-[2rem] border border-slate-100/50 bg-white p-6 shadow-sm">
+          <div className="mt-6 mb-6 rounded-[2rem] border border-white/40 bg-white/20 p-6 shadow-glow backdrop-blur-3xl animate-float">
             <TransferForm />
           </div>
         )}

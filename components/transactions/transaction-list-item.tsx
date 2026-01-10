@@ -78,7 +78,8 @@ export default function TransactionListItem({
             ? t("transactions.statusFixedExpense")
             : t("transactions.statusExpense")
           : t("transactions.statusExpense"));
-  const statusTone = isFuture
+  const statusTone = isFuture ? "text-violet-400" : "text-violet-600";
+  const amountTone = isFuture
     ? "text-slate-400"
     : transactionType === "income"
       ? "text-emerald-500"
@@ -87,20 +88,24 @@ export default function TransactionListItem({
         : transactionType === "transfer"
           ? "text-sky-500"
           : "text-slate-900";
-  const amountTone = isFuture ? "text-slate-400" : statusTone;
   const titleTone = isFuture ? "text-slate-400" : "text-slate-900";
   const eurCents = amountEurCents != null ? Math.abs(amountEurCents) : null;
   const bgnCents = amountBgnCents != null ? Math.abs(amountBgnCents) : null;
+  const displayTitle =
+    transactionType === "transfer" &&
+    ["transfer", "transfers"].includes(title.trim().toLowerCase())
+      ? t("transactions.transfer")
+      : title;
 
   return (
     <div
-      className={`box-border flex w-full flex-nowrap items-center justify-between overflow-hidden border-b border-slate-100 px-3 py-4 transition-colors hover:bg-slate-50 last:border-0 md:px-4 lg:px-6 ${
+      className={`box-border flex w-full flex-nowrap items-center justify-between overflow-hidden border-b border-white/30 px-3 py-4 transition-colors hover:bg-white/20 last:border-0 md:px-4 lg:px-6 ${
         className ?? ""
       }`}
     >
       <div className="flex shrink-0 w-10 items-center justify-center md:w-12">
         <div
-          className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-50 text-3xl md:h-14 md:w-14"
+          className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/40 text-3xl shadow-glow md:h-14 md:w-14"
           style={{ backgroundColor: ui.backgroundColor }}
         >
           <Icon className="h-5 w-5 md:h-6 md:w-6" style={{ color: ui.textColor }} />
@@ -108,7 +113,7 @@ export default function TransactionListItem({
       </div>
       <div className="flex min-w-0 flex-1 flex-col justify-center px-3 md:px-5">
         <p className={`truncate text-[13px] font-semibold md:text-[17px] ${titleTone}`}>
-          {title}
+          {displayTitle}
         </p>
         {stackedSubtitle ? (
           <div className="flex flex-col text-[10px] text-slate-400 md:text-xs">

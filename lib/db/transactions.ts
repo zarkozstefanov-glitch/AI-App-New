@@ -147,32 +147,42 @@ export async function createFromExtraction(input: ExtractionTransactionInput) {
 }
 
 export async function listTransactions(userId: string, filters: Record<string, string>) {
-  const where: Record<string, unknown> = { userId };
+  const and: Record<string, unknown>[] = [{ userId }];
   const take = filters.limit ? Math.max(1, Number(filters.limit)) : undefined;
-  if (filters.category) where.category = filters.category;
-  if (filters.accountId) where.accountId = filters.accountId;
-  if (filters.transactionType) where.transactionType = filters.transactionType;
-  if (filters.expenseType === "fixed") where.isFixed = true;
-  if (filters.expenseType === "variable") where.isFixed = false;
-  if (filters.merchant) where.merchantName = { contains: filters.merchant };
+  if (filters.category) and.push({ category: filters.category });
+  if (filters.transactionType) and.push({ transactionType: filters.transactionType });
+  if (filters.accountId) {
+    and.push({
+      OR: [
+        { accountId: filters.accountId },
+        { transferAccountId: filters.accountId },
+      ],
+    });
+  }
+  if (filters.expenseType === "fixed") and.push({ isFixed: true });
+  if (filters.expenseType === "variable") and.push({ isFixed: false });
+  if (filters.merchant) and.push({ merchantName: { contains: filters.merchant } });
   if (filters.search) {
-    where.OR = [
-      { merchantName: { contains: filters.search } },
-      { notes: { contains: filters.search } },
-    ];
+    and.push({
+      OR: [
+        { merchantName: { contains: filters.search } },
+        { notes: { contains: filters.search } },
+      ],
+    });
   }
   if (filters.from || filters.to) {
     const range: Record<string, Date> = {};
     if (filters.from) range.gte = new Date(`${filters.from}T00:00:00`);
     if (filters.to) range.lte = new Date(`${filters.to}T23:59:59.999`);
-    where.transactionDate = range;
+    and.push({ transactionDate: range });
   }
   if (filters.min || filters.max) {
     const totalFilter: Record<string, number> = {};
     if (filters.min) totalFilter.gte = Math.round(Number(filters.min) * 100);
     if (filters.max) totalFilter.lte = Math.round(Number(filters.max) * 100);
-    where.totalEurCents = totalFilter;
+    and.push({ totalEurCents: totalFilter });
   }
+  const where: Record<string, unknown> = and.length > 1 ? { AND: and } : and[0];
   const rows = await prisma.transaction.findMany({
     where,
     include: { lineItems: true },

@@ -30,7 +30,6 @@ type WizardFormState = {
   totalOriginal?: number | string;
   currencyOriginal?: string;
   category?: CategoryKey | string;
-  paymentMethod?: string;
   notes?: string;
   sourceType?: "receipt" | "bank" | "unknown";
   accountId?: string;
@@ -69,6 +68,36 @@ export default function UploadWizard({
   const [error, setError] = useState("");
   const [formState, setFormState] = useState<WizardFormState>({});
   const { accounts, currentAccountId } = useAccounts();
+  const categoryOptions = useMemo(() => getCategoryOptionsForLocale(locale), [locale]);
+
+  const resolveCategoryLabel = (value: CategoryKey | string | undefined) => {
+    if (!value) return t("upload.other");
+    const option = categoryOptions.find((item) => item.value === value);
+    if (option) return option.label;
+    return categoryConfig[value as keyof typeof categoryConfig]?.label ?? t("upload.other");
+  };
+
+  const resolveAccountLabel = (accountId?: string) => {
+    if (!accountId) return "—";
+    const account = accounts.find((acc) => acc.id === accountId);
+    return account ? formatAccountLabel(account, locale) : "—";
+  };
+  const categoryEmoji: Record<string, string> = {
+    food_supermarket: "🛒",
+    restaurants_cafe: "🍽️",
+    transport: "🚗",
+    home_bills: "🏠",
+    clothing: "👕",
+    subscriptions: "📺",
+    entertainment: "🎧",
+    health: "💊",
+    alcohol: "🍸",
+    tobacco: "🚬",
+    beauty: "✨",
+    gifts: "🎁",
+    other: "🧩",
+    transfer: "🔁",
+  };
 
   const totals = useMemo(() => {
     if (!formState.totalOriginal || !formState.currencyOriginal) return null;
@@ -195,7 +224,6 @@ export default function UploadWizard({
           totalOriginal: payload.total_sum_bgn ?? "",
           currencyOriginal: "BGN",
           category: primaryCategory,
-          paymentMethod: "",
           notes: "",
           sourceType:
             formState.sourceType ?? "receipt",
@@ -268,8 +296,8 @@ export default function UploadWizard({
     <div
       className={
         isCompact
-          ? `w-full max-w-full box-border rounded-2xl border border-slate-200 bg-white p-3 shadow-sm ${className ?? ""}`
-          : `w-full max-w-full box-border rounded-[2rem] bg-white p-4 shadow-[0_10px_40px_rgba(0,0,0,0.06)] backdrop-blur-md sm:p-8 ${
+          ? `w-full max-w-full box-border rounded-2xl border border-white/40 bg-white/20 p-3 shadow-glow backdrop-blur-3xl ${className ?? ""}`
+          : `w-full max-w-full box-border rounded-[2rem] bg-white/20 p-4 shadow-[0_10px_40px_rgba(0,0,0,0.06)] backdrop-blur-md sm:p-8 ${
               className ?? ""
             }`
       }
@@ -319,7 +347,7 @@ export default function UploadWizard({
         {step === 1 && (
           <div className={isCompact ? "flex flex-col gap-2" : "grid gap-2 sm:gap-4"}>
             {isCompact ? (
-              <div className="rounded-2xl border border-slate-200 bg-white px-3 py-2">
+              <div className="rounded-2xl border border-white/40 bg-white/30 px-3 py-2">
                 <div className="flex items-center gap-2 text-[11px] font-semibold text-slate-500">
                   <span className="text-xs">✨</span>
                   {t("upload.aiScan")}
@@ -328,7 +356,7 @@ export default function UploadWizard({
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[12px] font-semibold text-slate-700 transition hover:bg-slate-50"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/40 bg-white/30 px-3 py-2 text-[12px] font-semibold text-slate-700 transition hover:bg-white/40"
                   >
                     <span aria-hidden="true">📁</span>
                     {t("upload.upload")}
@@ -336,7 +364,7 @@ export default function UploadWizard({
                   <button
                     type="button"
                     onClick={openCamera}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[12px] font-semibold text-slate-700 transition hover:bg-slate-50"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/40 bg-white/30 px-3 py-2 text-[12px] font-semibold text-slate-700 transition hover:bg-white/40"
                   >
                     <span aria-hidden="true">📸</span>
                     {t("upload.capture")}
@@ -344,7 +372,7 @@ export default function UploadWizard({
                 </div>
               </div>
             ) : (
-              <div className="flex min-h-[180px] flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-blue-300/50 bg-white/80 p-5 text-center text-slate-700 sm:min-h-[220px] sm:gap-4 sm:p-6">
+              <div className="flex min-h-[180px] flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-white/40 bg-white/20 backdrop-blur-3xl p-5 text-center text-slate-700 sm:min-h-[220px] sm:gap-4 sm:p-6">
                 <p className="text-[13px] font-semibold text-slate-900 sm:text-lg">
                   {t("upload.uploadOrPhoto")}
                 </p>
@@ -352,7 +380,7 @@ export default function UploadWizard({
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-white py-3 px-3 text-[13px] font-bold text-slate-900 shadow-[0_10px_24px_rgba(59,130,246,0.2)] transition hover:scale-105 hover:bg-slate-50 sm:gap-3 sm:p-8 sm:text-base"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-white/20 py-3 px-3 text-[13px] font-bold text-slate-900 shadow-glow backdrop-blur-xl transition hover:scale-105 hover:bg-white/20 sm:gap-3 sm:p-8 sm:text-base"
                   >
                     <FileUp className="h-5 w-5" />
                     {t("upload.upload")}
@@ -360,7 +388,7 @@ export default function UploadWizard({
                   <button
                     type="button"
                     onClick={openCamera}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-white py-3 px-3 text-[13px] font-bold text-slate-900 shadow-[0_10px_24px_rgba(59,130,246,0.2)] transition hover:scale-105 hover:bg-slate-50 sm:gap-3 sm:p-8 sm:text-base"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-white/20 py-3 px-3 text-[13px] font-bold text-slate-900 shadow-glow backdrop-blur-xl transition hover:scale-105 hover:bg-white/20 sm:gap-3 sm:p-8 sm:text-base"
                   >
                     <Camera className="h-5 w-5" />
                     {t("upload.capture")}
@@ -378,7 +406,7 @@ export default function UploadWizard({
                         sourceType: e.target.value as "receipt" | "bank" | "unknown",
                       }))
                     }
-                    className="min-h-[36px] h-auto w-full max-w-full rounded-xl border border-slate-100 bg-slate-50 px-2 py-1 text-center text-[13px] text-slate-900 leading-tight outline-none transition focus:border-indigo-500/50 focus:bg-white box-border"
+                    className="min-h-[36px] h-auto w-full max-w-full rounded-xl border border-white/40 bg-white/30 px-2 py-1 text-center text-[13px] text-slate-900 leading-tight outline-none transition focus:border-indigo-500/50 focus:bg-white/60 box-border"
                   >
                     <option value="receipt">{t("upload.receipt")}</option>
                     <option value="bank">{t("upload.bankStatement")}</option>
@@ -391,7 +419,7 @@ export default function UploadWizard({
               <p className="text-xs text-amber-600">{cameraError}</p>
             )}
             {cameraOpen && (
-              <div className="mt-2 w-full max-w-xl rounded-2xl border border-slate-200 bg-white/80 p-3 text-left">
+              <div className="mt-2 w-full max-w-xl rounded-2xl border border-white/40 bg-white/20 p-3 text-left">
                 <video ref={videoRef} className="w-full rounded-lg" playsInline />
                 <div className="mt-3 flex flex-wrap gap-2">
                   <button
@@ -404,7 +432,7 @@ export default function UploadWizard({
                   <button
                     type="button"
                     onClick={stopCamera}
-                    className="rounded-lg bg-white px-4 py-2 text-xs font-semibold text-slate-900"
+                    className="rounded-lg bg-white/30 px-4 py-2 text-xs font-semibold text-slate-900"
                   >
                     {t("upload.cancel")}
                   </button>
@@ -444,7 +472,7 @@ export default function UploadWizard({
         )}
 
         {step === 2 && file && (
-          <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-[0_10px_40px_rgba(0,0,0,0.04)]">
+          <div className="rounded-2xl border border-white/40 bg-white/20 p-4 shadow-glow">
             <p className="text-sm text-slate-700">
               {t("upload.sending")}
             </p>
@@ -462,7 +490,7 @@ export default function UploadWizard({
         {step === 3 && extracted && (
           <div className="space-y-4">
             <div className="grid gap-4 lg:grid-cols-2">
-              <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-[0_10px_40px_rgba(0,0,0,0.04)]">
+              <div className="rounded-2xl border border-white/40 bg-white/20 p-4 shadow-glow">
                 <h3 className="text-lg font-semibold text-slate-900">
                   {t("upload.resultEdit")}
                 </h3>
@@ -474,7 +502,7 @@ export default function UploadWizard({
                       onChange={(e) =>
                         setFormState((s) => ({ ...s, accountId: e.target.value }))
                       }
-                      className="mt-1 w-full rounded-xl border-2 border-slate-100 bg-slate-50 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+                      className="mt-1 w-full rounded-xl border border-white/40 bg-white/30 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white/60"
                     >
                       {accounts.map((acc) => (
                         <option key={acc.id} value={acc.id}>
@@ -499,7 +527,7 @@ export default function UploadWizard({
                           merchantName: e.target.value,
                         }))
                       }
-                      className="mt-1 w-full rounded-lg border-2 border-slate-100 bg-slate-50 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+                      className="mt-1 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white/60"
                     />
                   </label>
                   <label className="text-sm text-slate-700">
@@ -514,7 +542,7 @@ export default function UploadWizard({
                           transactionDate: e.target.value,
                         }))
                       }
-                      className="mt-1 w-full rounded-lg border-2 border-slate-100 bg-slate-50 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+                      className="mt-1 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white/60"
                     />
                   </label>
                   <label className="text-sm text-slate-700">
@@ -530,7 +558,7 @@ export default function UploadWizard({
                           totalOriginal: e.target.value,
                         }))
                       }
-                      className="mt-1 w-full rounded-lg border-2 border-slate-100 bg-slate-50 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+                      className="mt-1 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white/60"
                     />
                   </label>
                   <label className="text-sm text-slate-700">
@@ -544,7 +572,7 @@ export default function UploadWizard({
                           currencyOriginal: e.target.value,
                         }))
                       }
-                      className="mt-1 w-full rounded-lg border-2 border-slate-100 bg-slate-50 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+                      className="mt-1 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white/60"
                     >
                       <option value="BGN">BGN</option>
                       <option value="EUR">EUR</option>
@@ -561,9 +589,9 @@ export default function UploadWizard({
                           category: e.target.value,
                         }))
                       }
-                      className="mt-1 w-full rounded-lg border-2 border-slate-100 bg-slate-50 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+                      className="mt-1 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white/60"
                     >
-                      {getCategoryOptionsForLocale(locale).map((c) => (
+                      {categoryOptions.map((c) => (
                         <option key={c.value} value={c.value}>
                           {c.label}
                         </option>
@@ -586,7 +614,7 @@ export default function UploadWizard({
                           notes: e.target.value,
                         }))
                       }
-                      className="mt-1 w-full rounded-lg border-2 border-slate-100 bg-slate-50 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+                      className="mt-1 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white/60"
                     />
                   </label>
                 </div>
@@ -596,22 +624,88 @@ export default function UploadWizard({
                   </p>
                 )}
               </div>
-              <div className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-[0_10px_40px_rgba(0,0,0,0.04)] text-sm text-slate-700">
-                <h4 className="text-lg font-semibold text-slate-900">{t("upload.aiData")}</h4>
-                <p className="mt-2 text-slate-600">
-                  {t("upload.overallConfidence", {
-                    value: (overallConfidence * 100).toFixed(0),
-                  })}
-                </p>
+              <div className="relative overflow-hidden rounded-[2rem] border border-white/60 bg-white/20 p-5 font-mono text-[11px] text-slate-600 shadow-[0_12px_40px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+                <div className="pointer-events-none absolute inset-0 rounded-[2rem] border border-transparent bg-gradient-to-r from-indigo-200/30 via-cyan-200/20 to-purple-200/30 opacity-0 transition-opacity duration-500 motion-safe:animate-pulse" />
+                <div className="relative space-y-4">
+                  <div className="flex items-center justify-between font-sans">
+                    <h4 className="text-base font-semibold text-slate-900">{t("upload.aiData")}</h4>
+                    <span className="text-[10px] text-slate-500">
+                      {t("upload.overallConfidence", {
+                        value: (overallConfidence * 100).toFixed(0),
+                      })}
+                    </span>
+                  </div>
+                  <div className="rounded-2xl border border-dashed border-white/40 bg-white/20 px-4 py-3 font-sans">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400">
+                          {t("upload.merchant")}
+                        </p>
+                        <p className="mt-1 flex items-center gap-2 text-sm font-semibold text-slate-900">
+                          <span>{categoryEmoji[formState.category ?? "other"] ?? "🧾"}</span>
+                          {formState.merchantName?.trim() || "—"}
+                        </p>
+                      </div>
+                      <p className="text-[13px] font-semibold text-slate-900">
+                        {formState.transactionDate
+                          ? new Date(formState.transactionDate).toLocaleDateString(
+                              locale === "en" ? "en-US" : "bg-BG",
+                            )
+                          : "—"}
+                      </p>
+                    </div>
+                    <div className="mt-3 flex items-center justify-between border-t border-dashed border-white/40 pt-3">
+                      <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400">
+                        {t("upload.total")}
+                      </span>
+                      <span className="text-lg font-semibold text-slate-900">
+                        {formState.totalOriginal
+                          ? `${formState.totalOriginal} ${formState.currencyOriginal ?? "BGN"}`
+                          : "—"}
+                      </span>
+                    </div>
+                    {totals && (
+                      <p className="mt-2 text-xs text-slate-500">
+                        {formatMoney(totals.eurCents, totals.bgnCents)}
+                      </p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between border-b border-dashed border-white/40 pb-2">
+                      <span className="uppercase tracking-[0.2em] text-slate-400">
+                        {t("upload.categoryAi")}
+                      </span>
+                      <span className="font-semibold text-slate-900">
+                        {resolveCategoryLabel(formState.category)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between border-b border-dashed border-white/40 pb-2">
+                      <span className="uppercase tracking-[0.2em] text-slate-400">
+                        {t("upload.account")}
+                      </span>
+                      <span className="font-semibold text-slate-900">
+                        {resolveAccountLabel(formState.accountId)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between border-b border-dashed border-white/40 pb-2">
+                      <span className="uppercase tracking-[0.2em] text-slate-400">
+                        {t("upload.note")}
+                      </span>
+                      <span className="font-semibold text-slate-900">
+                        {formState.notes?.trim() || "—"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
                 {extracted.data?.items?.length ? (
-                  <div className="mt-3 space-y-2">
-                    <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
+                  <div className="mt-4 space-y-2 font-sans">
+                    <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400">
                       {t("upload.items")}
                     </p>
                     {extracted.data.items.map((item, idx) => (
                       <div
                         key={idx}
-                        className="flex items-center justify-between rounded-lg bg-white px-3 py-2"
+                        className="flex items-center justify-between rounded-lg bg-white/70 px-3 py-2 text-xs"
                       >
                         <div>
                           <p className="font-semibold text-slate-900">
@@ -628,7 +722,7 @@ export default function UploadWizard({
                     ))}
                   </div>
                 ) : (
-                  <p className="mt-2 text-emerald-600">
+                  <p className="mt-3 text-emerald-600">
                     {t("upload.fieldsClear")}
                   </p>
                 )}
@@ -654,7 +748,7 @@ export default function UploadWizard({
         )}
 
         {step === 4 && (
-          <div className="rounded-2xl border border-slate-200 bg-emerald-500/10 p-6 text-slate-800">
+          <div className="rounded-2xl border border-white/40 bg-emerald-500/10 p-6 text-slate-800">
             <h3 className="text-lg font-semibold text-slate-900">
               {t("upload.saved")}
             </h3>
@@ -679,7 +773,7 @@ export default function UploadWizard({
                   stopCamera();
                   setStep(1);
                 }}
-                className="rounded-xl bg-white px-4 py-3 text-sm font-semibold text-slate-900"
+                className="rounded-xl bg-white/30 px-4 py-3 text-sm font-semibold text-slate-900"
               >
                 {t("upload.newExpense")}
               </button>

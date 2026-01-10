@@ -279,7 +279,7 @@ export default function RecurringTemplates({
   return (
     <div className="space-y-4">
       {showForm && (
-        <div className="glass rounded-3xl border border-slate-200 bg-white/70 p-6 shadow-glow">
+        <div className="glass rounded-3xl border border-white/40 bg-white/20 p-6 shadow-glow">
           <h3 className="text-lg font-semibold text-slate-900">
             {t("recurring.newTitle")}
           </h3>
@@ -289,7 +289,7 @@ export default function RecurringTemplates({
             <select
               value={form.accountId}
               onChange={(e) => setForm((f) => ({ ...f, accountId: e.target.value }))}
-              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-900"
+              className="mt-1 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-slate-900"
             >
               {accounts.map((acc) => (
                 <option key={acc.id} value={acc.id}>
@@ -311,7 +311,7 @@ export default function RecurringTemplates({
                       ?.items?.[0] ?? "",
                 }))
               }
-              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-900"
+              className="mt-1 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-slate-900"
             >
               {recurringGroups.map((group) => (
                 <option key={group.value} value={group.value}>
@@ -325,7 +325,7 @@ export default function RecurringTemplates({
             <select
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-900"
+              className="mt-1 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-slate-900"
             >
               {groupItems.map((item) => (
                 <option key={item} value={item}>
@@ -343,7 +343,7 @@ export default function RecurringTemplates({
               step="0.01"
               value={form.amount}
               onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))}
-              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-900"
+              className="mt-1 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-slate-900"
             />
           </label>
           <label className="text-sm text-slate-700">
@@ -356,7 +356,7 @@ export default function RecurringTemplates({
               onChange={(e) =>
                 setForm((f) => ({ ...f, paymentDay: e.target.value }))
               }
-              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-900"
+              className="mt-1 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-slate-900"
             />
           </label>
           <label className="text-sm text-slate-700 sm:col-span-2">
@@ -364,7 +364,7 @@ export default function RecurringTemplates({
             <textarea
               value={form.note}
               onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
-              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-slate-900"
+              className="mt-1 w-full rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-slate-900"
             />
           </label>
         </div>
@@ -406,7 +406,7 @@ export default function RecurringTemplates({
                   isActive: true,
                 });
               }}
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-700"
+              className="inline-flex items-center gap-2 rounded-lg border border-white/40 bg-white/20 px-4 py-2 text-xs font-semibold text-slate-700"
             >
               <X size={16} />
               {t("recurring.cancel")}
@@ -416,7 +416,7 @@ export default function RecurringTemplates({
         </div>
       )}
 
-      <div className="glass rounded-3xl border border-slate-200 bg-white/70 p-6 shadow-glow">
+      <div className="glass rounded-3xl border border-white/40 bg-white/20 p-6 shadow-glow">
         <h3 className="text-lg font-semibold text-slate-900">{resolvedTitle}</h3>
         {recurringTotals.length > 0 ? (
           <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -427,10 +427,10 @@ export default function RecurringTemplates({
               return (
                 <div
                   key={value}
-                className="flex items-center justify-between rounded-2xl bg-white px-3 py-2 text-xs text-slate-700"
+                className="flex items-center justify-between rounded-2xl bg-white/30 px-3 py-2 text-xs text-slate-700"
                 >
                   <span className="flex items-center gap-2 text-slate-900">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/30">
                       <Icon className="h-4 w-4 text-slate-900" />
                     </span>
                     {getRecurringGroupLabel(group, locale)}
@@ -462,7 +462,7 @@ export default function RecurringTemplates({
             {templates.map((template) => (
               <div
                 key={template.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white/70 px-4 py-3 text-sm text-slate-700"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/40 bg-white/20 px-4 py-3 text-sm text-slate-700"
               >
                 <div>
                   <p className="text-slate-900">
@@ -510,7 +510,7 @@ export default function RecurringTemplates({
                       }
                       startEdit(template);
                     }}
-                    className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-900"
+                    className="rounded-full border border-white/40 px-3 py-1 text-xs font-semibold text-slate-900"
                   >
                     {t("recurring.edit")}
                   </button>
@@ -519,7 +519,7 @@ export default function RecurringTemplates({
                     className={`rounded-full px-3 py-1 text-xs font-semibold ${
                       template.isActive
                         ? "bg-emerald-500/15 text-emerald-700"
-                        : "bg-slate-200 text-slate-700"
+                        : "bg-white/30 text-slate-700"
                     }`}
                   >
                     {template.isActive ? t("recurring.active") : t("recurring.paused")}

@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Check } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { AuthModalHost, AuthOpenButton } from "@/components/auth/auth-modal";
+import Footer from "@/components/footer";
 
 const features = [
   "Всички AI функции",
@@ -40,7 +41,7 @@ export default function PricingPage() {
             Планове
           </p>
           <h1 className="mt-3 text-3xl font-semibold text-slate-900 sm:text-4xl">
-            Пробвай премиум без риск.
+            Пробвай безплатно без ангажимент.
           </h1>
           <p className="mt-3 text-sm text-slate-600 sm:text-base">
             Започни с 1 месец безплатно и отключи всички AI функции още днес.
@@ -107,36 +108,7 @@ export default function PricingPage() {
           </Card>
         </div>
       </main>
-      <footer className="border-t border-blue-900/20 bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-8 text-xs text-white/80 sm:flex-row sm:px-6">
-          <Link href="/" className="flex items-center gap-3">
-            <span className="flex h-12 w-32 items-center justify-center overflow-hidden rounded-3xl border border-white/20 bg-white/10 shadow-[0_12px_30px_rgba(15,23,42,0.18)] backdrop-blur-sm ring-1 ring-white/20">
-              <Image
-                src="/novologo.png"
-                alt="Logo"
-                width={160}
-                height={48}
-                className="h-full w-full object-cover scale-240 brightness-0 invert"
-                priority
-              />
-            </span>
-          </Link>
-          <div className="flex flex-wrap items-center justify-center gap-4 uppercase tracking-[0.2em]">
-            <Link href="/contact" className="hover:text-white">
-              Контакти
-            </Link>
-            <Link href="/faq" className="hover:text-white">
-              Често задавани въпроси
-            </Link>
-            <Link href="/policies" className="hover:text-white">
-              Политики
-            </Link>
-            <Link href="/privacy" className="hover:text-white">
-              Поверителност
-            </Link>
-          </div>
-        </div>
-      </footer>
+      <Footer className="mt-6" />
       <AuthModalHost />
     </div>
   );

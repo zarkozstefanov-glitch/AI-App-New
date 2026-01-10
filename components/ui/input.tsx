@@ -8,7 +8,7 @@ const Input = forwardRef<HTMLInputElement, Props>(({ className, ...props }, ref)
     <input
       ref={ref}
       className={clsx(
-        "w-full rounded-xl border-2 border-slate-100 bg-slate-50 px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white",
+        "w-full rounded-xl border border-white/40 bg-white/30 px-3 py-2 text-sm text-slate-800 outline-none shadow-glow backdrop-blur-xl transition focus:border-blue-400/60 focus:bg-white/60",
         className,
       )}
       {...props}
