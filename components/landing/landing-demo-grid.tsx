@@ -571,18 +571,26 @@ export default function LandingDemoGrid({
           ) : (
             <>
               <motion.div
-                className="flex touch-pan-y"
+                className="flex w-full touch-pan-y will-change-transform"
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.15}
+                dragMomentum={false}
                 onDragEnd={handleDragEnd}
                 animate={{ x: `${-activeIndex * 100}%` }}
-                transition={{ type: "spring", stiffness: 260, damping: 30 }}
+                transition={{ type: "spring", stiffness: 220, damping: 28 }}
               >
                 {cards.map((card, index) => (
-                  <motion.button
+                  <motion.div
                     key={card.id}
-                    type="button"
+                    role="button"
+                    tabIndex={0}
                     onClick={() => setActiveIndex(index)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        setActiveIndex(index);
+                      }
+                    }}
                     className="w-full shrink-0 px-2"
                     animate={{ scale: activeIndex === index ? 1 : 0.98 }}
                     whileTap={{ scale: 0.97 }}
@@ -600,7 +608,7 @@ export default function LandingDemoGrid({
                         {card.renderMain}
                       </motion.div>
                     </div>
-                  </motion.button>
+                  </motion.div>
                 ))}
               </motion.div>
               <div className="flex items-center justify-center gap-2">

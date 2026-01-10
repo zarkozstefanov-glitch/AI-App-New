@@ -144,8 +144,28 @@ export default function LandingHeader() {
             </AuthOpenButton>
           </div>
           <div className="flex items-center gap-2 lg:hidden">
-            <AuthOpenButton className="rounded-full border border-white/40 bg-white/10 px-4 py-2 text-xs font-semibold text-slate-700 shadow-glow backdrop-blur-xl transition hover:scale-[1.05]">
-              {t("landing.hero.ctaPrimary")}
+            <div className="flex items-center rounded-full border border-white/50 bg-white/40 px-1 py-1 text-[10px] font-semibold shadow-glow backdrop-blur-xl">
+              <button
+                type="button"
+                onClick={() => setLocale("bg")}
+                className={`rounded-full px-2 py-1 transition ${
+                  locale === "bg" ? "bg-white/70 text-slate-800" : "text-slate-500"
+                }`}
+              >
+                BG
+              </button>
+              <button
+                type="button"
+                onClick={() => setLocale("en")}
+                className={`rounded-full px-2 py-1 transition ${
+                  locale === "en" ? "bg-white/70 text-slate-800" : "text-slate-500"
+                }`}
+              >
+                EN
+              </button>
+            </div>
+            <AuthOpenButton className="rounded-full border border-white/50 bg-white/40 px-3 py-2 text-xs font-semibold text-slate-700 shadow-glow backdrop-blur-xl transition hover:scale-[1.05]">
+              {t("auth.login")}
             </AuthOpenButton>
           </div>
           </div>
