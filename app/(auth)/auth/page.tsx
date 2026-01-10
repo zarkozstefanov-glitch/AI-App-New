@@ -49,9 +49,16 @@ export default async function AuthPage() {
     Math.round(eurCents * 1.95583);
   const bgnCentsToEurCents = (bgnCents: number) =>
     Math.round(bgnCents / 1.95583);
+  const demoNow = new Date("2026-01-09T12:00:00Z");
+  const startOfDay = (date: Date) =>
+    new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const startOfMonth = (date: Date) =>
+    new Date(date.getFullYear(), date.getMonth(), 1);
+  const endOfMonth = (date: Date) =>
+    new Date(date.getFullYear(), date.getMonth() + 1, 0);
 
   const mockData = {
-    budgetBgnCents: 150000,
+    budgetBgnCents: 200000,
     accounts: [
       {
         id: "demo-cash",
@@ -142,15 +149,33 @@ export default async function AuthPage() {
 
   const demoAccounts = mockData.accounts;
   const demoTransactions = mockData.transactions;
+  const spentToDateBgnCents = demoTransactions
+    .filter((tx) => new Date(tx.transactionDate) <= demoNow)
+    .reduce((sum, tx) => sum + tx.bgnCents, 0);
   const totalSpentBgnCents = demoTransactions.reduce(
     (sum, tx) => sum + tx.bgnCents,
     0,
   );
-  const remainingBgnCents = Math.max(mockData.budgetBgnCents - totalSpentBgnCents, 0);
-  const upcomingFixedBgnCents = mockData.upcomingPayments.reduce(
-    (sum, payment) => sum + payment.bgnCents,
-    0,
+  const remainingBgnCents = Math.max(mockData.budgetBgnCents - spentToDateBgnCents, 0);
+  const upcomingFixedBgnCents = mockData.upcomingPayments
+    .filter((payment) => new Date(payment.transactionDate) >= startOfDay(demoNow))
+    .reduce((sum, payment) => sum + payment.bgnCents, 0);
+  const totalDaysInMonth = Math.max(
+    1,
+    Math.floor(
+      (startOfDay(endOfMonth(demoNow)).getTime() -
+        startOfDay(startOfMonth(demoNow)).getTime()) /
+        (24 * 60 * 60 * 1000),
+    ) + 1,
   );
+  const elapsedDaysInMonth = Math.max(1, demoNow.getDate());
+  const remainingDaysInMonth = Math.max(0, totalDaysInMonth - elapsedDaysInMonth);
+  const averageDailyVariableBgn = spentToDateBgnCents / elapsedDaysInMonth;
+  const projectedBgnCents =
+    Math.round(averageDailyVariableBgn * remainingDaysInMonth) +
+    spentToDateBgnCents +
+    upcomingFixedBgnCents;
+  const toSaveBgnCents = Math.max(mockData.budgetBgnCents - projectedBgnCents, 0);
 
   const categoryTotals = new Map<
     CategoryKey,
@@ -207,14 +232,14 @@ export default async function AuthPage() {
     },
     upcomingFixedBgnCents,
     projectedTotal: {
-      bgnCents: totalSpentBgnCents,
-      eurCents: bgnCentsToEurCents(totalSpentBgnCents),
+      bgnCents: projectedBgnCents,
+      eurCents: bgnCentsToEurCents(projectedBgnCents),
     },
     toSave: {
-      bgnCents: remainingBgnCents,
-      eurCents: bgnCentsToEurCents(remainingBgnCents),
+      bgnCents: toSaveBgnCents,
+      eurCents: bgnCentsToEurCents(toSaveBgnCents),
     },
-    remainingDaysInMonth: 22,
+    remainingDaysInMonth,
     byCategory: demoByCategory,
     topMerchants: sortedMerchants.map((item) => ({
       merchant: item.merchant,

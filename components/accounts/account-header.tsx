@@ -142,7 +142,9 @@ export default function AccountHeader({
             style={{ WebkitOverflowScrolling: "touch" }}
           >
             {sorted.map((account) => {
-              const colors = demoAccountColors[account.kind];
+              const colors =
+                demoAccountColors[account.kind] ??
+                demoAccountColors.cash;
               return (
               <div
                 key={account.id}
@@ -211,7 +213,9 @@ export default function AccountHeader({
       ) : (
         <div className="mt-6 grid gap-y-4 md:grid-cols-3 md:gap-4">
           {sorted.map((account) => {
-            const colors = demoAccountColors[account.kind];
+            const colors =
+              demoAccountColors[account.kind] ??
+              demoAccountColors.cash;
             return (
             <div key={account.id} className={accountCardBaseLive}>
               <div className="flex w-full items-center gap-4">
