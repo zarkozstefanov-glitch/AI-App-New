@@ -47,15 +47,7 @@ export function AuthModalHost() {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm">
       <div className="w-full max-w-md rounded-3xl border border-white/40 bg-white/70 p-5 shadow-[0_20px_60px_rgba(15,23,42,0.18)]">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
-              Вход / Регистрация
-            </p>
-            <h3 className="text-lg font-semibold text-slate-900">
-              Влез или създай профил.
-            </h3>
-          </div>
+        <div className="flex items-center justify-end">
           <button
             type="button"
             onClick={() => setOpen(false)}

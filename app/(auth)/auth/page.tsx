@@ -364,25 +364,25 @@ export default async function AuthPage() {
           <div className="pointer-events-none absolute inset-0 diagonal-clip diagonal-flow" />
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-              <div className="space-y-6 text-left">
+              <div className="space-y-6 text-center lg:text-left">
                 <h1 className="text-4xl font-bold leading-tight text-[#1E40AF] sm:text-5xl lg:text-6xl">
                   {t("landing.hero.title")}
                 </h1>
-                <p className="max-w-xl text-sm text-[#1E293B] sm:text-base">
+                <p className="mx-auto max-w-xl text-sm text-[#1E293B] sm:text-base lg:mx-0">
                   {t("landing.hero.subtitle")}
                 </p>
-                <div className="flex flex-wrap gap-3">
-                  <AuthOpenButton className="rounded-full bg-gradient-to-r from-sky-300 via-indigo-300 to-violet-300 px-7 py-3 text-sm font-semibold text-slate-800 shadow-glow transition hover:-translate-y-0.5 hover:scale-[1.05] hover:shadow-neon-strong">
+                <div className="flex flex-nowrap items-center justify-center gap-2 lg:justify-start">
+                  <AuthOpenButton className="rounded-full bg-gradient-to-r from-sky-300 via-indigo-300 to-violet-300 px-4 py-2 text-xs font-semibold text-slate-800 shadow-glow transition hover:-translate-y-0.5 hover:scale-[1.05] hover:shadow-neon-strong sm:px-7 sm:py-3 sm:text-sm">
                     {t("landing.hero.ctaPrimary")}
                   </AuthOpenButton>
                   <a
                     href="#dashboard-demo"
-                    className="rounded-full border border-blue-200/60 bg-white/40 px-6 py-3 text-sm font-semibold text-[#1E40AF] shadow-glow backdrop-blur-xl transition hover:-translate-y-0.5 hover:scale-[1.05] hover:shadow-neon-strong"
+                    className="rounded-full border border-blue-200/60 bg-white/40 px-4 py-2 text-xs font-semibold text-[#1E40AF] shadow-glow backdrop-blur-xl transition hover:-translate-y-0.5 hover:scale-[1.05] hover:shadow-neon-strong sm:px-6 sm:py-3 sm:text-sm"
                   >
                     {t("landing.hero.ctaSecondary")}
                   </a>
                 </div>
-                <div className="flex flex-wrap items-center justify-start gap-3 text-xs text-slate-700">
+                <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-slate-700 lg:justify-start">
                   <span className="inline-flex items-center rounded-full border border-white/40 bg-white/10 px-3 py-1 backdrop-blur-2xl shadow-glow animate-float">
                     {t("landing.hero.badgeNoRegistration")}
                   </span>
