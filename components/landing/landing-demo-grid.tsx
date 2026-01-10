@@ -85,6 +85,45 @@ export default function LandingDemoGrid({
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
   const [isDesktop, setIsDesktop] = useState<boolean | null>(null);
 
+  const amountFormatter = useMemo(
+    () =>
+      new Intl.NumberFormat("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }),
+    [],
+  );
+
+  const renderPrimaryAmount = (cents: number | null) => {
+    if (cents == null) return "—";
+    return (
+      <span className="flex items-baseline gap-1">
+        <span>€</span>
+        <NumberTicker value={fromCents(cents)} format={(val) => amountFormatter.format(val)} />
+      </span>
+    );
+  };
+
+  const renderSecondaryAmount = (cents: number | null) => {
+    if (cents == null) return "—";
+    return (
+      <span>
+        BGN{" "}
+        <NumberTicker value={fromCents(cents)} format={(val) => amountFormatter.format(val)} />
+      </span>
+    );
+  };
+
+  const dailyLimitBgnCents =
+    demoSummary.remainingBudget.bgnCents != null && demoSummary.remainingDaysInMonth > 0
+      ? Math.floor(
+          (demoSummary.remainingBudget.bgnCents - demoSummary.upcomingFixedBgnCents) /
+            demoSummary.remainingDaysInMonth,
+        )
+      : null;
+  const dailyLimitEurCents =
+    dailyLimitBgnCents != null ? Math.round(dailyLimitBgnCents / 1.95583) : null;
+
   useEffect(() => {
     const mediaQuery = window.matchMedia("(min-width: 768px)");
     const update = () => setIsDesktop(mediaQuery.matches);
@@ -500,6 +539,94 @@ export default function LandingDemoGrid({
 
   return (
     <div className="space-y-8">
+      <div className="space-y-2">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-2 lg:grid-cols-6">
+            <div className="w-full">
+              <div className="rounded-2xl border border-white/40 bg-white/40 p-3 shadow-glow backdrop-blur-xl transition-transform hover:scale-[1.05] hover:shadow-neon-strong">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">
+                  {t("dashboard.totalForPeriod")}
+                </p>
+                <h3 className="mt-2 text-lg font-semibold text-slate-900 sm:text-xl">
+                {renderPrimaryAmount(demoSummary.totals.eurCents)}
+              </h3>
+              <p className="mt-1 text-sm text-slate-500">
+                {renderSecondaryAmount(demoSummary.totals.bgnCents)}
+              </p>
+              </div>
+            </div>
+            <div className="w-full">
+              <div className="rounded-2xl border border-white/40 bg-white/40 p-3 shadow-glow backdrop-blur-xl transition-transform hover:scale-[1.05] hover:shadow-neon-strong">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">
+                  {t("dashboard.monthBudget")}
+                </p>
+              <h3 className="mt-2 text-lg font-semibold text-slate-900 sm:text-xl">
+                {renderPrimaryAmount(demoSummary.monthlyBudget.eurCents)}
+              </h3>
+              <p className="mt-1 text-sm text-slate-500">
+                {renderSecondaryAmount(demoSummary.monthlyBudget.bgnCents)}
+              </p>
+              </div>
+            </div>
+            <div className="w-full">
+              <div className="rounded-2xl border border-white/40 bg-white/40 p-3 shadow-glow backdrop-blur-xl transition-transform hover:scale-[1.05] hover:shadow-neon-strong">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">
+                  {t("dashboard.remaining")}
+                </p>
+              <h3 className="mt-2 text-lg font-semibold text-slate-900 sm:text-xl">
+                {renderPrimaryAmount(demoSummary.remainingBudget.eurCents)}
+              </h3>
+              <p className="mt-1 text-sm text-slate-500">
+                {renderSecondaryAmount(demoSummary.remainingBudget.bgnCents)}
+              </p>
+              </div>
+            </div>
+            <div className="w-full">
+              <div className="rounded-2xl border border-white/40 bg-white/40 p-3 shadow-glow backdrop-blur-xl transition-transform hover:scale-[1.05] hover:shadow-neon-strong">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">
+                  {t("dashboard.forecast")}
+                </p>
+              <h3 className="mt-2 text-lg font-semibold text-slate-900 sm:text-xl">
+                {renderPrimaryAmount(demoSummary.projectedTotal.eurCents)}
+              </h3>
+              <p className="mt-1 text-sm text-slate-500">
+                {renderSecondaryAmount(demoSummary.projectedTotal.bgnCents)}
+              </p>
+              </div>
+            </div>
+            <div className="w-full">
+              <div className="rounded-2xl border border-white/40 bg-white/40 p-3 shadow-glow backdrop-blur-xl transition-transform hover:scale-[1.05] hover:shadow-neon-strong">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">
+                  {t("dashboard.toSave")}
+                </p>
+              <h3 className="mt-2 text-lg font-semibold text-slate-900 sm:text-xl">
+                {renderPrimaryAmount(demoSummary.toSave.eurCents)}
+              </h3>
+              <p className="mt-1 text-sm text-slate-500">
+                {renderSecondaryAmount(demoSummary.toSave.bgnCents)}
+              </p>
+              </div>
+            </div>
+            <div className="w-full">
+              <div className="rounded-2xl border border-white/40 bg-white/40 p-3 shadow-glow backdrop-blur-xl transition-transform hover:scale-[1.05] hover:shadow-neon-strong">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">
+                  {t("dashboard.dailyLimit")}
+                </p>
+              <h3 className="mt-2 text-lg font-semibold text-slate-900 sm:text-xl">
+                {renderPrimaryAmount(dailyLimitEurCents)}
+              </h3>
+              <p className="mt-1 text-sm text-slate-500">
+                {dailyLimitBgnCents == null
+                  ? "—"
+                  : (
+                      <span>
+                        {renderSecondaryAmount(dailyLimitBgnCents)} {t("dashboard.perDay")}
+                      </span>
+                    )}
+              </p>
+              </div>
+            </div>
+          </div>
+        </div>
       <div className="space-y-4">
         <div className="relative overflow-hidden rounded-3xl border border-white/40 bg-white/40 p-4 shadow-glow backdrop-blur-xl md:p-6">
           {isDesktop === null ? (

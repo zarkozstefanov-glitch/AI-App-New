@@ -169,6 +169,7 @@ export async function GET(request: NextRequest) {
         totalOriginal: true,
         currencyOriginal: true,
         isFixed: true,
+        transactionDate: true,
       },
     });
 
@@ -202,6 +203,14 @@ export async function GET(request: NextRequest) {
 
     const averageDailyVariableBgn = variableSpentBgnCents / elapsedDaysInMonth;
     const remainingDaysInMonth = Math.max(0, totalDaysInMonth - elapsedDaysInMonth);
+
+    const todayStart = startOfDay(now);
+    const upcomingFixedBgnCents = monthTransactions.reduce((acc, tx) => {
+      if (!tx.isFixed) return acc;
+      if (!tx.transactionDate || tx.transactionDate < todayStart) return acc;
+      const resolved = resolveTotalsCents(tx);
+      return acc + (resolved.bgnCents ?? 0);
+    }, 0);
 
     const fixedPlannedBgnCents = monthTransactions.reduce((acc, tx) => {
       if (!tx.isFixed) return acc;
@@ -246,6 +255,7 @@ export async function GET(request: NextRequest) {
         eurCents: remainingEurCents,
         bgnCents: remainingBgnCents,
       },
+      upcomingFixedBgnCents,
       projectedTotal: {
         eurCents: projectedEurCents,
         bgnCents: projectedBgnCents,

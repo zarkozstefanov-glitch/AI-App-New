@@ -8,7 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { applyDueFixedExpenses } from "@/lib/db/fixed-expenses";
 
 const manualSchema = z.object({
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  date: z.string().optional(),
   accountId: z.string().min(1),
   transactionType: z.enum(["expense", "income"]),
   isFixed: z.boolean().optional().default(false),
@@ -79,12 +79,14 @@ export async function POST(request: NextRequest) {
     if (!account) {
       return jsonError(403, "INVALID_ACCOUNT", "Account not found");
     }
+    const isFixed = parsed.data.isFixed ?? false;
+    const dateForCreate = isFixed ? (parsed.data.date ?? null) : null;
     const transaction = await createManualTransaction({
       userId: user.id,
-      date: parsed.data.date,
+      date: dateForCreate,
       accountId: parsed.data.accountId,
       transactionType: parsed.data.transactionType,
-      isFixed: parsed.data.isFixed ?? false,
+      isFixed,
       merchant: parsed.data.merchant,
       category: parsed.data.category,
       amountCents: toCents(parsed.data.amount),

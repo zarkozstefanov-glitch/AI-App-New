@@ -19,8 +19,6 @@ type TransactionListItemProps = {
   badges?: React.ReactNode;
   transactionType?: "income" | "expense" | "transfer";
   isFixed?: boolean;
-  isEdited?: boolean;
-  statusLabelOverride?: string;
   transactionDate?: string | null;
   amountEurCents?: number | null;
   amountBgnCents?: number | null;
@@ -40,8 +38,6 @@ export default function TransactionListItem({
   badges,
   transactionType,
   isFixed,
-  isEdited,
-  statusLabelOverride,
   transactionDate,
   amountEurCents,
   amountBgnCents,
@@ -67,27 +63,22 @@ export default function TransactionListItem({
   const [now] = useState(() => Date.now());
   const isFuture =
     !!transactionDate && new Date(transactionDate).getTime() > now;
-  const statusLabel =
-    statusLabelOverride ??
-    (transactionType === "income"
-      ? t("transactions.statusIncome")
+  const transferTone = isFuture ? "text-sky-400" : "text-sky-600";
+  const incomeTone = isFuture ? "text-emerald-400" : "text-emerald-600";
+  const expenseTone = isFixed
+    ? isFuture
+      ? "text-slate-400"
+      : "text-rose-600"
+    : isFuture
+      ? "text-rose-400"
+      : "text-rose-600";
+  const statusTone =
+    transactionType === "income"
+      ? incomeTone
       : transactionType === "transfer"
-        ? t("transactions.statusTransfer")
-        : transactionType === "expense"
-          ? isFixed
-            ? t("transactions.statusFixedExpense")
-            : t("transactions.statusExpense")
-          : t("transactions.statusExpense"));
-  const statusTone = isFuture ? "text-violet-400" : "text-violet-600";
-  const amountTone = isFuture
-    ? "text-slate-400"
-    : transactionType === "income"
-      ? "text-emerald-500"
-      : transactionType === "expense"
-        ? "text-rose-600"
-        : transactionType === "transfer"
-          ? "text-sky-500"
-          : "text-slate-900";
+        ? transferTone
+        : expenseTone;
+  const amountTone = statusTone;
   const titleTone = isFuture ? "text-slate-400" : "text-slate-900";
   const eurCents = amountEurCents != null ? Math.abs(amountEurCents) : null;
   const bgnCents = amountBgnCents != null ? Math.abs(amountBgnCents) : null;
@@ -99,59 +90,48 @@ export default function TransactionListItem({
 
   return (
     <div
-      className={`box-border flex w-full flex-nowrap items-center justify-between overflow-hidden border-b border-white/30 px-3 py-4 transition-colors hover:bg-white/20 last:border-0 md:px-4 lg:px-6 ${
+      className={`box-border grid w-full min-w-0 grid-cols-[36px_1fr_auto] items-center gap-2 overflow-hidden border-b border-white/30 px-2 py-2 transition-colors hover:bg-white/20 last:border-0 md:grid-cols-[48px_1fr_auto] md:gap-3 md:px-4 ${
         className ?? ""
       }`}
     >
-      <div className="flex shrink-0 w-10 items-center justify-center md:w-12">
+      <div className="flex items-center justify-center">
         <div
-          className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/40 text-3xl shadow-glow md:h-14 md:w-14"
+          className="flex h-9 w-9 items-center justify-center rounded-2xl shadow-glow md:h-11 md:w-11"
           style={{ backgroundColor: ui.backgroundColor }}
         >
-          <Icon className="h-5 w-5 md:h-6 md:w-6" style={{ color: ui.textColor }} />
+          <Icon className="h-4.5 w-4.5 md:h-5 md:w-5" style={{ color: ui.textColor }} />
         </div>
       </div>
-      <div className="flex min-w-0 flex-1 flex-col justify-center px-3 md:px-5">
-        <p className={`truncate text-[13px] font-semibold md:text-[17px] ${titleTone}`}>
+      <div className="min-w-0">
+        <p className={`truncate text-[13px] font-semibold md:text-[16px] ${titleTone}`}>
           {displayTitle}
         </p>
         {stackedSubtitle ? (
           <div className="flex flex-col text-[10px] text-slate-400 md:text-xs">
-            <span className="truncate">
-              {stackedSubtitle.primary}
-              {badges && <span className="ml-2 inline-flex text-[9px] md:text-[10px]">{badges}</span>}
-            </span>
+            <span className="truncate">{stackedSubtitle.primary}</span>
             <span className="truncate">{stackedSubtitle.secondary}</span>
           </div>
         ) : (
-          <p className="truncate text-[10px] text-slate-400 md:text-xs">
-            {subtitle}
-            {badges && <span className="ml-2 inline-flex text-[9px] md:text-[10px]">{badges}</span>}
-          </p>
+          <p className="truncate text-[10px] text-slate-400 md:text-xs">{subtitle}</p>
         )}
       </div>
-      <div className="flex shrink-0 w-28 flex-col justify-center text-right md:w-36">
+      <div className="flex shrink-0 flex-col items-end gap-1 whitespace-nowrap text-right">
+        {actions && <div className="mb-1 flex items-center justify-center">{actions}</div>}
         {eurCents != null && bgnCents != null && (
-          <>
-            <span className={`whitespace-nowrap text-[14px] font-bold md:text-[18px] ${amountTone}`}>
-              €{amountFormatter.format(fromCents(eurCents))}
-            </span>
-            <span
-              className={`whitespace-nowrap text-[9px] md:text-[12px] ${
-                isFuture ? "text-slate-400" : "text-slate-500"
-              }`}
-            >
-              BGN {amountFormatter.format(fromCents(bgnCents))}
-            </span>
-            <span
-              className={`text-[9px] font-bold uppercase tracking-wider ${statusTone}`}
-            >
-              {statusLabel}
-              {isEdited ? ` • ${t("transactions.edited")}` : ""}
-            </span>
-          </>
+          <div className="flex flex-col items-end gap-0.5 text-right">
+            <div className="flex items-center gap-2 text-[11px] md:text-[12px]">
+              <span className={`font-bold ${amountTone}`}>
+                €{amountFormatter.format(fromCents(eurCents))}
+              </span>
+              <span className={amountTone}>
+                BGN {amountFormatter.format(fromCents(bgnCents))}
+              </span>
+            </div>
+          </div>
         )}
-        {actions}
+        {badges && !actions && (
+          <span className="text-[9px] font-semibold text-slate-500">{badges}</span>
+        )}
       </div>
     </div>
   );

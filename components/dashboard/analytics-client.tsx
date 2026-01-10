@@ -29,6 +29,7 @@ export type Summary = {
   totals: { eurCents: number; bgnCents: number };
   monthlyBudget: { eurCents: number | null; bgnCents: number | null };
   remainingBudget: { eurCents: number | null; bgnCents: number | null };
+  upcomingFixedBgnCents: number;
   projectedTotal: { eurCents: number; bgnCents: number };
   toSave: { eurCents: number | null; bgnCents: number | null };
   remainingDaysInMonth: number;
@@ -448,7 +449,10 @@ export default function AnalyticsClient({
 
   const dailyLimitBgnCents =
     summary?.remainingBudget?.bgnCents != null && summary.remainingDaysInMonth > 0
-      ? Math.floor(summary.remainingBudget.bgnCents / summary.remainingDaysInMonth)
+      ? Math.floor(
+          (summary.remainingBudget.bgnCents - summary.upcomingFixedBgnCents) /
+            summary.remainingDaysInMonth,
+        )
       : null;
   const dailyLimitEurCents =
     dailyLimitBgnCents != null ? Math.round(dailyLimitBgnCents / 1.95583) : null;

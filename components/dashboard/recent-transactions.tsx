@@ -120,16 +120,6 @@ export default function RecentTransactions() {
                 imageUrl={row.originalImageUrl}
                 transactionType={row.transactionType}
                 isFixed={row.isFixed}
-                isEdited={row.isEdited}
-                statusLabelOverride={
-                  row.transactionType === "income"
-                    ? t("transactions.statusIncome").toUpperCase()
-                    : row.transactionType === "transfer"
-                      ? t("transactions.statusTransfer").toUpperCase()
-                      : row.isFixed
-                        ? t("transactions.statusFixedExpense").toUpperCase()
-                        : t("transactions.statusExpense").toUpperCase()
-                }
                 transactionDate={row.transactionDate}
                 amountEurCents={row.totalEurCents}
                 amountBgnCents={row.totalBgnCents}

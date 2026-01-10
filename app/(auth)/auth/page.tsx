@@ -147,6 +147,10 @@ export default async function AuthPage() {
     0,
   );
   const remainingBgnCents = Math.max(mockData.budgetBgnCents - totalSpentBgnCents, 0);
+  const upcomingFixedBgnCents = mockData.upcomingPayments.reduce(
+    (sum, payment) => sum + payment.bgnCents,
+    0,
+  );
 
   const categoryTotals = new Map<
     CategoryKey,
@@ -201,6 +205,7 @@ export default async function AuthPage() {
       bgnCents: remainingBgnCents,
       eurCents: bgnCentsToEurCents(remainingBgnCents),
     },
+    upcomingFixedBgnCents,
     projectedTotal: {
       bgnCents: totalSpentBgnCents,
       eurCents: bgnCentsToEurCents(totalSpentBgnCents),
@@ -377,13 +382,14 @@ export default async function AuthPage() {
                     {t("landing.hero.ctaSecondary")}
                   </a>
                 </div>
-                <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600">
-                  <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-blue-50/60 px-3 py-1">
-                    <Check className="h-3 w-3 text-indigo-500" />
+                <div className="flex flex-wrap items-center justify-start gap-3 text-xs text-slate-700">
+                  <span className="inline-flex items-center rounded-full border border-white/40 bg-white/10 px-3 py-1 backdrop-blur-2xl shadow-glow animate-float">
                     {t("landing.hero.badgeNoRegistration")}
                   </span>
-                  <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-blue-50/60 px-3 py-1">
-                    <Check className="h-3 w-3 text-indigo-500" />
+                  <span
+                    className="inline-flex items-center rounded-full border border-white/40 bg-white/10 px-3 py-1 backdrop-blur-2xl shadow-glow animate-float"
+                    style={{ animationDelay: "0.4s" }}
+                  >
                     {t("landing.hero.badgeBulgarian")}
                   </span>
                 </div>
@@ -553,17 +559,17 @@ export default async function AuthPage() {
           </div>
         </section>
 
-        <section className="relative overflow-hidden pb-6 pt-2">
+        <section className="relative overflow-hidden pb-3 pt-2">
           <div className="pointer-events-none absolute inset-0 diagonal-clip diagonal-flow" />
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <AccountHeader demoAccounts={demoAccounts} hideIncomeAction />
           </div>
         </section>
 
-        <section id="dashboard-demo" className="relative overflow-hidden py-20">
+        <section id="dashboard-demo" className="relative overflow-hidden py-8">
           <div className="pointer-events-none absolute inset-0 diagonal-clip diagonal-flow" />
           <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="space-y-8">
+            <div className="space-y-4">
               <LandingDemoGrid
                 demoAccounts={demoAccounts}
                 demoSummary={demoSummary}

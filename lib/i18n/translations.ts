@@ -31,6 +31,7 @@ export const translations = {
       details: "Детайли",
       back: "Назад",
       currencyBgn: "лв",
+      swipe: "Плъзни",
     },
     errors: {
       emptyResponse: "Празен отговор от сървъра.",
@@ -60,8 +61,8 @@ export const translations = {
           "AI личен финансист, който превръща хаоса от бележки в ясен план за следващата ти почивка.",
         ctaPrimary: "Пробвай безплатно",
         ctaSecondary: "Виж демото",
-        badgeNoRegistration: "Без регистрация",
-        badgeBulgarian: "Изцяло на български",
+        badgeNoRegistration: "1 месец безплатно",
+        badgeBulgarian: "Изключително лесно",
       },
       explore: {
         label: "Разгледай Интелекта",
@@ -363,6 +364,8 @@ export const translations = {
         "Съвет: провери влиянието върху бюджета и постави лимит за най-силната категория.",
       newExpense: "Нов разход",
       cameraError: "Няма достъп до камера. Използвай качване на файл.",
+      cameraHttpsWarning:
+        "Камерата изисква HTTPS. Ако си на http, браузърът може да я блокира.",
       readError: "Неуспешно разчитане на снимката",
       missingData: "Липсват извлечени данни",
       unknownError: "Неизвестна грешка",
@@ -372,6 +375,7 @@ export const translations = {
     },
     recurring: {
       title: "Постоянни разходи",
+      activeTitle: "Моите фиксирани разходи",
       newTitle: "Нова постоянна сметка",
       account: "Акаунт",
       group: "Група",
@@ -524,6 +528,7 @@ export const translations = {
       details: "Details",
       back: "Back",
       currencyBgn: "BGN",
+      swipe: "Swipe",
     },
     errors: {
       emptyResponse: "Empty server response.",
@@ -553,8 +558,8 @@ export const translations = {
           "An AI personal finance assistant that turns receipt chaos into a clear plan for your next trip.",
         ctaPrimary: "Try for free",
         ctaSecondary: "See the demo",
-        badgeNoRegistration: "No registration",
-        badgeBulgarian: "Available in Bulgarian",
+        badgeNoRegistration: "1 month free",
+        badgeBulgarian: "Exceptionally easy",
       },
       explore: {
         label: "Explore the Intelligence",
@@ -855,6 +860,8 @@ export const translations = {
       tip: "Tip: check budget impact and set a limit for the strongest category.",
       newExpense: "New expense",
       cameraError: "No camera access. Use file upload.",
+      cameraHttpsWarning:
+        "Camera requires HTTPS. If you are on http, the browser may block it.",
       readError: "Failed to read the image",
       missingData: "Missing extracted data",
       unknownError: "Unknown error",
@@ -864,6 +871,7 @@ export const translations = {
     },
     recurring: {
       title: "Fixed expenses",
+      activeTitle: "My fixed expenses",
       newTitle: "New fixed payment",
       account: "Account",
       group: "Group",

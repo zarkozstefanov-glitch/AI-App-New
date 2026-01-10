@@ -41,107 +41,112 @@ export default function NewTransaction() {
 
   return (
     <div className="w-full max-w-full space-y-6 overflow-x-hidden">
-      <div className="w-full max-w-full rounded-[2rem] border border-white/40 bg-white/20 p-4 shadow-glow backdrop-blur-3xl animate-float sm:p-6">
-        <div className="mx-auto w-full max-w-full px-4 box-border sm:max-w-md">
-          <div className="relative grid h-[46px] w-full grid-cols-3 items-center rounded-2xl border border-white/40 bg-white/20 p-1 backdrop-blur-xl sm:h-[52px]">
+      <div className="mx-auto w-full max-w-full px-4 box-border sm:max-w-md">
+        <div className="relative grid h-[46px] w-full grid-cols-3 items-center rounded-2xl border border-white/40 bg-white/20 p-1 backdrop-blur-xl sm:h-[52px]">
+          <span
+            className={`absolute inset-y-1 w-1/3 rounded-xl bg-white/70 shadow-glow transition-[transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+              tab === "income"
+                ? "translate-x-0"
+                : tab === "expense"
+                  ? "translate-x-full"
+                  : "translate-x-[200%]"
+            }`}
+          />
+          <button
+            type="button"
+            onClick={() => setTab("income")}
+            className={`relative z-10 h-8 w-full rounded-xl text-[12px] font-semibold transition whitespace-nowrap sm:h-10 sm:text-[14px] ${
+              tab === "income"
+                ? "border border-white/60 bg-white/60 text-emerald-600 font-bold"
+                : "text-slate-500"
+            }`}
+          >
+            {t("transactions.income")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab("expense")}
+            className={`relative z-10 h-8 w-full rounded-xl text-[12px] font-semibold transition whitespace-nowrap sm:h-10 sm:text-[14px] ${
+              tab === "expense"
+                ? "border border-white/60 bg-white/60 text-rose-600 font-bold"
+                : "text-slate-500"
+            }`}
+          >
+            {t("transactions.expense")}
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab("transfer")}
+            className={`relative z-10 h-8 w-full rounded-xl text-[12px] font-semibold transition whitespace-nowrap sm:h-10 sm:text-[14px] ${
+              tab === "transfer"
+                ? "border border-white/60 bg-white/60 text-blue-600 font-bold"
+                : "text-slate-500"
+            }`}
+          >
+            {t("transactions.transfer")}
+          </button>
+        </div>
+      </div>
+
+      {tab === "expense" && (
+        <div className="-mt-2 mx-auto w-full max-w-full px-4 box-border sm:-mt-3 sm:max-w-md">
+          <div className="relative grid h-[44px] w-full grid-cols-3 items-center rounded-2xl border border-white/40 bg-white/20 p-1.5 backdrop-blur-xl sm:h-[52px]">
             <span
-              className={`absolute inset-y-1 w-1/3 rounded-xl bg-white/70 shadow-glow transition-[transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                tab === "income"
+              className={`absolute inset-y-1.5 w-1/3 rounded-xl bg-white/70 shadow-glow transition-[transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                expenseTab === "manual"
                   ? "translate-x-0"
-                  : tab === "expense"
+                  : expenseTab === "ai"
                     ? "translate-x-full"
                     : "translate-x-[200%]"
               }`}
             />
             <button
               type="button"
-              onClick={() => setTab("income")}
-              className={`relative z-10 h-8 w-full rounded-xl text-[12px] font-semibold transition whitespace-nowrap sm:h-10 sm:text-[14px] ${
-                tab === "income"
-                  ? "border border-white/60 bg-white/60 text-emerald-600 font-bold"
+              onClick={() => setExpenseTab("manual")}
+              className={`relative z-10 h-9 w-full rounded-xl border border-transparent text-[12px] font-semibold transition whitespace-nowrap sm:h-10 sm:text-[13px] ${
+                expenseTab === "manual"
+                  ? "text-blue-600 font-bold"
                   : "text-slate-500"
               }`}
             >
-              {t("transactions.income")}
+              {t("transactions.manual")}
             </button>
             <button
               type="button"
-              onClick={() => setTab("expense")}
-              className={`relative z-10 h-8 w-full rounded-xl text-[12px] font-semibold transition whitespace-nowrap sm:h-10 sm:text-[14px] ${
-                tab === "expense"
-                  ? "border border-white/60 bg-white/60 text-rose-600 font-bold"
+              onClick={() => setExpenseTab("ai")}
+              className={`relative z-10 h-9 w-full rounded-xl border border-transparent text-[12px] font-semibold transition whitespace-nowrap sm:h-10 sm:text-[13px] ${
+                expenseTab === "ai"
+                  ? "border-blue-400/60 bg-gradient-to-r from-blue-400/30 to-purple-400/30 text-blue-900 font-extrabold shadow-neon-strong"
                   : "text-slate-500"
               }`}
             >
-              {t("transactions.expense")}
+              {t("transactions.ai")}
             </button>
             <button
               type="button"
-              onClick={() => setTab("transfer")}
-              className={`relative z-10 h-8 w-full rounded-xl text-[12px] font-semibold transition whitespace-nowrap sm:h-10 sm:text-[14px] ${
-                tab === "transfer"
-                  ? "border border-white/60 bg-white/60 text-blue-600 font-bold"
+              onClick={() => setExpenseTab("fixed")}
+              className={`relative z-10 h-9 w-full rounded-xl border border-transparent text-[12px] font-semibold transition whitespace-nowrap sm:h-10 sm:text-[13px] ${
+                expenseTab === "fixed"
+                  ? "text-blue-600 font-bold"
                   : "text-slate-500"
               }`}
             >
-              {t("transactions.transfer")}
+              {t("transactions.fixed")}
             </button>
           </div>
         </div>
+      )}
 
-        {tab === "income" && (
-          <div className="mt-6 mb-6 rounded-[2rem] border border-white/40 bg-white/20 p-6 shadow-glow backdrop-blur-3xl animate-float">
-            <IncomeForm />
-          </div>
-        )}
+      <div
+        className={`w-full max-w-full sm:p-6 ${
+          tab === "expense" && expenseTab === "ai"
+            ? "rounded-[2rem] border border-transparent bg-transparent p-0 shadow-none backdrop-blur-0"
+            : "rounded-[2rem] border border-white/40 bg-white/20 p-4 shadow-glow backdrop-blur-3xl animate-float"
+        }`}
+      >
+        {tab === "income" && <IncomeForm />}
         {tab === "expense" && (
           <div className="mt-2 flex flex-col gap-2">
-            <div className="mx-auto w-full max-w-full px-4 box-border sm:max-w-md">
-              <div className="relative grid h-[38px] w-full grid-cols-3 items-center rounded-2xl border border-white/40 bg-white/20 p-1 backdrop-blur-xl sm:h-[42px]">
-                <span
-                  className={`absolute inset-y-1 w-1/3 rounded-xl bg-white/70 shadow-glow transition-[transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                    expenseTab === "manual"
-                      ? "translate-x-0"
-                      : expenseTab === "ai"
-                        ? "translate-x-full"
-                        : "translate-x-[200%]"
-                  }`}
-                />
-                <button
-                  type="button"
-                  onClick={() => setExpenseTab("manual")}
-                  className={`relative z-10 h-7 w-full rounded-xl border border-transparent text-[10px] font-medium transition whitespace-nowrap sm:h-8 sm:text-[11px] ${
-                    expenseTab === "manual"
-                      ? "text-blue-600 font-bold"
-                      : "text-slate-500"
-                  }`}
-                >
-                  {t("transactions.manual")}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setExpenseTab("ai")}
-                  className={`relative z-10 h-7 w-full rounded-xl border border-transparent text-[10px] font-medium transition whitespace-nowrap sm:h-8 sm:text-[11px] ${
-                    expenseTab === "ai"
-                      ? "border-blue-400/60 bg-gradient-to-r from-blue-400/30 to-purple-400/30 text-blue-900 font-extrabold shadow-neon-strong"
-                      : "text-slate-500"
-                  }`}
-                >
-                  {t("transactions.ai")}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setExpenseTab("fixed")}
-                  className={`relative z-10 h-7 w-full rounded-xl border border-transparent text-[10px] font-medium transition whitespace-nowrap sm:h-8 sm:text-[11px] ${
-                    expenseTab === "fixed"
-                      ? "text-blue-600 font-bold"
-                      : "text-slate-500"
-                  }`}
-                >
-                  {t("transactions.fixed")}
-                </button>
-              </div>
-            </div>
             {expenseTab === "ai" ? (
               <div className="grid w-full max-w-full gap-4 lg:grid-cols-2">
                 <UploadWizard />
@@ -176,11 +181,7 @@ export default function NewTransaction() {
             )}
           </div>
         )}
-        {tab === "transfer" && (
-          <div className="mt-6 mb-6 rounded-[2rem] border border-white/40 bg-white/20 p-6 shadow-glow backdrop-blur-3xl animate-float">
-            <TransferForm />
-          </div>
-        )}
+        {tab === "transfer" && <TransferForm />}
       </div>
     </div>
   );

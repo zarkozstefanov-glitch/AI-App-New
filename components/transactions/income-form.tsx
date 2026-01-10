@@ -118,7 +118,15 @@ export default function IncomeForm() {
             {t("transactions.amount")}
           </p>
           <div className="flex min-h-[44px] h-auto flex-nowrap items-center rounded-xl border border-white/40 bg-white/30 focus-within:border-indigo-500/50 focus-within:ring-2 focus-within:ring-indigo-500/20 px-2 py-1 box-border sm:h-[52px] sm:px-4">
-            <div className="relative mr-2 flex items-center">
+            <input
+              type="number"
+              step="0.01"
+              value={form.amount}
+              onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))}
+              className="flex-1 border-none bg-transparent text-left text-[13px] font-bold text-slate-900 leading-tight outline-none"
+            />
+            <span className="mx-2 h-4 w-px bg-white/30 sm:mx-3 sm:h-5" />
+            <div className="relative ml-1 flex items-center">
               <select
                 value={form.currency}
                 onChange={(e) => setForm((f) => ({ ...f, currency: e.target.value }))}
@@ -131,14 +139,6 @@ export default function IncomeForm() {
                 ⌄
               </span>
             </div>
-            <span className="mx-2 h-4 w-px bg-white/30 sm:mx-3 sm:h-5" />
-            <input
-              type="number"
-              step="0.01"
-              value={form.amount}
-              onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))}
-              className="flex-1 border-none bg-transparent text-left text-[13px] font-bold text-slate-900 leading-tight outline-none"
-            />
           </div>
         </div>
 

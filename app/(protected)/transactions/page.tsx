@@ -1,5 +1,5 @@
-import ListClient from "@/components/transactions/list-client";
 import PageHeader from "@/components/page-header";
+import HistorySections from "@/components/transactions/history-sections";
 import { getServerTranslator } from "@/lib/i18n/server";
 
 // Промени:
@@ -14,7 +14,7 @@ export default async function AccountsPage() {
           subtitle={t("transactions.historySubtitle")}
         />
       </div>
-      <ListClient />
+      <HistorySections />
     </div>
   );
 }

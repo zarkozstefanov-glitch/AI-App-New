@@ -125,7 +125,7 @@ export default function AccountHeader({
               <span className="text-[10px] font-medium text-slate-500 lg:text-xs">
                 {t("dashboard.totalBalance")}
               </span>
-              <div className="flex items-center gap-2 text-[10px] font-medium text-slate-500 lg:text-sm lg:font-semibold">
+              <div className="flex flex-col items-end gap-1 whitespace-nowrap text-[10px] font-medium text-slate-500 lg:text-sm lg:font-semibold">
                 <span>€{amountFormatter.format(fromCents(totals.eurCents))}</span>
                 <span>BGN {amountFormatter.format(fromCents(totals.bgnCents))}</span>
               </div>

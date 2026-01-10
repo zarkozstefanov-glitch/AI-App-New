@@ -33,12 +33,16 @@ type RecurringTemplatesProps = {
   showForm?: boolean;
   title?: string;
   editAction?: "inline" | "navigate";
+  showOnlyActive?: boolean;
+  readOnly?: boolean;
 };
 
 export default function RecurringTemplates({
   showForm = true,
   title,
   editAction = "inline",
+  showOnlyActive = false,
+  readOnly = false,
 }: RecurringTemplatesProps) {
   const { t, locale } = useI18n();
   const router = useRouter();
@@ -79,7 +83,10 @@ export default function RecurringTemplates({
     for (const group of recurringGroups) {
       map.set(group.value, 0);
     }
-    for (const template of templates) {
+    const source = showOnlyActive
+      ? templates.filter((template) => template.isActive)
+      : templates;
+    for (const template of source) {
       if (!template.isActive) continue;
       const current = map.get(template.subCategory) ?? 0;
       map.set(template.subCategory, current + template.amount);
@@ -91,7 +98,12 @@ export default function RecurringTemplates({
         group: recurringGroups.find((group) => group.value === value) ?? recurringGroups[0],
       }))
       .filter((entry) => entry.amount > 0);
-  }, [templates]);
+  }, [showOnlyActive, templates]);
+
+  const visibleTemplates = useMemo(
+    () => (showOnlyActive ? templates.filter((template) => template.isActive) : templates),
+    [showOnlyActive, templates],
+  );
 
   const startEdit = (template: RecurringTemplate) => {
     const matchedGroup =
@@ -418,7 +430,11 @@ export default function RecurringTemplates({
 
       <div className="glass rounded-3xl border border-white/40 bg-white/20 p-6 shadow-glow">
         <h3 className="text-lg font-semibold text-slate-900">{resolvedTitle}</h3>
-        {recurringTotals.length > 0 ? (
+        {!loading && visibleTemplates.length === 0 ? (
+          <p className="mt-4 text-sm text-slate-600">
+            {showOnlyActive ? t("recurring.noActive") : t("recurring.none")}
+          </p>
+        ) : recurringTotals.length > 0 ? (
           <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {recurringTotals.map(({ value, amount, group }) => {
               const Icon = group.icon;
@@ -444,22 +460,14 @@ export default function RecurringTemplates({
               );
             })}
           </div>
-        ) : (
-          <p className="mt-4 text-sm text-slate-600">
-            {t("recurring.noActive")}
-          </p>
-        )}
+        ) : null}
         {loading ? (
           <div className="mt-4 flex items-center gap-2 text-sm text-slate-600">
             <Loader2 className="h-4 w-4 animate-spin" /> {t("recurring.loading")}
           </div>
-        ) : templates.length === 0 ? (
-          <p className="mt-4 text-sm text-slate-600">
-            {t("recurring.none")}
-          </p>
-        ) : (
+        ) : visibleTemplates.length === 0 ? null : (
           <div className="mt-4 space-y-2">
-            {templates.map((template) => (
+            {visibleTemplates.map((template) => (
               <div
                 key={template.id}
                 className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/40 bg-white/20 px-4 py-3 text-sm text-slate-700"
@@ -488,50 +496,52 @@ export default function RecurringTemplates({
                     )}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`rounded-full px-3 py-1 text-[10px] font-semibold ${
-                      template.status === "paid"
-                        ? "bg-emerald-500/15 text-emerald-700"
-                        : "bg-amber-500/15 text-amber-700"
-                    }`}
-                  >
-                    {template.status === "paid"
-                      ? t("recurring.paid")
-                      : t("recurring.unpaid")}
-                  </span>
-                  <button
-                    onClick={() => {
-                      if (editAction === "navigate") {
-                        router.push(
-                          `/transactions?recurringId=${template.id}#recurring`,
-                        );
-                        return;
-                      }
-                      startEdit(template);
-                    }}
-                    className="rounded-full border border-white/40 px-3 py-1 text-xs font-semibold text-slate-900"
-                  >
-                    {t("recurring.edit")}
-                  </button>
-                  <button
-                    onClick={() => toggle(template)}
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                      template.isActive
-                        ? "bg-emerald-500/15 text-emerald-700"
-                        : "bg-white/30 text-slate-700"
-                    }`}
-                  >
-                    {template.isActive ? t("recurring.active") : t("recurring.paused")}
-                  </button>
-                  <button
-                    onClick={() => remove(template.id)}
-                    className="rounded-full bg-rose-500/15 p-2 text-rose-700"
-                    aria-label={t("recurring.delete")}
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
+                {!readOnly && (
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`rounded-full px-3 py-1 text-[10px] font-semibold ${
+                        template.status === "paid"
+                          ? "bg-emerald-500/15 text-emerald-700"
+                          : "bg-amber-500/15 text-amber-700"
+                      }`}
+                    >
+                      {template.status === "paid"
+                        ? t("recurring.paid")
+                        : t("recurring.unpaid")}
+                    </span>
+                    <button
+                      onClick={() => {
+                        if (editAction === "navigate") {
+                          router.push(
+                            `/transactions?recurringId=${template.id}#recurring`,
+                          );
+                          return;
+                        }
+                        startEdit(template);
+                      }}
+                      className="rounded-full border border-white/40 px-3 py-1 text-xs font-semibold text-slate-900"
+                    >
+                      {t("recurring.edit")}
+                    </button>
+                    <button
+                      onClick={() => toggle(template)}
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                        template.isActive
+                          ? "bg-emerald-500/15 text-emerald-700"
+                          : "bg-white/30 text-slate-700"
+                      }`}
+                    >
+                      {template.isActive ? t("recurring.active") : t("recurring.paused")}
+                    </button>
+                    <button
+                      onClick={() => remove(template.id)}
+                      className="rounded-full bg-rose-500/15 p-2 text-rose-700"
+                      aria-label={t("recurring.delete")}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
           </div>

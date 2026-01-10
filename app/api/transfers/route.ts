@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     const amountCents = toCents(parsed.data.amount);
     const totals = convertCents(amountCents, parsed.data.currency);
-    const date = parsed.data.date ? new Date(parsed.data.date) : new Date();
+    const date = new Date();
 
     const transfer = await prisma.$transaction(async (db) => {
       const created = await db.transaction.create({

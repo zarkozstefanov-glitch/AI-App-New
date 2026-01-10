@@ -71,74 +71,74 @@ const TransactionRow = ({
       : rawMerchantLabel;
   const isFuture =
     !!tx.transactionDate && new Date(tx.transactionDate).getTime() > now;
-  const statusLabel =
+  const fixedExpenseTone = isFuture ? "text-slate-400" : "text-rose-600";
+  const transferTone = isFuture ? "text-sky-400" : "text-sky-600";
+  const incomeTone = isFuture ? "text-emerald-400" : "text-emerald-600";
+  const expenseTone = tx.isFixed ? fixedExpenseTone : isFuture ? "text-rose-400" : "text-rose-600";
+  const statusTone =
     tx.transactionType === "income"
-      ? t("transactions.statusIncome")
+      ? incomeTone
       : tx.transactionType === "transfer"
-        ? t("transactions.statusTransfer")
-        : tx.transactionType === "expense"
-          ? tx.isFixed
-            ? t("transactions.statusFixedExpense")
-            : t("transactions.statusExpense")
-          : t("transactions.statusExpense");
-  const statusTone = isFuture ? "text-violet-400" : "text-violet-600";
-  const amountTone = isFuture
-    ? "text-slate-400"
-    : tx.transactionType === "income"
-      ? "text-emerald-500"
-      : tx.transactionType === "expense"
-        ? "text-rose-600"
-        : "text-sky-500";
+        ? transferTone
+        : expenseTone;
+  const amountTone = statusTone;
   const titleTone = isFuture ? "text-slate-400" : "text-slate-800";
   const categoryTone = isFuture ? "text-slate-400" : "text-slate-500";
   const metaTone = isFuture ? "text-slate-400" : "text-slate-400";
   const editTone = isFuture ? "text-slate-400" : "text-slate-500";
 
   return (
-    <div className="flex w-full items-center justify-between border-b border-white/30 px-4 py-4 last:border-0">
-      <div className="flex shrink-0 items-center justify-center">
+    <div className="grid w-full min-w-0 grid-cols-[36px_1fr_auto] items-center gap-2 border-b-2 border-white/30 px-2 py-2 sm:grid-cols-[48px_1fr_auto] sm:gap-3 sm:px-4 sm:py-4 last:border-0">
+      <div className="flex items-center justify-center">
         <div
-          className="flex h-10 w-10 items-center justify-center rounded-2xl md:h-14 md:w-14"
+          className="flex h-10 w-10 items-center justify-center rounded-2xl sm:h-11 sm:w-11"
           style={{ backgroundColor: ui.backgroundColor }}
         >
-          <Icon className="h-4 w-4 md:h-6 md:w-6" style={{ color: ui.textColor }} />
+          <Icon className="h-4.5 w-4.5 sm:h-5 sm:w-5" style={{ color: ui.textColor }} />
         </div>
       </div>
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5 px-3">
-        <p className={`truncate text-[13px] font-bold md:text-[17px] ${titleTone}`}>
+      <div className="min-w-0">
+        <p className={`truncate text-[13px] font-bold sm:text-[16px] ${titleTone}`}>
           {merchantLabel?.trim() || t("transactions.unknownMerchant")}
         </p>
         <span className={`text-[10px] ${categoryTone}`}>{categoryLabel}</span>
-        <div className={`flex flex-col text-[10px] leading-tight ${metaTone}`}>
-          <span className="truncate">{dateLabel}</span>
-        </div>
+        <span className={`block text-[10px] ${metaTone}`}>{dateLabel}</span>
       </div>
-      <div className="ml-auto flex shrink-0 flex-col items-end gap-0.5 whitespace-nowrap pr-2 text-right">
-        <span className={`text-[14px] font-bold md:text-[18px] ${amountTone}`}>
-          €{amountFormatter.format(fromCents(eurCents))}
-        </span>
-        <span
-          className={`text-[10px] md:text-[12px] ${
-            isFuture ? "text-slate-400" : "text-slate-500"
-          }`}
-        >
-          BGN {amountFormatter.format(fromCents(bgnCents))}
-        </span>
-        <span className={`text-[9px] font-bold uppercase tracking-wider ${statusTone}`}>
-          {statusLabel}
-        </span>
+      <div className="flex flex-col items-end gap-1 whitespace-nowrap text-right">
+        {actions && <div className="mb-1 flex items-center justify-center">{actions}</div>}
+        <div className="flex flex-col items-end gap-0.5 text-right">
+          <div className="flex items-center gap-2 text-[11px] sm:text-[12px]">
+            <span className={`font-bold ${amountTone}`}>
+              €{amountFormatter.format(fromCents(eurCents))}
+            </span>
+          <span className={amountTone}>
+            BGN {amountFormatter.format(fromCents(bgnCents))}
+          </span>
+          </div>
+        </div>
         {tx.isEdited && (
           <span className={`text-[9px] font-bold uppercase tracking-wider ${editTone}`}>
             {t("transactions.edited")}
           </span>
         )}
       </div>
-      {actions && <div className="flex shrink-0 items-center">{actions}</div>}
     </div>
   );
 };
 
-export default function ListClient() {
+type ListClientProps = {
+  mode?: "all" | "fixed";
+  showFilters?: boolean;
+  showCategoryTotals?: boolean;
+  maxItems?: number;
+};
+
+export default function ListClient({
+  mode = "all",
+  showFilters = true,
+  showCategoryTotals = true,
+  maxItems,
+}: ListClientProps) {
   const { accounts } = useAccounts();
   const { t, locale } = useI18n();
   const [loading, setLoading] = useState(true);
@@ -154,11 +154,11 @@ export default function ListClient() {
   };
 
   const [filters, setFilters] = useState(() => ({
-    ...getCurrentMonthRange(),
+    ...(mode === "fixed" ? { from: "", to: "" } : getCurrentMonthRange()),
     search: "",
     accountId: "",
     operationType: "",
-    entryMethod: "",
+    entryMethod: mode === "fixed" ? "fixed" : "",
     category: "",
   }));
   const filtersRef = useRef(filters);
@@ -207,20 +207,34 @@ export default function ListClient() {
       })),
     [locale],
   );
+  const effectiveFilters = useMemo(
+    () =>
+      mode === "fixed"
+        ? {
+            ...filters,
+            from: "",
+            to: "",
+            operationType: "",
+            entryMethod: "fixed",
+          }
+        : filters,
+    [filters, mode],
+  );
+
   const categoryOptionsForType = useMemo(() => {
-    if (filters.operationType === "income") {
+    if (effectiveFilters.operationType === "income") {
       return incomeCategories.map((item) => ({ value: item, label: item }));
     }
-    if (filters.operationType === "expense") {
-      if (filters.entryMethod === "fixed") return fixedCategories;
-      if (filters.entryMethod === "manual" || filters.entryMethod === "ai") {
+    if (effectiveFilters.operationType === "expense") {
+      if (effectiveFilters.entryMethod === "fixed") return fixedCategories;
+      if (effectiveFilters.entryMethod === "manual" || effectiveFilters.entryMethod === "ai") {
         return expenseCategories;
       }
     }
     return [];
   }, [
-    filters.operationType,
-    filters.entryMethod,
+    effectiveFilters.operationType,
+    effectiveFilters.entryMethod,
     fixedCategories,
     expenseCategories,
     incomeCategories,
@@ -230,7 +244,7 @@ export default function ListClient() {
     setLoading(true);
     setError(null);
     const params = new URLSearchParams();
-    const activeFilters = nextFilters ?? filters;
+    const activeFilters = nextFilters ?? effectiveFilters;
     if (activeFilters.from) {
       params.set("from", activeFilters.from);
     }
@@ -259,14 +273,14 @@ export default function ListClient() {
       to: filters.to,
       search: filters.search,
       accountId: filters.accountId,
-      operationType: filters.operationType,
-      entryMethod: filters.entryMethod,
+      operationType: effectiveFilters.operationType,
+      entryMethod: effectiveFilters.entryMethod,
       category: filters.category,
     });
   };
 
   useEffect(() => {
-    fetchData(filters);
+    fetchData(effectiveFilters);
     const handler = () => fetchData(filtersRef.current);
     window.addEventListener("transactions:changed", handler);
     return () => {
@@ -276,19 +290,21 @@ export default function ListClient() {
   }, []);
 
   const filteredTransactions = useMemo(() => {
-    const search = filters.search.trim().toLowerCase();
+    const search = effectiveFilters.search.trim().toLowerCase();
     return transactions.filter((tx) => {
-      if (filters.accountId && tx.accountId !== filters.accountId) return false;
-      if (filters.operationType && tx.transactionType !== filters.operationType)
+      if (effectiveFilters.accountId && tx.accountId !== effectiveFilters.accountId)
         return false;
-      if (filters.entryMethod === "manual") {
+      if (effectiveFilters.operationType && tx.transactionType !== effectiveFilters.operationType)
+        return false;
+      if (effectiveFilters.entryMethod === "manual") {
         if (tx.sourceType !== "manual" || tx.isFixed) return false;
-      } else if (filters.entryMethod === "ai") {
+      } else if (effectiveFilters.entryMethod === "ai") {
         if (tx.sourceType !== "receipt" || tx.isFixed) return false;
-      } else if (filters.entryMethod === "fixed") {
+      } else if (effectiveFilters.entryMethod === "fixed") {
         if (!tx.isFixed) return false;
       }
-      if (filters.category && tx.category !== filters.category) return false;
+      if (effectiveFilters.category && tx.category !== effectiveFilters.category)
+        return false;
       if (search) {
         const merchant = (tx.merchantName ?? "").toLowerCase();
         const notes = (tx.notes ?? "").toLowerCase();
@@ -296,7 +312,7 @@ export default function ListClient() {
       }
       return true;
     });
-  }, [transactions, filters]);
+  }, [transactions, effectiveFilters]);
 
   const categoryTotals = useMemo(() => {
     const map = new Map<string, { eurCents: number; bgnCents: number }>();
@@ -312,6 +328,11 @@ export default function ListClient() {
       .sort((a, b) => b.eurCents - a.eurCents);
   }, [filteredTransactions]);
 
+  const visibleTransactions = useMemo(() => {
+    if (!maxItems || maxItems <= 0) return filteredTransactions;
+    return filteredTransactions.slice(0, maxItems);
+  }, [filteredTransactions, maxItems]);
+
   const groupedTransactions = useMemo(() => {
     const groups = new Map<
       string,
@@ -324,7 +345,7 @@ export default function ListClient() {
       }
     >();
 
-    for (const tx of filteredTransactions) {
+    for (const tx of visibleTransactions) {
       const date = tx.transactionDate ? new Date(tx.transactionDate) : null;
       const key = date ? format(date, "yyyy-MM-dd") : "no-date";
 
@@ -349,156 +370,158 @@ export default function ListClient() {
         if (!b.sortDate) return -1;
         return b.sortDate.getTime() - a.sortDate.getTime();
       });
-  }, [filteredTransactions, t]);
+  }, [visibleTransactions, t]);
 
   return (
     <div className="w-full space-y-4">
-      <form
-        onSubmit={handleFilter}
-        className="w-full rounded-2xl border border-white/40 bg-white/20 p-4 shadow-glow backdrop-blur-3xl lg:p-6"
-      >
-        <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-6">
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-2 sm:col-span-2 lg:col-span-2">
-            <label className="text-xs text-slate-600">
-              {t("transactions.fromDate")}
-              <input
-                type="date"
-                value={filters.from}
-                onChange={(e) => setFilters((f) => ({ ...f, from: e.target.value }))}
-                className="mt-1 h-9 w-full rounded-lg border border-white/40 bg-white/30 px-2 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
-              />
-            </label>
-            <label className="text-xs text-slate-600">
-              {t("transactions.toDate")}
-              <input
-                type="date"
-                value={filters.to}
-                onChange={(e) => setFilters((f) => ({ ...f, to: e.target.value }))}
-                className="mt-1 h-9 w-full rounded-lg border border-white/40 bg-white/30 px-2 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
-              />
-            </label>
-          </div>
-          <label className="text-xs text-slate-600 sm:col-span-2 lg:col-span-1">
-            {t("transactions.accountFilter")}
-            <select
-              value={filters.accountId}
-              onChange={(e) => setFilters((f) => ({ ...f, accountId: e.target.value }))}
-              className="mt-1 h-9 w-full rounded-xl border border-white/40 bg-white/30 px-3 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
-            >
-              <option value="">{t("common.all")}</option>
-              {sortedAccounts.map((acc) => (
-                <option key={acc.id} value={acc.id}>
-                  {formatAccountLabel(acc, locale)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="text-xs text-slate-600 sm:col-span-2 lg:col-span-1">
-            {t("transactions.typeOperation")}
-            <select
-              value={filters.operationType}
-              onChange={(e) =>
-                setFilters((f) => ({
-                  ...f,
-                  operationType: e.target.value,
-                  entryMethod: "",
-                  category: "",
-                }))
-              }
-              className="mt-1 h-9 w-full rounded-xl border border-white/40 bg-white/30 px-3 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
-            >
-              <option value="">{t("common.all")}</option>
-              <option value="income">{t("transactions.income")}</option>
-              <option value="expense">{t("transactions.expense")}</option>
-              <option value="transfer">{t("transactions.transfer")}</option>
-            </select>
-          </label>
-          {filters.operationType === "expense" && (
+      {showFilters && (
+        <form
+          onSubmit={handleFilter}
+          className="w-full rounded-2xl border border-white/40 bg-white/20 p-4 shadow-glow backdrop-blur-3xl lg:p-6"
+        >
+          <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-6">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-2 sm:col-span-2 lg:col-span-2">
+              <label className="text-xs text-slate-600">
+                {t("transactions.fromDate")}
+                <input
+                  type="date"
+                  value={filters.from}
+                  onChange={(e) => setFilters((f) => ({ ...f, from: e.target.value }))}
+                  className="mt-1 h-9 w-full rounded-lg border border-white/40 bg-white/30 px-2 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+                />
+              </label>
+              <label className="text-xs text-slate-600">
+                {t("transactions.toDate")}
+                <input
+                  type="date"
+                  value={filters.to}
+                  onChange={(e) => setFilters((f) => ({ ...f, to: e.target.value }))}
+                  className="mt-1 h-9 w-full rounded-lg border border-white/40 bg-white/30 px-2 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+                />
+              </label>
+            </div>
             <label className="text-xs text-slate-600 sm:col-span-2 lg:col-span-1">
-            {t("transactions.entryMethod")}
+              {t("transactions.accountFilter")}
               <select
-                value={filters.entryMethod}
+                value={filters.accountId}
+                onChange={(e) => setFilters((f) => ({ ...f, accountId: e.target.value }))}
+                className="mt-1 h-9 w-full rounded-xl border border-white/40 bg-white/30 px-3 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+              >
+                <option value="">{t("common.all")}</option>
+                {sortedAccounts.map((acc) => (
+                  <option key={acc.id} value={acc.id}>
+                    {formatAccountLabel(acc, locale)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-xs text-slate-600 sm:col-span-2 lg:col-span-1">
+              {t("transactions.typeOperation")}
+              <select
+                value={filters.operationType}
                 onChange={(e) =>
                   setFilters((f) => ({
                     ...f,
-                    entryMethod: e.target.value,
+                    operationType: e.target.value,
+                    entryMethod: "",
                     category: "",
                   }))
                 }
                 className="mt-1 h-9 w-full rounded-xl border border-white/40 bg-white/30 px-3 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
               >
                 <option value="">{t("common.all")}</option>
-                <option value="manual">{t("transactions.manual")}</option>
-                <option value="ai">{t("transactions.ai")}</option>
-                <option value="fixed">{t("transactions.fixed")}</option>
+                <option value="income">{t("transactions.income")}</option>
+                <option value="expense">{t("transactions.expense")}</option>
+                <option value="transfer">{t("transactions.transfer")}</option>
               </select>
             </label>
-          )}
-          {(filters.operationType === "income" ||
-            (filters.operationType === "expense" &&
-              (filters.entryMethod === "manual" ||
-                filters.entryMethod === "ai" ||
-                filters.entryMethod === "fixed"))) && (
-            <label className="text-xs text-slate-600 sm:col-span-2 lg:col-span-1">
-              {filters.operationType === "income"
-                ? t("transactions.incomeCategory")
-                : filters.entryMethod === "fixed"
-                  ? t("transactions.fixedCategory")
-                  : t("transactions.expenseCategory")}
-              <select
-                value={filters.category}
-                onChange={(e) =>
-                  setFilters((f) => ({ ...f, category: e.target.value }))
-                }
+            {filters.operationType === "expense" && (
+              <label className="text-xs text-slate-600 sm:col-span-2 lg:col-span-1">
+              {t("transactions.entryMethod")}
+                <select
+                  value={filters.entryMethod}
+                  onChange={(e) =>
+                    setFilters((f) => ({
+                      ...f,
+                      entryMethod: e.target.value,
+                      category: "",
+                    }))
+                  }
+                  className="mt-1 h-9 w-full rounded-xl border border-white/40 bg-white/30 px-3 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+                >
+                  <option value="">{t("common.all")}</option>
+                  <option value="manual">{t("transactions.manual")}</option>
+                  <option value="ai">{t("transactions.ai")}</option>
+                  <option value="fixed">{t("transactions.fixed")}</option>
+                </select>
+              </label>
+            )}
+            {(filters.operationType === "income" ||
+              (filters.operationType === "expense" &&
+                (filters.entryMethod === "manual" ||
+                  filters.entryMethod === "ai" ||
+                  filters.entryMethod === "fixed"))) && (
+              <label className="text-xs text-slate-600 sm:col-span-2 lg:col-span-1">
+                {filters.operationType === "income"
+                  ? t("transactions.incomeCategory")
+                  : filters.entryMethod === "fixed"
+                    ? t("transactions.fixedCategory")
+                    : t("transactions.expenseCategory")}
+                <select
+                  value={filters.category}
+                  onChange={(e) =>
+                    setFilters((f) => ({ ...f, category: e.target.value }))
+                  }
+                  className="mt-1 h-9 w-full rounded-xl border border-white/40 bg-white/30 px-3 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
+                >
+                  <option value="">{t("common.all")}</option>
+                  {categoryOptionsForType.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+            <label className="text-xs text-slate-600 sm:col-span-2 lg:col-span-2">
+              {t("transactions.search")}
+              <input
+                value={filters.search}
+                onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
+                placeholder={t("transactions.searchPlaceholder")}
                 className="mt-1 h-9 w-full rounded-xl border border-white/40 bg-white/30 px-3 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
-              >
-                <option value="">{t("common.all")}</option>
-                {categoryOptionsForType.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+              />
             </label>
-          )}
-          <label className="text-xs text-slate-600 sm:col-span-2 lg:col-span-2">
-            {t("transactions.search")}
-            <input
-              value={filters.search}
-              onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
-              placeholder={t("transactions.searchPlaceholder")}
-              className="mt-1 h-9 w-full rounded-xl border border-white/40 bg-white/30 px-3 text-xs text-slate-900 outline-none transition focus:border-indigo-500/50 focus:bg-white"
-            />
-          </label>
-        </div>
-        <div className="mt-3 flex flex-wrap gap-2 sm:justify-end">
-          <button
-            type="button"
-            onClick={() => {
-              const range = getCurrentMonthRange();
-              const cleared = {
-                ...range,
-                category: "",
-                search: "",
-                accountId: "",
-                operationType: "",
-                entryMethod: "",
-              };
-              setFilters(cleared);
-              fetchData(cleared);
-            }}
-            className="flex-1 rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-white/40 sm:flex-none"
-          >
-            {t("common.clear")}
-          </button>
-          <button
-            type="submit"
-            className="flex-1 rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-xs font-semibold text-slate-900 shadow-sm transition hover:bg-white/40 sm:flex-none"
-          >
-            {t("common.filter")}
-          </button>
-        </div>
-      </form>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2 sm:justify-end">
+            <button
+              type="button"
+              onClick={() => {
+                const range = getCurrentMonthRange();
+                const cleared = {
+                  ...range,
+                  category: "",
+                  search: "",
+                  accountId: "",
+                  operationType: "",
+                  entryMethod: "",
+                };
+                setFilters(cleared);
+                fetchData(cleared);
+              }}
+              className="flex-1 rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-white/40 sm:flex-none"
+            >
+              {t("common.clear")}
+            </button>
+            <button
+              type="submit"
+              className="flex-1 rounded-lg border border-white/40 bg-white/30 px-3 py-2 text-xs font-semibold text-slate-900 shadow-sm transition hover:bg-white/40 sm:flex-none"
+            >
+              {t("common.filter")}
+            </button>
+          </div>
+        </form>
+      )}
 
       {error && (
         <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2 text-sm text-rose-700">
@@ -513,7 +536,7 @@ export default function ListClient() {
         </div>
       ) : (
         <div className="grid gap-3">
-          {categoryTotals.length > 0 && (
+          {showCategoryTotals && categoryTotals.length > 0 && (
             <div className="rounded-2xl border border-white/40 bg-white/20 p-4 shadow-glow backdrop-blur-3xl">
               <p className="text-xs uppercase tracking-[0.2em] text-slate-500">
                 {t("transactions.amountCategoryTitle")}
@@ -576,38 +599,39 @@ export default function ListClient() {
           {groupedTransactions.map((group) => {
             const items = group.items;
             return (
-              <div key={group.key} className="space-y-3">
-                <div className="px-2 text-sm font-bold uppercase tracking-wider text-slate-400">
+              <div
+                key={group.key}
+                className="space-y-3 rounded-[2rem] border border-white/40 bg-white/20 p-3 shadow-glow backdrop-blur-3xl sm:rounded-none sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none sm:backdrop-blur-0"
+              >
+                <div className="px-2 text-sm font-bold uppercase tracking-wider text-slate-400 sm:px-0">
                   {group.label}
                 </div>
-                <div className="mx-auto w-full max-w-[560px] overflow-hidden rounded-[2rem] border border-white/40 bg-white/20 shadow-glow backdrop-blur-3xl sm:max-w-none">
-                  {items.map((tx) => {
-                      return (
-                        <TransactionRow
-                          key={tx.id}
-                          tx={tx}
-                          amountFormatter={amountFormatter}
-                          categoryLabel={
-                            tx.transactionType === "transfer"
-                              ? `${accountLabelById.get(tx.accountId) ?? t("transactions.fromAccount")} → ${
-                                  accountLabelById.get(tx.transferAccountId ?? "") ??
-                                  t("transactions.toAccount")
-                                }`
-                              : getCategoryLabel(tx.category, locale)
-                          }
-                          actions={
-                            <Link
-                              href={`/transactions/${tx.id}`}
-                              prefetch={false}
-                              className="rounded-full border border-white/40 bg-white/30 p-1 text-slate-600 transition hover:bg-white/40"
-                              aria-label={t("common.details")}
-                            >
-                              <ChevronRight className="h-4 w-4" />
-                            </Link>
-                          }
-                        />
-                    );
-                  })}
+                <div className="w-full overflow-hidden">
+                  {items.map((tx) => (
+                    <TransactionRow
+                      key={tx.id}
+                      tx={tx}
+                      amountFormatter={amountFormatter}
+                      categoryLabel={
+                        tx.transactionType === "transfer"
+                          ? `${accountLabelById.get(tx.accountId) ?? t("transactions.fromAccount")} → ${
+                              accountLabelById.get(tx.transferAccountId ?? "") ??
+                              t("transactions.toAccount")
+                            }`
+                          : getCategoryLabel(tx.category, locale)
+                      }
+                      actions={
+                        <Link
+                          href={`/transactions/${tx.id}`}
+                          prefetch={false}
+                          className="rounded-full border border-white/40 bg-white/30 p-1 text-slate-600 transition hover:bg-white/40"
+                          aria-label={t("common.details")}
+                        >
+                          <ChevronRight className="h-4 w-4" />
+                        </Link>
+                      }
+                    />
+                  ))}
                 </div>
               </div>
             );

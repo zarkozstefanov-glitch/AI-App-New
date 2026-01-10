@@ -64,6 +64,7 @@ export default function UploadWizard({
   const [draftId, setDraftId] = useState<string | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [cameraWarning, setCameraWarning] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [formState, setFormState] = useState<WizardFormState>({});
@@ -129,10 +130,36 @@ export default function UploadWizard({
     }
   }, [currentAccountId, formState.accountId]);
 
+  const triggerFilePicker = (input: HTMLInputElement | null) => {
+    if (!input) return;
+    if (typeof input.showPicker === "function") {
+      input.showPicker();
+      return;
+    }
+    input.click();
+  };
+
   const openCamera = async () => {
     setCameraError(null);
+    const isSecure =
+      typeof window !== "undefined" && window.isSecureContext;
+    setCameraWarning(isSecure ? null : t("upload.cameraHttpsWarning"));
+    const isMobile =
+      typeof navigator !== "undefined" &&
+      /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (!isSecure) {
+      setCameraOpen(false);
+      triggerFilePicker(fileInputRef.current);
+      return;
+    }
+    if (isMobile) {
+      setCameraOpen(false);
+      triggerFilePicker(cameraInputRef.current);
+      return;
+    }
     if (!navigator.mediaDevices?.getUserMedia) {
-      cameraInputRef.current?.click();
+      setCameraOpen(false);
+      triggerFilePicker(cameraInputRef.current);
       return;
     }
     try {
@@ -148,7 +175,8 @@ export default function UploadWizard({
     } catch (err) {
       console.warn("Camera access failed", err);
       setCameraError(t("upload.cameraError"));
-      cameraInputRef.current?.click();
+      setCameraOpen(false);
+      triggerFilePicker(fileInputRef.current);
     }
   };
 
@@ -209,7 +237,7 @@ export default function UploadWizard({
       if (!payload) {
         throw new Error(t("upload.missingData"));
       }
-      const dateTime = payload.date ? `${payload.date}T00:00` : "";
+      const dateTime = payload.date ? `${payload.date}T00:00` : new Date().toISOString();
       const primaryCategory = normalizeCategory(
         mapAssistantCategory(payload.items[0]?.category ?? null),
       );
@@ -355,7 +383,7 @@ export default function UploadWizard({
                 <div className="mt-2 flex w-full gap-2">
                   <button
                     type="button"
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={() => triggerFilePicker(fileInputRef.current)}
                     className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/40 bg-white/30 px-3 py-2 text-[12px] font-semibold text-slate-700 transition hover:bg-white/40"
                   >
                     <span aria-hidden="true">📁</span>
@@ -379,7 +407,7 @@ export default function UploadWizard({
                 <div className="flex w-full flex-nowrap justify-center gap-2">
                   <button
                     type="button"
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={() => triggerFilePicker(fileInputRef.current)}
                     className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-white/20 py-3 px-3 text-[13px] font-bold text-slate-900 shadow-glow backdrop-blur-xl transition hover:scale-105 hover:bg-white/20 sm:gap-3 sm:p-8 sm:text-base"
                   >
                     <FileUp className="h-5 w-5" />
@@ -418,6 +446,9 @@ export default function UploadWizard({
             {cameraError && (
               <p className="text-xs text-amber-600">{cameraError}</p>
             )}
+            {cameraWarning && (
+              <p className="text-[11px] text-amber-600">{cameraWarning}</p>
+            )}
             {cameraOpen && (
               <div className="mt-2 w-full max-w-xl rounded-2xl border border-white/40 bg-white/20 p-3 text-left">
                 <video ref={videoRef} className="w-full rounded-lg" playsInline />
@@ -443,7 +474,7 @@ export default function UploadWizard({
               ref={fileInputRef}
               type="file"
               accept="image/*"
-              className="hidden"
+              className="sr-only"
               onChange={(e) => {
                 const f = e.target.files?.[0];
                 if (f) {
@@ -458,7 +489,7 @@ export default function UploadWizard({
               type="file"
               accept="image/*"
               capture="environment"
-              className="hidden"
+              className="absolute h-0 w-0 opacity-0 pointer-events-none"
               onChange={(e) => {
                 const f = e.target.files?.[0];
                 if (f) {
